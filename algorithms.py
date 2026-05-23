@@ -1,3 +1,3 @@
-def toggleVariable(var):
+def toggleVariable(var : bool):
     """Returns the opposite value to the one passed in"""
     return not var
