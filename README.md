@@ -15,7 +15,7 @@ ___
 
 ```python
 import pygame
-from typing import List
+from typing import Tuple, List
 ```
 
 ## Window
