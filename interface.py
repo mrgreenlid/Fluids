@@ -3,7 +3,7 @@ from algorithms import *
 from typing import Tuple, List
 
 class Window:
-    def __init__(self, window : pygame.Surface, x : int, y : int, width : int, height : int, colour : str):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
         """Creates window to be placed on screen"""
         self.__window = window
 
