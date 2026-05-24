@@ -1,5 +1,5 @@
 import pygame
-from algorithms import toggleVariable
+from algorithms import *
 from typing import Tuple, List
 
 class Window:
@@ -14,19 +14,6 @@ class Window:
     def place(self):
         """Draws window at preset location"""
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
-
-
-def tapping(event : pygame.event.Event):
-    """Checks for tapping"""
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        return True
-    return False
-
-def typing(event : pygame.event.Event):
-    """Checks for typing"""
-    if event.type == pygame.KEYDOWN:
-        return True
-    return False
 
 class Label:
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str):
