@@ -1,5 +1,5 @@
 import pygame
-from interface import tapping, typing
+from algorithms import tapping, typing
 import interface as ui
 
 pygame.init()
