@@ -8,7 +8,7 @@ class Window:
         self.__window = window
 
         self.__colour = colour
-        self.__rect = pygame.Rect(0, 0, width, height)
+        self.__rec45 = pygame.Rect(0, 0, width, height)
         self.__rect.center = (x,y)
 
     def place(self):

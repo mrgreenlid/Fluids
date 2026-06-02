@@ -33,7 +33,7 @@ speed_label = ui.Label(screen, SCREEN_WIDTH-330, 120, "Speed:", 25, ui_bg)
 speed_box = ui.Entry(screen, SCREEN_WIDTH-260, 120, 0, "speed", float, 27)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, ui_bg)
 direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
-direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down"), "direction", str)
+direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
 ui_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
 ui_interactable = (speed_box, direction_dropdown)
@@ -51,7 +51,7 @@ tank_interactable = [flow_button,]
 running = True
 while running:
     # Changes the caption of the window to view framerate and colours the screen blank, to allow for objects to be placed on it
-    pygame.display.set_caption(f"Fluid Mechanics {clock.get_fps()}")
+    pygame.display.set_caption(f"Fluid Mechanics Simulator - FPS: {str(clock.get_fps())[:5]}")
     screen.fill(bg_colour)
 
 
@@ -70,7 +70,6 @@ while running:
                 obj.checkInteract(event, keys)
                 if tapping(event) or typing(event):
                     variables[obj.getVariable()] = obj.getValue()
-
 
         if variables["ui_active"]:
             for obj in ui_interactable:
