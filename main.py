@@ -1,5 +1,6 @@
 import pygame
-from interface import *
+from interface import tapping, typing
+import interface as ui
 
 pygame.init()
 
@@ -26,20 +27,20 @@ variables = {"tank":True,
 
 
 # Instantiates UI components
-control_panel = Window(screen, SCREEN_WIDTH-225, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
-control_panel_title = Label(screen, SCREEN_WIDTH-225, 30, "Control Panel", 30, ui_bg)
-speed_label = Label(screen, SCREEN_WIDTH-330, 120, "Speed:", 25, ui_bg)
-speed_box = Entry(screen, SCREEN_WIDTH-260, 120, 0, "speed", float, 27)
-speed_unit_label = Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, ui_bg)
-direction_label = Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
-direction_dropdown = Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down"), "direction", str)
+control_panel = ui.Window(screen, SCREEN_WIDTH-225, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
+control_panel_title = ui.Label(screen, SCREEN_WIDTH-225, 30, "Control Panel", 30, ui_bg)
+speed_label = ui.Label(screen, SCREEN_WIDTH-330, 120, "Speed:", 25, ui_bg)
+speed_box = ui.Entry(screen, SCREEN_WIDTH-260, 120, 0, "speed", float, 27)
+speed_unit_label = ui.Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, ui_bg)
+direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
+direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down"), "direction", str)
 
 ui_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
 ui_interactable = (speed_box, direction_dropdown)
 
 
 # Instantiates tank components
-flow_button = Button(screen, 20, 25, "flow", "play_image.png", "pause_image.png", (0.1, 0.1), (0.1, 0.1), "space")
+flow_button = ui.Button(screen, 20, 25, "flow", "play_image.png", "pause_image.png", (0.1, 0.1), (0.1, 0.1), "space")
 
 tank_objects = [flow_button,]
 tank_interactable = [flow_button,]
