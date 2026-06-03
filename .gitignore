@@ -1,4 +1,3 @@
-
 .idea/Fluids.iml
 .idea/modules.xml
 .idea/vcs.xml
@@ -6,3 +5,4 @@
 .idea/.gitignore
 test.py
 Documents
+__pycache__
