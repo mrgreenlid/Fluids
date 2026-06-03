@@ -4,5 +4,5 @@
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/.gitignore
 test.py
-Documents
-__pycache__
+Documents/
+__pycache__/
