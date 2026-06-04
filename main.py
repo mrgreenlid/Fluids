@@ -26,7 +26,7 @@ variables = {"tank":True,
              "direction":"left"}
 
 
-# Instantiates UI components
+# Instantiates control panel components
 control_panel = ui.Window(screen, SCREEN_WIDTH-225, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
 control_panel_title = ui.Label(screen, SCREEN_WIDTH-225, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-330, 120, "Speed:", 25, ui_bg)
@@ -35,8 +35,8 @@ speed_unit_label = ui.Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, 
 direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
 direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
-ui_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
-ui_interactable = (speed_box, direction_dropdown)
+control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
+control_interactable = (speed_box, direction_dropdown)
 
 
 # Instantiates tank components
@@ -79,7 +79,7 @@ while running:
                     variables[obj.getVariable()] = obj.getValue()
 
         if variables["control_active"]:
-            for obj in ui_interactable:
+            for obj in control_interactable:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     variables[obj.getVariable()] = obj.getValue()
@@ -90,7 +90,7 @@ while running:
         obj.place()
 
     if variables["control_active"]:
-        for obj in ui_objects:
+        for obj in control_objects:
             obj.place()
 
 

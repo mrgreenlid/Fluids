@@ -16,7 +16,7 @@ class Window:
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
 
 class Label:
-    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str):
+    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas"):
         """Creates text label to be placed on screen"""
         self._window = window
 
@@ -28,7 +28,7 @@ class Label:
         self._render_arguments = [self._text, True, "black", self._bg]
 
         # Creates the font object, rect and sets position
-        self._font = pygame.font.SysFont("Consolas", self._size)
+        self._font = pygame.font.SysFont(font, self._size)
         self._rect = self._font.render(*self._render_arguments).get_rect()
         self._rect.center = (x,y)
 
@@ -42,21 +42,14 @@ class Entry(Label):
 
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25):
         """Creates entry box to be placed on screen"""
-        super().__init__(window, x, y, " ", size, self._inactive_colour)
+        super().__init__(window, x, y, " ", size, self._inactive_colour, "Courier")
 
         self._text = f"{text}"
-
         self._variable = variable
         self._datatype = datatype
-
         self._in_use = False
 
-        # Creates font object, rect and sets position
-        self._font = pygame.font.SysFont("Courier", self._size)
-        self._rect = self._font.render(*self._render_arguments).get_rect()
-        self._rect.center = (x, y)
-
-        # Lengthens the box
+        # Lengthens the box 
         self._rect.width = 120
 
         self._updateText()
@@ -251,9 +244,10 @@ class Button:
         self.__off_rect = self.__off_shape.get_rect()
         self.__off_rect.center = (x, y)
 
-        self.__on_shape = pygame.transform.scale_by(pygame.image.load(path_2).convert_alpha(), scale_factor_2)
-        self.__on_rect = self.__on_shape.get_rect()
-        self.__on_rect.center = (x, y)
+        if path_2:
+            self.__on_shape = pygame.transform.scale_by(pygame.image.load(path_2).convert_alpha(), scale_factor_2)
+            self.__on_rect = self.__on_shape.get_rect()
+            self.__on_rect.center = (x, y)
 
         try:
             self.__key_bind = pygame.key.key_code(key_bind)
