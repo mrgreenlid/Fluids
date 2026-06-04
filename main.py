@@ -20,7 +20,7 @@ dt = 0
 
 # Creates variables to be used throughout
 variables = {"tank":True,
-             "ui_active":True,
+             "control_active":True,
              "flow":False,
              "speed":0,
              "direction":"left"}
@@ -55,34 +55,41 @@ while running:
     screen.fill(bg_colour)
 
 
+
+    # Starts event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+    
         keys = pygame.key.get_pressed()
 
         if typing(event):
-            if keys[pygame.K_c]:
-                variables["ui_active"] = toggleVariable(variables["ui_active"])
 
+            if keys[pygame.K_c]:
+                variables["control"] = toggleVariable(variables["control_active"])
+
+
+
+        # Checks for interactions with different objects
         if variables["tank"]:
             for obj in tank_interactable:
                 obj.checkInteract(event, keys)
                 if tapping(event) or typing(event):
                     variables[obj.getVariable()] = obj.getValue()
 
-        if variables["ui_active"]:
+        if variables["control_active"]:
             for obj in ui_interactable:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     variables[obj.getVariable()] = obj.getValue()
 
 
-    # Places all objects, when relevant
+    # Places objects, when relevant
     for obj in tank_objects:
         obj.place()
 
-    if variables["ui_active"]:
+    if variables["control_active"]:
         for obj in ui_objects:
             obj.place()
 

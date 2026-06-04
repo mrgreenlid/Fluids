@@ -1,8 +1,5 @@
-.idea/Fluids.iml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/.gitignore
+.idea/
 test.py
 Documents/
 __pycache__/
+.vscode/
