@@ -5,8 +5,8 @@ import interface as ui
 pygame.init()
 
 # Sets the constants of the screen surface
-SCREEN_HEIGHT = 900
-SCREEN_WIDTH = 1500
+SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1600
 bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
 
@@ -27,7 +27,7 @@ variables = {"tank":True,
 
 
 # Instantiates control panel components
-control_panel = ui.Window(screen, SCREEN_WIDTH-225, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
+control_panel = ui.Window(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
 control_panel_title = ui.Label(screen, SCREEN_WIDTH-225, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-330, 120, "Speed:", 25, ui_bg)
 speed_box = ui.Entry(screen, SCREEN_WIDTH-260, 120, 0, "speed", float, 27)
@@ -67,11 +67,10 @@ while running:
         if typing(event):
 
             if keys[pygame.K_c]:
-                variables["control"] = toggleVariable(variables["control_active"])
+                variables["control_active"] = toggleVariable(variables["control_active"])
+                
 
-
-
-        # Checks for interactions with different objects
+        # Checks for interactions with different objects, depending
         if variables["tank"]:
             for obj in tank_interactable:
                 obj.checkInteract(event, keys)
@@ -88,7 +87,7 @@ while running:
     # Places objects, when relevant
     for obj in tank_objects:
         obj.place()
-
+    
     if variables["control_active"]:
         for obj in control_objects:
             obj.place()
