@@ -15,6 +15,7 @@ class Window:
         """Draws window at preset location"""
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
 
+
 class Label:
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas"):
         """Creates text label to be placed on screen"""
@@ -35,6 +36,7 @@ class Label:
     def place(self):
         """Places label at preset location"""
         self._window.blit(self._font.render(*self._render_arguments), self._rect)
+
 
 class Entry(Label):
     _inactive_colour = "#FFFFFF"
@@ -136,6 +138,7 @@ class Entry(Label):
 
         return None
 
+
 class Dropdown(Entry):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : Tuple[str], variable : str, datatype : type):
         """Creates dropdown box to be placed on screen"""
@@ -182,6 +185,7 @@ class Dropdown(Entry):
             if typing(event):
                 if event.unicode == "\x0D":
                     self._antiClick()
+
 
 class Checkbox:
     __inactive_colour = "#FFFFFF"
@@ -232,6 +236,7 @@ class Checkbox:
     def getValue(self):
         """Returns value"""
         return self.__state
+
 
 class Button:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):

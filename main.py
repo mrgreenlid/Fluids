@@ -1,7 +1,7 @@
 import pygame
 from algorithms import *
 import interface as ui
-
+import fluid
 pygame.init()
 
 # Sets the constants of the screen surface
@@ -35,6 +35,8 @@ speed_unit_label = ui.Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, 
 direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
 direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
+v = fluid.VectorField(screen, 10)
+
 control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
 control_interactable = (speed_box, direction_dropdown)
 
@@ -42,7 +44,7 @@ control_interactable = (speed_box, direction_dropdown)
 # Instantiates tank components
 flow_button = ui.Button(screen, 20, 25, "flow", "play_image.png", "pause_image.png", (0.1, 0.1), (0.1, 0.1), "space")
 
-tank_objects = [flow_button,]
+tank_objects = [flow_button,v]
 tank_interactable = [flow_button,]
 
 
