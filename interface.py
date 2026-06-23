@@ -240,6 +240,7 @@ class Checkbox:
 
 class Button:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):
+        """Creates button to be placed on screen"""
         self.__window = window
         self.__variable = variable
 

@@ -23,6 +23,7 @@ dt = 0
 variables = {"tank":True,
              "control_active":True,
              "flow":False,
+             "show_grid":True,
              "speed":0,
              "direction":"left"}
 
@@ -36,17 +37,17 @@ speed_unit_label = ui.Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, 
 direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
 direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
-v = fluid.VectorField(screen, 10)
+v = fluid.VectorField(screen, 20, "g", "#C7C1B8", False)
 
 control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
 control_interactable = (speed_box, direction_dropdown)
 
 
 # Instantiates tank components
-flow_button = ui.Button(screen, 20, 25, "flow", "play_image.png", "pause_image.png", (0.1, 0.1), (0.1, 0.1), "space")
+flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 
-tank_objects = [flow_button,v]
-tank_interactable = [flow_button,]
+tank_objects = [v, flow_button]
+tank_interactable = [flow_button, v]
 
 
 
@@ -64,7 +65,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    
         keys = pygame.key.get_pressed()
 
         if typing(event):
@@ -78,7 +78,10 @@ while running:
             for obj in tank_interactable:
                 obj.checkInteract(event, keys)
                 if tapping(event) or typing(event):
-                    variables[obj.getVariable()] = obj.getValue()
+                    try:
+                        variables[obj.getVariable()] = obj.getValue()
+                    except AttributeError:
+                        pass
 
         if variables["control_active"]:
             for obj in control_interactable:
