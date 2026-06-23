@@ -35,13 +35,6 @@ class VectorField:
 
 
         
-
-
-
-
-
-
-
 class Particle(pygame.sprite.Sprite):
     def __init__(self,):
 
