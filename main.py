@@ -27,10 +27,9 @@ variables = {"tank":True,
              "speed":0,
              "direction":"left"}
 
-data = {}
 
 # Instantiates control panel components
-control_panel = ui.Box(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
+control_panel = ui.Window(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
 control_panel_title = ui.Label(screen, SCREEN_WIDTH-225, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-330, 120, "Speed:", 25, ui_bg)
 speed_box = ui.Entry(screen, SCREEN_WIDTH-260, 120, 0, "speed", float, 27)
@@ -39,16 +38,19 @@ direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_b
 direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
 
+
 control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
 control_interactable = (speed_box, direction_dropdown)
 
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, 18, "g", variables["show_grid"])
+vector_field = fluid.VectorField(screen, 25, "g", variables["show_grid"])
+
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [flow_button, vector_field]
+
 
 
 
