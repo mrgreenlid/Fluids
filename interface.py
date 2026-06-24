@@ -2,25 +2,22 @@ import pygame
 from algorithms import *
 from typing import Tuple, List
 
-class Window:
+class Box:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
-        """Creates window to be placed on screen"""
+        """Creates dedicated space to be placed on screen"""
         self.__window = window
-
         self.__colour = colour
         self.__rect = pygame.Rect(0, 0, width, height)
         self.__rect.center = (x,y)
 
     def place(self):
-        """Draws window at preset location"""
+        """Draws box at centred preset location"""
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
-
 
 class Label:
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas"):
         """Creates text label to be placed on screen"""
         self._window = window
-
         self._size = size
         self._bg = bg
         self._text = f"{text}"
