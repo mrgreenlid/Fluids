@@ -2,9 +2,9 @@ import pygame
 from algorithms import *
 from typing import Tuple, List
 
-class Window:
+class Box:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
-        """Creates window to be placed on screen"""
+        """Creates box to be placed on screen"""
         self.__window = window
 
         self.__colour = colour
@@ -12,8 +12,9 @@ class Window:
         self.__rect.center = (x,y)
 
     def place(self):
-        """Draws window at preset location"""
+        """Draws box at preset location"""
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
+        pygame.draw.rect(self.__window, "#000000", self.__rect, 1)
 
 
 class Label:
@@ -140,7 +141,7 @@ class Entry(Label):
 
 
 class Dropdown(Entry):
-    def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : List[str], variable : str, datatype : type):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : Tuple[str], variable : str, datatype : type):
         """Creates dropdown box to be placed on screen"""
         super().__init__(window, x, y, options[0], variable, datatype)
 
@@ -164,9 +165,9 @@ class Dropdown(Entry):
         pygame.draw.polygon(self._window, "#000000", self.__arrow_coordinates)
 
         if self._in_use:
-            for rect in range(len(self.__option_rect)-1):
+            for rect in range(len(self.__option_rect)):
                 pygame.draw.rect(self._window, "#FFFFFF", self.__option_rect[rect], 0)
-                self._window.blit(self._font.render([option for option in self.__options if option != self._text][rect], True, "#000000", "#FFFFFF"), self.__option_rect[rect])
+                self._window.blit(self._font.render(self.__options[rect], True, "#000000", "#FFFFFF"), self.__option_rect[rect])
                 pygame.draw.rect(self._window, "#000000", self.__option_rect[rect], 1)
 
     def checkInteract(self, event : pygame.event.Event):
