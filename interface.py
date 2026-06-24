@@ -137,7 +137,7 @@ class Entry(Label):
 
 
 class Dropdown(Entry):
-    def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : Tuple[str], variable : str, datatype : type):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : List[str], variable : str, datatype : type):
         """Creates dropdown box to be placed on screen"""
         super().__init__(window, x, y, options[0], variable, datatype)
 
@@ -161,9 +161,9 @@ class Dropdown(Entry):
         pygame.draw.polygon(self._window, "#000000", self.__arrow_coordinates)
 
         if self._in_use:
-            for rect in range(len(self.__option_rect)):
+            for rect in range(len(self.__option_rect)-1):
                 pygame.draw.rect(self._window, "#FFFFFF", self.__option_rect[rect], 0)
-                self._window.blit(self._font.render(self.__options[rect], True, "#000000", "#FFFFFF"), self.__option_rect[rect])
+                self._window.blit(self._font.render([option for option in self.__options if option != self._text][rect], True, "#000000", "#FFFFFF"), self.__option_rect[rect])
                 pygame.draw.rect(self._window, "#000000", self.__option_rect[rect], 1)
 
     def checkInteract(self, event : pygame.event.Event):

@@ -40,7 +40,7 @@ class VectorField:
                 height += self.__grid_line_interval
                 for i in range(2):
                     for j in range(1, self.__rows):
-                        self.__drawVector(width, self.__grid_line_start*j)
+                        self.__drawVector(width, self.__grid_line_interval*j)
                     pygame.draw.line(self.__window, self.__grid_colour, (width, 0), (width, self.__line_height ))
                     width += self.__grid_line_interval
                     
