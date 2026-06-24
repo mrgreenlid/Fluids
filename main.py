@@ -37,7 +37,7 @@ speed_unit_label = ui.Label(screen, SCREEN_WIDTH-115, 123,"ms\u207B\u00B9", 20, 
 direction_label = ui.Label(screen, SCREEN_WIDTH-330, 220, "Direction:", 20, ui_bg)
 direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 219, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
-v = fluid.VectorField(screen, 20, "g", "#C7C1B8", False)
+
 
 control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
 control_interactable = (speed_box, direction_dropdown)
@@ -45,9 +45,11 @@ control_interactable = (speed_box, direction_dropdown)
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
+vector_field = fluid.VectorField(screen, 25, "g", variables["show_grid"])
 
-tank_objects = [v, flow_button]
-tank_interactable = [flow_button, v]
+
+tank_objects = [vector_field, flow_button]
+tank_interactable = [flow_button, vector_field]
 
 
 
@@ -59,7 +61,6 @@ while running:
     screen.fill(bg_colour)
 
 
-
     # Starts event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -68,11 +69,10 @@ while running:
         keys = pygame.key.get_pressed()
 
         if typing(event):
-
             if keys[pygame.K_c]:
                 variables["control_active"] = toggleVariable(variables["control_active"])
                 
-
+                
         # Checks for interactions with different objects, depending
         if variables["tank"]:
             for obj in tank_interactable:
