@@ -24,7 +24,7 @@ class VectorField(Output):
         self.__display = display
 
     def __drawVector(self, tail_x : int, tail_y : int):
-        pygame.draw.circle(self.__window, "#000000", (tail_x, tail_y), 5)
+        pygame.draw.circle(self.__window, "#000000", (tail_x, tail_y), 2)
         
     def place(self):
         """Draws the vector field"""

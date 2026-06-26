@@ -29,34 +29,27 @@ variables = {"tank":True,
 
 
 # Instantiates control panel components
-control_panel = ui.Box(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
-control_panel_title = ui.Label(screen, SCREEN_WIDTH-200, 30, "Control Panel", 30, ui_bg)
+control_panel_box = ui.Box(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
+control_panel_label = ui.Label(screen, SCREEN_WIDTH-200, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-352, 100, "Speed:", 20, ui_bg)
-speed_box = ui.Entry(screen, SCREEN_WIDTH-250, 99, 0, "speed", float)
+speed_entry = ui.Entry(screen, SCREEN_WIDTH-250, 99, 0, "speed", float)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-100, 100,"ms\u207B\u00B9", 21, ui_bg)
-direction_label = ui.Label(screen, SCREEN_WIDTH-330, 150, "Direction:", 20, ui_bg)
-direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-250, 149, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
+show_field_label = ui.Label(screen, SCREEN_WIDTH-315, 150, "Vector field:", 20, ui_bg)
+show_particle_label = ui.Label(screen, SCREEN_WIDTH-332, 200, "Particles:", 20, ui_bg )
+show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-220, 150, 0,50, "show_field")
+direction_label = ui.Label(screen, SCREEN_WIDTH-330, 350, "Direction:", 20, ui_bg)
+direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-250, 349, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
-
-show_field_label = ui.Label(screen, SCREEN_WIDTH-315, 210, "Vector field:", 20, ui_bg)
-show_particle_label = ui.Label(screen, SCREEN_WIDTH-332, 260, "Particles:", 20, ui_bg )
-show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-220, 210, 0,50, "show_field")
-
-
-control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label,
+control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label, direction_label,
                    show_grid_doublecheckbox, show_field_label, show_particle_label, direction_dropdown)
-control_interactable = (speed_box, direction_dropdown, show_grid_doublecheckbox)
-
+control_interactable = (speed_entry, direction_dropdown, show_grid_doublecheckbox)
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, 10, "show_field", variables["show_field"])
-
+vector_field = fluid.VectorField(screen, 19, "show_field", variables["show_field"])
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [flow_button, vector_field]
-
-
 
 running = True
 while running:
@@ -101,12 +94,9 @@ while running:
         for obj in control_objects:
             obj.place()
 
-
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
     # Keeps loop in time with the clock
     dt = clock.tick(60) / 1000
-    print(variables)
-    
 pygame.quit()

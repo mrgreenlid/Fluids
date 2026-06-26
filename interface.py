@@ -7,7 +7,6 @@ class Box:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
         """Creates box to be placed on screen"""
         self.__window = window
-
         self.__colour = colour
         self.__rect = pygame.Rect(0, 0, width, height)
         self.__rect.center = (x,y)
@@ -22,7 +21,6 @@ class Label:
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas"):
         """Creates text label to be placed on screen"""
         self._window = window
-
         self._size = size
         self._bg = bg
         self._text = f"{text}"
@@ -55,7 +53,6 @@ class Entry(Label, Input):
 
         # Lengthens the box 
         self._rect.width = 120
-
         self._updateText()
 
     def place(self):
@@ -137,9 +134,7 @@ class Entry(Label, Input):
             return float(self._text)
         elif self._datatype == str:
             return self._text.lower()
-
         return None
-
 
 class Dropdown(Entry, Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : Tuple[str], variable : str, datatype : type):
@@ -188,7 +183,6 @@ class Dropdown(Entry, Input):
                 if event.unicode == "\x0D":
                     self._antiClick()
 
-
 class Checkbox(Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
@@ -233,7 +227,6 @@ class Checkbox(Input):
         """Returns value"""
         return self._state
 
-
 class DoubleCheckbox(Checkbox):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, x_displacement : int, y_displacement, variable : str):
         """Creates pair of linked checkboxes to be placed on screen"""
@@ -271,11 +264,6 @@ class DoubleCheckbox(Checkbox):
             elif self.__rect2.collidepoint(*pygame.mouse.get_pos()[:2]):
                 self._antiClick()
             
-
-        
-
-
-
 class Button(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):
         """Creates button to be placed on screen"""
