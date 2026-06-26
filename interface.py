@@ -2,6 +2,7 @@ import pygame
 from algorithms import *
 from typing import Tuple, List
 
+
 class Box:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
         """Creates box to be placed on screen"""
@@ -39,7 +40,7 @@ class Label:
         self._window.blit(self._font.render(*self._render_arguments), self._rect)
 
 
-class Entry(Label):
+class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
 
@@ -140,7 +141,7 @@ class Entry(Label):
         return None
 
 
-class Dropdown(Entry):
+class Dropdown(Entry, Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : Tuple[str], variable : str, datatype : type):
         """Creates dropdown box to be placed on screen"""
         super().__init__(window, x, y, options[0], variable, datatype)
@@ -188,58 +189,94 @@ class Dropdown(Entry):
                     self._antiClick()
 
 
-class Checkbox:
-    __inactive_colour = "#FFFFFF"
-    __active_colour = "#90D5FF"
-
+class Checkbox(Input):
+    _inactive_colour = "#FFFFFF"
+    _active_colour = "#90D5FF"
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str):
         """Creates checkbox to be placed on screen"""
-        self.__window = window
-
-        self.__variable = variable
-
-        self.__state = False
-        self.__bg = self.__inactive_colour
-
-
-        self.__rect = pygame.Rect(0, 0, 25, 25)
-        self.__rect.center = (x, y)
+        self._window = window
+        self._variable = variable
+        self._state = False
+        self._bg = self._inactive_colour
+        self._rect = pygame.Rect(0, 0, 25, 25)
+        self._rect.center = (x, y)
 
     def place(self):
         """Draws checkbox, with border"""
-        pygame.draw.rect(self.__window, self.__bg, self.__rect)
-        pygame.draw.rect(self.__window, "#000000", self.__rect, 1)
+        pygame.draw.rect(self._window, self._bg, self._rect)
+        pygame.draw.rect(self._window, "#000000", self._rect, 1)
 
-    def __click(self):
+    def _click(self):
         """Changes box to active colours"""
-        self.__bg = self.__active_colour
-        self.__state = True
+        self._bg = self._active_colour
+        self._state = True
 
-    def __antiClick(self):
+    def _antiClick(self):
         """Changes box to inactive colours"""
-        self.__bg = self.__inactive_colour
-        self.__state = False
+        self._bg = self._inactive_colour
+        self._state = False
 
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
         if tapping(event):
-            if self.__rect.collidepoint(*pygame.mouse.get_pos()[:2]):
-                if self.__state:
-                    self.__antiClick()
+            if self._rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                if self._state:
+                    self._antiClick()
                 else:
-                    self.__click()
-
+                    self._click()
 
     def getVariable(self):
         """Returns associated variable"""
-        return self.__variable
+        return self._variable
 
     def getValue(self):
         """Returns value"""
-        return self.__state
+        return self._state
 
 
-class Button:
+class DoubleCheckbox(Checkbox):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, x_displacement : int, y_displacement, variable : str):
+        """Creates pair of linked checkboxes to be placed on screen"""
+        super().__init__(window, x, y, variable)
+        self.__rect2 = self._rect.copy()
+        self.__rect2.centerx  += x_displacement
+        self.__rect2.centery +=  y_displacement
+        self.__bg2 = self._inactive_colour
+        self._bg = self._active_colour
+        self._state = True
+
+    def place(self):
+        """Draws checkboxs, with border"""
+        super().place()
+        pygame.draw.rect(self._window, self.__bg2, self.__rect2)
+        pygame.draw.rect(self._window, "#000000", self.__rect2, 1)
+    
+    def _click(self):
+        """Changes appropriate box colours"""
+        self._bg = self._active_colour
+        self.__bg2 = self._inactive_colour
+        self._state = True
+
+    def _antiClick(self):
+        """Changes appropriate box colours"""
+        self._bg = self._inactive_colour
+        self.__bg2 = self._active_colour
+        self._state = False
+
+    def checkInteract(self, event : pygame.event.Event):
+        """Checks for interactions"""
+        if tapping(event):
+            if self._rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                self._click()
+            elif self.__rect2.collidepoint(*pygame.mouse.get_pos()[:2]):
+                self._antiClick()
+            
+
+        
+
+
+
+class Button(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):
         """Creates button to be placed on screen"""
         self.__window = window

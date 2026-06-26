@@ -3,16 +3,15 @@ import numpy as np
 from typing import List
 from algorithms import *
 
+
 class velocityFunction:
     def __init__(self):
         return
 
-
-
-
-class VectorField:
+class VectorField(Output):
+    class_type = "output"
     __grid_colour =  "#C7C1B8"
-    def __init__(self, window : pygame.surface.Surface, rows : int, key_bind : str, display : bool = False):
+    def __init__(self, window : pygame.surface.Surface, rows : int, variable : str, display : bool = False):
         """Creates a vector field to be displayed and store data"""
         self.__window = window
         self.__rows = rows
@@ -21,7 +20,7 @@ class VectorField:
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
 
-        self.__key_bind = pygame.key.key_code(key_bind)
+        self.__variable = variable
         self.__display = display
 
     def __drawVector(self, tail_x : int, tail_y : int):
@@ -30,7 +29,6 @@ class VectorField:
     def place(self):
         """Draws the vector field"""
         if self.__display:
-
             # Draws vector field grid and sets up vector arrows
             height = width = self.__grid_line_interval
             for row in range(self.__rows):
@@ -44,19 +42,17 @@ class VectorField:
                     pygame.draw.line(self.__window, self.__grid_colour, (width, 0), (width, self.__line_height))
                     width += self.__grid_line_interval
                     
-
-    def checkInteract(self, event : pygame.event.Event, keys : List[bool]):
-        if self.__key_bind:
-            if typing(event):
-                if keys[self.__key_bind]:
-                    self.__display = toggleVariable(self.__display)
-                    
-                    
+    def getVariable(self):
+        """Returns associated variable"""
+        return self.__variable
+    
+    def setValue(self, value):
+        """Changes variable value"""
+        self.__display = value           
 
         
 class Particle(pygame.sprite.Sprite):
     def __init__(self,):
-
         return 
 
 class Body(pygame.sprite.Sprite):

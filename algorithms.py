@@ -1,6 +1,12 @@
 import pygame
 import numpy as np
 
+class Output:
+    class_type = "output"
+
+class Input:
+    class_type = "input"
+
 def tapping(event : pygame.event.Event):
     """Checks for tapping"""
     if event.type == pygame.MOUSEBUTTONDOWN:

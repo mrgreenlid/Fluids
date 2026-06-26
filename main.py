@@ -23,30 +23,34 @@ dt = 0
 variables = {"tank":True,
              "control_active":True,
              "flow":False,
-             "show_grid":True,
-             "speed":0,
+             "show_field":True,
+             "speed":0.0,
              "direction":"left"}
 
 
 # Instantiates control panel components
 control_panel = ui.Box(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
 control_panel_title = ui.Label(screen, SCREEN_WIDTH-200, 30, "Control Panel", 30, ui_bg)
-
 speed_label = ui.Label(screen, SCREEN_WIDTH-352, 100, "Speed:", 20, ui_bg)
-speed_box = ui.Entry(screen, SCREEN_WIDTH-260, 99, 0, "speed", float, 25)
-speed_unit_label = ui.Label(screen, SCREEN_WIDTH-110, 100,"ms\u207B\u00B9", 21, ui_bg)
-
+speed_box = ui.Entry(screen, SCREEN_WIDTH-250, 99, 0, "speed", float)
+speed_unit_label = ui.Label(screen, SCREEN_WIDTH-100, 100,"ms\u207B\u00B9", 21, ui_bg)
 direction_label = ui.Label(screen, SCREEN_WIDTH-330, 150, "Direction:", 20, ui_bg)
-direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-260, 149, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
+direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-250, 149, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
 
 
-control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label, direction_dropdown)
-control_interactable = (speed_box, direction_dropdown)
+show_field_label = ui.Label(screen, SCREEN_WIDTH-315, 210, "Vector field:", 20, ui_bg)
+show_particle_label = ui.Label(screen, SCREEN_WIDTH-332, 260, "Particles:", 20, ui_bg )
+show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-220, 210, 0,50, "show_field")
+
+
+control_objects = (control_panel, control_panel_title, speed_label, speed_box, speed_unit_label, direction_label,
+                   show_grid_doublecheckbox, show_field_label, show_particle_label, direction_dropdown)
+control_interactable = (speed_box, direction_dropdown, show_grid_doublecheckbox)
 
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, 10, "g", variables["show_grid"])
+vector_field = fluid.VectorField(screen, 10, "show_field", variables["show_field"])
 
 
 tank_objects = [vector_field, flow_button]
@@ -70,32 +74,29 @@ while running:
         if typing(event):
             if keys[pygame.K_c]:
                 variables["control_active"] = toggleVariable(variables["control_active"])
-            if keys[pygame.K_g]:
-                variables["show_grid"] = toggleVariable(variables["show_grid"])
-                
-                
                 
         # Checks for interactions with different objects, depending
         if variables["tank"]:
             for obj in tank_interactable:
-                obj.checkInteract(event, keys)
                 if tapping(event) or typing(event):
-                    try:
+                    if obj.class_type == "input":
                         variables[obj.getVariable()] = obj.getValue()
-                    except AttributeError:
-                        pass
-
+                        obj.checkInteract(event, keys)
+                if obj.class_type == "output":
+                    obj.setValue(variables[obj.getVariable()])
+                        
+                
         if variables["control_active"]:
             for obj in control_interactable:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     variables[obj.getVariable()] = obj.getValue()
 
-
     # Places objects, when relevant
-    for obj in tank_objects:
-        obj.place()
-    
+    if variables["tank"]:
+        for obj in tank_objects:
+            obj.place()
+        
     if variables["control_active"]:
         for obj in control_objects:
             obj.place()
@@ -106,6 +107,6 @@ while running:
 
     # Keeps loop in time with the clock
     dt = clock.tick(60) / 1000
-
+    print(variables)
     
 pygame.quit()
