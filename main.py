@@ -29,19 +29,24 @@ variables = {"tank":True,
 
 
 # Instantiates control panel components
-control_panel_box = ui.Box(screen, SCREEN_WIDTH-180, SCREEN_HEIGHT/2, 450, SCREEN_HEIGHT, ui_bg)
-control_panel_label = ui.Label(screen, SCREEN_WIDTH-200, 30, "Control Panel", 30, ui_bg)
-speed_label = ui.Label(screen, SCREEN_WIDTH-352, 100, "Speed:", 20, ui_bg)
+control_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
+control_panel_label = ui.Label(screen, SCREEN_WIDTH-175, 30, "Control Panel", 30, ui_bg)
+speed_label = ui.Label(screen, SCREEN_WIDTH-300, 100, "Speed:", 20, ui_bg)
 speed_entry = ui.Entry(screen, SCREEN_WIDTH-250, 99, 0, "speed", float)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-100, 100,"ms\u207B\u00B9", 21, ui_bg)
-show_field_label = ui.Label(screen, SCREEN_WIDTH-315, 150, "Vector field:", 20, ui_bg)
-show_particle_label = ui.Label(screen, SCREEN_WIDTH-332, 200, "Particles:", 20, ui_bg )
-show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-220, 150, 0,50, "show_field")
-direction_label = ui.Label(screen, SCREEN_WIDTH-330, 350, "Direction:", 20, ui_bg)
-direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-250, 349, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
+show_field_label = ui.Label(screen, SCREEN_WIDTH-263, 150, "Vector field:", 20, ui_bg)
+show_particle_label = ui.Label(screen, SCREEN_WIDTH-282, 200, "Particles:", 20, ui_bg )
+show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-150, 150, 0,50, "show_field")
+direction_label = ui.Label(screen, SCREEN_WIDTH-282, 350, "Direction:", 20, ui_bg)
+direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 349, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
+
+divider_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 200, 2, "#000000")
+
+
+
 
 control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label, direction_label,
-                   show_grid_doublecheckbox, show_field_label, show_particle_label, direction_dropdown)
+                   show_grid_doublecheckbox, show_field_label, show_particle_label, divider_box, direction_dropdown,)
 control_interactable = (speed_entry, direction_dropdown, show_grid_doublecheckbox)
 
 # Instantiates tank components
