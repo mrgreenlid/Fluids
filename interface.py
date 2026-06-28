@@ -314,3 +314,54 @@ class Button(Input):
     def getValue(self):
         """Returns value"""
         return self.__state
+
+
+class Increment(Input):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, minimum : int | float, maximium : int | float, increment : int | float,):
+        """Creates increment buttons to be placed on screen"""
+        self.__window = window
+        self.__variable = variable
+        self.__maximum = maximium
+        self.__value = self.__minimum = minimum
+        self.__increment = increment
+        self.__up_rect = pygame.rect.Rect(0,0,25,25)
+        self.__down_rect = self.__up_rect.copy()
+        self.__up_rect.center = (x+15, y)
+        self.__down_rect.center = (x-15, y)
+
+        self.__up_arrow_coordinates = [(self.__up_rect.centerx, self.__up_rect.centery-2.5),
+                                        (self.__up_rect.centerx -5, self.__up_rect.centery + 2.5),
+                                        (self.__up_rect.centerx +5, self.__up_rect.centery +2.5)]
+        
+        self.__down_arrow_coordinates = [(self.__down_rect.centerx, self.__down_rect.centery+2.5),
+                                        (self.__down_rect.centerx -5, self.__down_rect.centery - 2.5),
+                                        (self.__down_rect.centerx +5, self.__down_rect.centery -2.5)]
+
+    def place(self):
+        """Draws increment buttons"""
+        pygame.draw.rect(self.__window, "#D3D3D3", self.__up_rect)
+        pygame.draw.rect(self.__window, "#000000", self.__up_rect, 1)
+        pygame.draw.rect(self.__window, "#D3D3D3", self.__down_rect)
+        pygame.draw.rect(self.__window, "#000000", self.__down_rect, 1)
+        pygame.draw.polygon(self.__window, "#000000", self.__up_arrow_coordinates)
+        pygame.draw.polygon(self.__window, "#000000", self.__down_arrow_coordinates)
+
+    def checkInteract(self, event):
+        """Checks for interactions"""
+        if tapping(event):
+        
+            if self.__up_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                if (self.__value + self.__increment) <= self.__maximum:
+                    self.__value += self.__increment
+            elif self.__down_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                if (self.__value - self.__increment) >= self.__minimum:
+                    self.__value -= self.__increment
+            
+
+    def getVariable(self):
+        return self.__variable
+    
+    def getValue(self):
+        return self.__value
+    
+

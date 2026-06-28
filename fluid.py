@@ -46,9 +46,12 @@ class VectorField(Output):
         """Returns associated variable"""
         return self.__variable
     
-    def setValue(self, value):
+    def setValue(self, display, rows):
         """Changes variable value"""
-        self.__display = value           
+        self.__display = display
+
+        self.__rows = rows    
+        self.__grid_line_interval = self.__line_height // self.__rows   
 
         
 class Particle(pygame.sprite.Sprite):

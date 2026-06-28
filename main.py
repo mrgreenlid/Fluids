@@ -20,38 +20,41 @@ clock = pygame.time.Clock()
 dt = 0
 
 # Creates variables to be used throughout
-variables = {"tank":True,
+data = {"tank":True,
              "control_active":True,
              "flow":False,
              "show_field":True,
+             "field_rows":10,
              "speed":0.0,
-             "direction":"left"}
+             "direction":"left",
+             "kinetic_energy": 0.0}
+
 
 
 # Instantiates control panel components
 control_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
 control_panel_label = ui.Label(screen, SCREEN_WIDTH-175, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-300, 100, "Speed:", 20, ui_bg)
-speed_entry = ui.Entry(screen, SCREEN_WIDTH-250, 99, 0, "speed", float)
-speed_unit_label = ui.Label(screen, SCREEN_WIDTH-100, 100,"ms\u207B\u00B9", 21, ui_bg)
+speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 99, 0, "speed", float)
+speed_unit_label = ui.Label(screen, SCREEN_WIDTH-50, 100,"ms\u207B\u00B9", 21, ui_bg)
 show_field_label = ui.Label(screen, SCREEN_WIDTH-263, 150, "Vector field:", 20, ui_bg)
+
+field_rows_increment = ui.Increment(screen, SCREEN_WIDTH-45, 150, "field_rows", data["field_rows"], 32, 2)
+
 show_particle_label = ui.Label(screen, SCREEN_WIDTH-282, 200, "Particles:", 20, ui_bg )
-show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-150, 150, 0,50, "show_field")
-direction_label = ui.Label(screen, SCREEN_WIDTH-282, 350, "Direction:", 20, ui_bg)
-direction_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 349, ("Left", "Right", "Up", "Down", "Random"), "direction", str)
-
-divider_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 200, 2, "#000000")
+show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0,50, "show_field")
 
 
 
 
-control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label, direction_label,
-                   show_grid_doublecheckbox, show_field_label, show_particle_label, divider_box, direction_dropdown,)
-control_interactable = (speed_entry, direction_dropdown, show_grid_doublecheckbox)
+control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label,
+                   show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment)
+
+control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment)
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, 19, "show_field", variables["show_field"])
+vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows"])
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [flow_button, vector_field]
@@ -71,31 +74,31 @@ while running:
 
         if typing(event):
             if keys[pygame.K_c]:
-                variables["control_active"] = toggleVariable(variables["control_active"])
+                data["control_active"] = toggleVariable(data["control_active"])
                 
         # Checks for interactions with different objects, depending
-        if variables["tank"]:
+        if data["tank"]:
             for obj in tank_interactable:
                 if tapping(event) or typing(event):
                     if obj.class_type == "input":
-                        variables[obj.getVariable()] = obj.getValue()
+                        data[obj.getVariable()] = obj.getValue()
                         obj.checkInteract(event, keys)
                 if obj.class_type == "output":
-                    obj.setValue(variables[obj.getVariable()])
+                    obj.setValue(*([data[variable] for variable in obj.getVariable()]))
                         
                 
-        if variables["control_active"]:
+        if data["control_active"]:
             for obj in control_interactable:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
-                    variables[obj.getVariable()] = obj.getValue()
+                    data[obj.getVariable()] = obj.getValue()
 
     # Places objects, when relevant
-    if variables["tank"]:
+    if data["tank"]:
         for obj in tank_objects:
             obj.place()
         
-    if variables["control_active"]:
+    if data["control_active"]:
         for obj in control_objects:
             obj.place()
 
@@ -104,4 +107,5 @@ while running:
 
     # Keeps loop in time with the clock
     dt = clock.tick(60) / 1000
+    
 pygame.quit()
