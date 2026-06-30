@@ -6,7 +6,8 @@ from algorithms import *
 
 class velocityFunction(Output):
     def __init__(self):
-        return
+        # Sets up an (initially empty numpy array to store velocities at each point)
+        self.__domain = np.empty((self.__line_height, self.__line_length), dtype=np.float32)
     
     def checkInteract(self):
         return
@@ -17,6 +18,7 @@ class velocityFunction(Output):
 
     def setValue(self, function):
         return
+
 class VectorField(Output):
     class_type = "output"
     __grid_colour =  "#C7C1B8"
@@ -26,22 +28,13 @@ class VectorField(Output):
         self.__rows = rows
         self.__variable = variable
         self.__display = display
-        
-
         self.__line_length = window.get_width()
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
-
-        # Sets up an (initially empty numpy array to store velocities at each point)
-        self.__plane = np.empty((self.__line_height, self.__line_length), dtype=np.float32)
-       
-
     
     def __drawVector(self, tail_x : int, tail_y : int):
         return
-
-    def __mapVelocities(self):
-        return
+    
 
     def place(self):
         """Draws the vector field"""

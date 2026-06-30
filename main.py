@@ -24,12 +24,11 @@ data = {"tank":True,
         "show_control":True,
         "flow":False,
         "show_field":True,
-        "show_data":False,
+        "show_streamline":False,
              "field_rows":10,
              "speed":0.0,
              "direction":"left",
              "kinetic_energy": 0.0}
-
 
 
 # Instantiates control panel components
@@ -42,18 +41,19 @@ show_field_label = ui.Label(screen, SCREEN_WIDTH-263, 150, "Vector field:", 20, 
 field_rows_increment = ui.Increment(screen, SCREEN_WIDTH-45, 150, "field_rows", data["field_rows"], 32, 2)
 show_particle_label = ui.Label(screen, SCREEN_WIDTH-282, 200, "Particles:", 20, ui_bg )
 show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0, 50, "show_field")
-show_data_button = ui.Button(screen, SCREEN_WIDTH-100, 500, "data_active","data_image.png", scale_factor_1=[0.2, 0.2])
+show_streamline_label = ui.Label(screen, SCREEN_WIDTH-278, 250, "Streamline:", 20, ui_bg)
+show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_streamline")
 
 control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label,
-                   show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment)
+                   show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment,
+                   show_streamline_label, show_streamline_checkbox)
 
-control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment)
-
+control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox)
 # Instantiates data panel components
 
-#data_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
+data_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
 
-#data_objects = (data_panel_box)
+data_objects = (data_panel_box,)
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
@@ -79,6 +79,7 @@ while running:
         if typing(event):
             if keys[pygame.K_c]:
                 data["show_control"] = toggleVariable(data["show_control"])
+                data["show_data"] = False
          
         # Checks for interactions with different objects, depending
         if data["tank"]:
@@ -106,14 +107,10 @@ while running:
         for obj in control_objects:
             obj.place()
 
-    if data["show_data"]:
-        for obj in data_objects:
-            obj.place()
-
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
     # Keeps loop in time with the clock
     dt = clock.tick(60) / 1000
-    
+    print(data)
 pygame.quit()

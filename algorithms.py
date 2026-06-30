@@ -1,5 +1,6 @@
 import pygame
-import numpy as np
+
+# Basic subroutines for interface components 
 
 class Output:
     class_type = "output"

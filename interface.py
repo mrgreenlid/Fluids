@@ -269,9 +269,7 @@ class Button(Input):
         """Creates button to be placed on screen"""
         self.__window = window
         self.__variable = variable
-
         self.__state = False
-
         self.__off_shape = pygame.transform.scale_by(pygame.image.load(path_1).convert_alpha(), scale_factor_1)
         self.__off_rect = self.__off_shape.get_rect()
         self.__off_rect.center = (x, y)
@@ -280,7 +278,6 @@ class Button(Input):
             self.__on_shape = pygame.transform.scale_by(pygame.image.load(path_2).convert_alpha(), scale_factor_2)
             self.__on_rect = self.__on_shape.get_rect()
             self.__on_rect.center = (x, y)
-
         try:
             self.__key_bind = pygame.key.key_code(key_bind)
         except TypeError:
@@ -293,7 +290,7 @@ class Button(Input):
         else:
             self.__window.blit(self.__off_shape, self.__off_rect)
 
-    def checkInteract(self, event : pygame.event.Event, keys : List[bool]):
+    def checkInteract(self, event : pygame.event.Event, keys : List[bool] = None):
         """Checks for interactions"""
         if tapping(event):
             if self.__state:
@@ -349,7 +346,6 @@ class Increment(Input):
     def checkInteract(self, event):
         """Checks for interactions"""
         if tapping(event):
-        
             if self.__up_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
                 if (self.__value + self.__increment) <= self.__maximum:
                     self.__value += self.__increment
