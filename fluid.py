@@ -4,10 +4,19 @@ from typing import List
 from algorithms import *
 
 
-class velocityFunction:
+class velocityFunction(Output):
     def __init__(self):
         return
+    
+    def checkInteract(self):
+        return
 
+    def getVariable(self):
+        """Returns associated variable"""
+        return self.__variable
+
+    def setValue(self, function):
+        return
 class VectorField(Output):
     class_type = "output"
     __grid_colour =  "#C7C1B8"
@@ -15,17 +24,25 @@ class VectorField(Output):
         """Creates a vector field to be displayed and store data"""
         self.__window = window
         self.__rows = rows
+        self.__variable = variable
+        self.__display = display
+        
 
         self.__line_length = window.get_width()
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
 
-        self.__variable = variable
-        self.__display = display
+        # Sets up an (initially empty numpy array to store velocities at each point)
+        self.__plane = np.empty((self.__line_height, self.__line_length), dtype=np.float32)
+       
 
+    
     def __drawVector(self, tail_x : int, tail_y : int):
-        pygame.draw.circle(self.__window, "#000000", (tail_x, tail_y), 2)
-        
+        return
+
+    def __mapVelocities(self):
+        return
+
     def place(self):
         """Draws the vector field"""
         if self.__display:
@@ -38,7 +55,9 @@ class VectorField(Output):
                     for j in range(1, self.__rows):
                         if width == 2*self.__rows*self.__grid_line_interval:
                             break
+
                         self.__drawVector(width, self.__grid_line_interval*j)
+
                     pygame.draw.line(self.__window, self.__grid_colour, (width, 0), (width, self.__line_height))
                     width += self.__grid_line_interval
                     
@@ -49,7 +68,6 @@ class VectorField(Output):
     def setValue(self, display, rows):
         """Changes variable value"""
         self.__display = display
-
         self.__rows = rows    
         self.__grid_line_interval = self.__line_height // self.__rows   
 

@@ -265,7 +265,7 @@ class DoubleCheckbox(Checkbox):
                 self._antiClick()
             
 class Button(Input):
-    def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str = None, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):
         """Creates button to be placed on screen"""
         self.__window = window
         self.__variable = variable
@@ -363,5 +363,3 @@ class Increment(Input):
     
     def getValue(self):
         return self.__value
-    
-

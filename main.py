@@ -21,9 +21,10 @@ dt = 0
 
 # Creates variables to be used throughout
 data = {"tank":True,
-             "control_active":True,
-             "flow":False,
-             "show_field":True,
+        "show_control":True,
+        "flow":False,
+        "show_field":True,
+        "show_data":False,
              "field_rows":10,
              "speed":0.0,
              "direction":"left",
@@ -38,26 +39,28 @@ speed_label = ui.Label(screen, SCREEN_WIDTH-300, 100, "Speed:", 20, ui_bg)
 speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 99, 0, "speed", float)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-50, 100,"ms\u207B\u00B9", 21, ui_bg)
 show_field_label = ui.Label(screen, SCREEN_WIDTH-263, 150, "Vector field:", 20, ui_bg)
-
 field_rows_increment = ui.Increment(screen, SCREEN_WIDTH-45, 150, "field_rows", data["field_rows"], 32, 2)
-
 show_particle_label = ui.Label(screen, SCREEN_WIDTH-282, 200, "Particles:", 20, ui_bg )
-show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0,50, "show_field")
-
-
-
+show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0, 50, "show_field")
+show_data_button = ui.Button(screen, SCREEN_WIDTH-100, 500, "data_active","data_image.png", scale_factor_1=[0.2, 0.2])
 
 control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label,
                    show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment)
 
 control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment)
 
+# Instantiates data panel components
+
+#data_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
+
+#data_objects = (data_panel_box)
+
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows"])
 
 tank_objects = [vector_field, flow_button]
-tank_interactable = [flow_button, vector_field]
+tank_interactable = [vector_field, flow_button,]
 
 running = True
 while running:
@@ -72,10 +75,11 @@ while running:
 
         keys = pygame.key.get_pressed()
 
+        # Sets keybinds for control of the ui
         if typing(event):
             if keys[pygame.K_c]:
-                data["control_active"] = toggleVariable(data["control_active"])
-                
+                data["show_control"] = toggleVariable(data["show_control"])
+         
         # Checks for interactions with different objects, depending
         if data["tank"]:
             for obj in tank_interactable:
@@ -87,7 +91,7 @@ while running:
                     obj.setValue(*([data[variable] for variable in obj.getVariable()]))
                         
                 
-        if data["control_active"]:
+        if data["show_control"]:
             for obj in control_interactable:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
@@ -98,8 +102,12 @@ while running:
         for obj in tank_objects:
             obj.place()
         
-    if data["control_active"]:
+    if data["show_control"]:
         for obj in control_objects:
+            obj.place()
+
+    if data["show_data"]:
+        for obj in data_objects:
             obj.place()
 
     # Updates the screen with changes that have been set in each loop
