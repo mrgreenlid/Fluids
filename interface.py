@@ -143,17 +143,16 @@ class Entry(Label, Input):
             return self._text.lower()
         return None
 
-class Dropdown(Entry, Input):
+class Dropdown(Entry):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, options : Tuple[str], variable : str, datatype : type):
-        """Creates dropdown box to be placed on screen"""
+        """Draws main box and button"""
         super().__init__(window, x, y, options[0], variable, datatype)
 
         self.__options = options
-        self.__option_rect = [self._rect.copy() for _ in range(len(self.__options))]
-        for rect in range(len(self.__options)):
-            self.__option_rect[rect].centery += (30*(rect+1))
+        self.__options_rect = [self._rect.copy() for _ in range(len(self.__options)-1)]
+        for rect in range(len(self.__options)-1):
+            self.__options_rect[rect].centery += (30*(rect+1))
 
-        # Creates rect and coords for dropdown button
         self.__arrow_rect = pygame.Rect(0, 0, 30, 30)
         self.__arrow_rect.center = (x + 140, y + 1)
         self.__arrow_coordinates = [(self.__arrow_rect.centerx, self.__arrow_rect.centery + 2.5),
@@ -161,34 +160,37 @@ class Dropdown(Entry, Input):
                                     (self.__arrow_rect.centerx - 5, self.__arrow_rect.centery - 2.5)]
 
     def place(self):
-        """Draws main box, button and options"""
+        """Draws text box and options at appropriate times"""
         super().place()
         pygame.draw.rect(self._window, "#D3D3D3", self.__arrow_rect)
         pygame.draw.rect(self._window, "#000000", self.__arrow_rect, 1)
         pygame.draw.polygon(self._window, "#000000", self.__arrow_coordinates)
-
         if self._in_use:
-            for rect in range(len(self.__option_rect)):
-                pygame.draw.rect(self._window, "#FFFFFF", self.__option_rect[rect], 0)
-                self._window.blit(self._font.render(self.__options[rect], True, "#000000", "#FFFFFF"), self.__option_rect[rect])
-                pygame.draw.rect(self._window, "#000000", self.__option_rect[rect], 1)
+            current_options = [option for option in self.__options if option != self._text]
+            print(current_options)
+            for rect in range(len(current_options)):
+                pygame.draw.rect(self._window, "#FFFFFF", self.__options_rect[rect], 0)
+                self._window.blit(self._font.render(current_options[rect], True, "#000000", "#FFFFFF"), self.__options_rect[rect])
+                pygame.draw.rect(self._window, "#000000", self.__options_rect[rect], 1)
+
 
     def checkInteract(self, event : pygame.event.Event):
-        """Checks for interactions"""
-        if tapping(event):
-            if not self._in_use:
-                if self.__arrow_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
-                    self._click()
-            else:
-                for rect in range(len(self.__option_rect)):
-                    if self.__option_rect[rect].collidepoint(*pygame.mouse.get_pos()[:2]):
-                        self._text = self.__options[rect]
-                self._antiClick()
-
-        if self._in_use:
-            if typing(event):
-                if event.unicode == "\x0D":
+            """Checks for interactions"""
+            current_options = [option for option in self.__options if option != self._text]
+            if tapping(event):
+                if not self._in_use:
+                    if self.__arrow_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                        self._click()
+                else:
+                    for rect in range(len(self.__options_rect)):
+                        if self.__options_rect[rect].collidepoint(*pygame.mouse.get_pos()[:2]):
+                            self._text = current_options[rect]
                     self._antiClick()
+
+            if self._in_use:
+                if typing(event):
+                    if event.unicode == "\x0D":
+                        self._antiClick()
 
 class Checkbox(Input):
     _inactive_colour = "#FFFFFF"
