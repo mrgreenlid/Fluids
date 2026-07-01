@@ -8,7 +8,7 @@ class velocityFunction(Output):
     def __init__(self):
         # Sets up an (initially empty numpy array to store velocities at each point)
         self.__domain = np.empty((self.__line_height, self.__line_length), dtype=np.float32)
-    
+        print(__domain)    
     def checkInteract(self):
         return
 
@@ -18,6 +18,9 @@ class velocityFunction(Output):
 
     def setValue(self, function):
         return
+
+
+
 
 class VectorField(Output):
     class_type = "output"

@@ -18,13 +18,15 @@ class Box:
 
 
 class Label:
-    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas"):
+    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas", variable : str = None):
         """Creates text label to be placed on screen"""
         self._window = window
         self._size = size
         self._bg = bg
         self._text = f"{text}"
-
+            
+        self.__variable = variable
+    
         # Creates a set of arguments to be used to render the text
         self._render_arguments = [self._text, True, "black", self._bg]
 
@@ -36,7 +38,13 @@ class Label:
     def place(self):
         """Places label at preset location"""
         self._window.blit(self._font.render(*self._render_arguments), self._rect)
-
+    
+    def update(self, data):
+        try:
+            if isinstance(data[self.__variable], float):
+                self._render_arguments[0] = str('{0:.10f}'.format(data[self.__variable]))[:5]
+        except KeyError:
+            pass
 
 class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
@@ -45,7 +53,6 @@ class Entry(Label, Input):
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25):
         """Creates entry box to be placed on screen"""
         super().__init__(window, x, y, " ", size, self._inactive_colour, "Courier")
-
         self._text = f"{text}"
         self._variable = variable
         self._datatype = datatype
@@ -353,9 +360,10 @@ class Increment(Input):
                 if (self.__value - self.__increment) >= self.__minimum:
                     self.__value -= self.__increment
             
-
     def getVariable(self):
+        """Returns associated variable"""
         return self.__variable
     
     def getValue(self):
+        """Returns value"""
         return self.__value

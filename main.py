@@ -8,6 +8,7 @@ pygame.init()
 # Sets the constants of the screen surface
 SCREEN_HEIGHT = 800
 SCREEN_WIDTH = 1600
+FRAME_RATE = 60
 bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
 
@@ -25,10 +26,15 @@ data = {"tank":True,
         "flow":False,
         "show_field":True,
         "show_streamline":False,
-             "field_rows":10,
+        "field_rows":16,
+        "frame_rate":0.0,
+            "velocity_function":"",
              "speed":0.0,
-             "direction":"left",
-             "kinetic_energy": 0.0}
+             "kinetic_energy": 0.0,
+             "circulation" : 0.0,
+             "flux" : 0.0,
+             "force":0.0
+             }
 
 
 # Instantiates control panel components
@@ -44,16 +50,28 @@ show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0, 5
 show_streamline_label = ui.Label(screen, SCREEN_WIDTH-278, 250, "Streamline:", 20, ui_bg)
 show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_streamline")
 
+
+velocity_function_entry = ui.Entry(screen, SCREEN_WIDTH-200, 300, "", "veloctiy_function", str)
+
+
+border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 400, 220, 1, "#000000")
+
+energy_label = ui.Label(screen, SCREEN_WIDTH-235, 430, "Kinetic Energy (J):", 17, ui_bg, "Courier")
+energy_data = ui.Label(screen, SCREEN_WIDTH-100, 430, 0.0, 17, ui_bg, "Courier", "kinetic_energy")
+circulation_label = ui.Label(screen, SCREEN_WIDTH-270, 460, "Circulation:", 17, ui_bg, "Courier")
+circulation_data = ui.Label(screen, SCREEN_WIDTH-100, 460, 0.0, 17, ui_bg, "Courier", "circulation")
+flux_label = ui.Label(screen, SCREEN_WIDTH-305, 490, "Flux:", 17, ui_bg, "Courier")
+flux_data = ui.Label(screen, SCREEN_WIDTH-100, 490, 0.0, 17, ui_bg, "Courier", "flux")
+frame_rate_label = ui.Label(screen,SCREEN_WIDTH-242, 520, "Performance (fps):", 17, ui_bg, "Courier")
+frame_rate_data= ui.Label(screen,SCREEN_WIDTH-100, 520, 0.0, 17, ui_bg, "Courier", "frame_rate")
+
+
 control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label,
                    show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment,
-                   show_streamline_label, show_streamline_checkbox)
+                   show_streamline_label, show_streamline_checkbox, border_data_box, energy_label, energy_data, circulation_label, circulation_data,
+                   flux_label, flux_data, frame_rate_label, frame_rate_data)
 
 control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox)
-# Instantiates data panel components
-
-data_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
-
-data_objects = (data_panel_box,)
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
@@ -65,7 +83,7 @@ tank_interactable = [vector_field, flow_button,]
 running = True
 while running:
     # Changes the caption of the window to view framerate and colours the screen blank, to allow for objects to be placed on it
-    pygame.display.set_caption(f"Fluid Mechanics Simulator - FPS: {str(clock.get_fps())[:5]}")
+    pygame.display.set_caption(f"Fluid Mechanics Simulator")
     screen.fill(bg_colour)
 
     # Starts event loop
@@ -97,7 +115,8 @@ while running:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[obj.getVariable()] = obj.getValue()
-
+                
+                
     # Places objects, when relevant
     if data["tank"]:
         for obj in tank_objects:
@@ -106,11 +125,17 @@ while running:
     if data["show_control"]:
         for obj in control_objects:
             obj.place()
+            try:
+                obj.update(data)
+            except AttributeError:
+                pass
 
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
     # Keeps loop in time with the clock
-    dt = clock.tick(60) / 1000
-    print(data)
+    dt = clock.tick(FRAME_RATE) / 1000
+
+    data["frame_rate"] = clock.get_fps()
+
 pygame.quit()
