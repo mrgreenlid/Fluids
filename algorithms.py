@@ -2,6 +2,7 @@ import pygame
 import math
 import cmath
 
+
 # Basic subroutines for interface components 
 
 class Output:
@@ -27,7 +28,7 @@ def toggleVariable(var : bool):
     return not var
 
 def arg(z : complex):
-    """Returns the argument of complex number [-pi, pi]"""
+    """Returns the argument [-pi, pi] of a complex number"""
     return cmath.phase(z)
 
 def magnitude(z : complex):
@@ -37,4 +38,8 @@ def magnitude(z : complex):
 def kineticEnergy(speed : int | float, mass : int | float):
     """Returns the kinetic energy of an object of given speed and mass"""
     return 0.5*mass*(speed**2)
+
+def getVelocityFunction(name : str):
+    return
+
 

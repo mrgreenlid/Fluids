@@ -21,27 +21,24 @@ clock = pygame.time.Clock()
 dt = 0
 
 # Creates variables to be used throughout
-data = {"tank":True,
-        "show_control":True,
+data = {"show_control":True,
         "flow":False,
         "show_field":True,
         "show_streamline":False,
         "field_rows":16,
         "frame_rate":0.0,
-            "velocity_function":"",
+            "velocity_function":"tunnel",
              "speed":0.0,
              "kinetic_energy": 0.0,
              "circulation" : 0.0,
-             "flux" : 0.0,
-             "force":0.0
-             }
+             "flux" : 0.0}
 
 
 # Instantiates control panel components
 control_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
 control_panel_label = ui.Label(screen, SCREEN_WIDTH-175, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-300, 100, "Speed:", 20, ui_bg)
-speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 99, 0, "speed", float)
+speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 100, 0, "speed", float)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-50, 100,"ms\u207B\u00B9", 21, ui_bg)
 show_field_label = ui.Label(screen, SCREEN_WIDTH-263, 150, "Vector field:", 20, ui_bg)
 field_rows_increment = ui.Increment(screen, SCREEN_WIDTH-45, 150, "field_rows", data["field_rows"], 32, 2)
@@ -50,7 +47,9 @@ show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0, 5
 show_streamline_label = ui.Label(screen, SCREEN_WIDTH-278, 250, "Streamline:", 20, ui_bg)
 show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_streamline")
 velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 20, ui_bg)
-velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex"], "velocity_function", str)
+velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "velocity_function", str)
+custom_velocity_function_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
+custom_velocity_function_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350, "", "velocity_function", str)
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
 
@@ -64,7 +63,7 @@ frame_rate_label = ui.Label(screen,SCREEN_WIDTH-222, 620, "Performance (fps):", 
 frame_rate_data= ui.Label(screen,SCREEN_WIDTH-80, 620, 0.0, 17, ui_bg, "Courier", "frame_rate")
 
 
-control_objects = (control_panel_box, control_panel_label, speed_label, speed_entry, speed_unit_label,
+control_objects = (control_panel_label, speed_label, speed_entry, speed_unit_label,
                    show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment,
                    show_streamline_label, show_streamline_checkbox, velocity_function_label, velocity_function_dropdown, border_data_box, energy_label, energy_data, circulation_label, circulation_data,
                    flux_label, flux_data, frame_rate_label, frame_rate_data, )
@@ -76,7 +75,10 @@ flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.p
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows"])
 
 tank_objects = [vector_field, flow_button]
-tank_interactable = [vector_field, flow_button,]
+tank_interactable = [vector_field, flow_button]
+
+# Instantiates the complex velocity function
+velocity_function = fluid.VelocityFunction(vector_field)
 
 running = True
 while running:
@@ -95,39 +97,46 @@ while running:
         if typing(event):
             if keys[pygame.K_c]:
                 data["show_control"] = toggleVariable(data["show_control"])
-                data["show_data"] = False
-         
+
         # Checks for interactions with different objects, depending
-        if data["tank"]:
-            for obj in tank_interactable:
-                if tapping(event) or typing(event):
-                    if obj.class_type == "input":
-                        data[obj.getVariable()] = obj.getValue()
-                        obj.checkInteract(event, keys)
-                if obj.class_type == "output":
-                    obj.setValue(*([data[variable] for variable in obj.getVariable()]))
+        for obj in tank_interactable:
+            if tapping(event) or typing(event):
+                if obj.class_type == "input":
+                    data[obj.getVariable()] = obj.getValue()
+                    obj.checkInteract(event, keys)
+            if obj.class_type == "output":
+                obj.setValue(*([data[variable] for variable in obj.getVariable()]))
                         
                 
         if data["show_control"]:
             for obj in control_interactable:
                 obj.checkInteract(event)
-                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+            if data["velocity_function"] == "custom" or custom_velocity_function_entry.getState():
+                custom_velocity_function_entry.checkInteract(event)
+            if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[obj.getVariable()] = obj.getValue()
-                
+            
+    # Ensures the velocity function is up to date
+    velocity_function.setVelocityFunction(data["velocity_function"])
+    data["velocity_function"] = velocity_function.getVelocityFunction()
+
 
     # Places objects, when relevant
-    if data["tank"]:
-        for obj in tank_objects:
-            obj.place()
+    for obj in tank_objects:
+        obj.place()
         
     if data["show_control"]:
+        control_panel_box.place()
+        if data["velocity_function"] == "custom":
+                custom_velocity_function_label.place()
+                custom_velocity_function_entry.place()
         for obj in control_objects:
             obj.place()
             try:
                 obj.update(data)
             except AttributeError:
                 pass
-
+        
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
@@ -135,5 +144,5 @@ while running:
     dt = clock.tick(FRAME_RATE) / 1000
     data["frame_rate"] = clock.get_fps()
 
-    print(data)
+    
 pygame.quit()

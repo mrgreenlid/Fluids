@@ -24,7 +24,6 @@ class Label:
         self._size = size
         self._bg = bg
         self._text = f"{text}"
-            
         self.__variable = variable
     
         # Creates a set of arguments to be used to render the text
@@ -40,6 +39,7 @@ class Label:
         self._window.blit(self._font.render(*self._render_arguments), self._rect)
     
     def update(self, data):
+        """Applies changes to the label if the parameters have changed"""
         try:
             if isinstance(data[self.__variable], float):
                 self._render_arguments[0] = str('{0:.10f}'.format(data[self.__variable]))[:5]
@@ -131,6 +131,9 @@ class Entry(Label, Input):
             if typing(event):
                 self._typeText(event)
 
+    def getState(self):
+        return self._in_use
+
     def getVariable(self):
         """Returns associated variable"""
         return self._variable
@@ -167,7 +170,6 @@ class Dropdown(Entry):
         pygame.draw.polygon(self._window, "#000000", self.__arrow_coordinates)
         if self._in_use:
             current_options = [option for option in self.__options if option != self._text]
-            print(current_options)
             for rect in range(len(current_options)):
                 pygame.draw.rect(self._window, "#FFFFFF", self.__options_rect[rect], 0)
                 self._window.blit(self._font.render(current_options[rect], True, "#000000", "#FFFFFF"), self.__options_rect[rect])

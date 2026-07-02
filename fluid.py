@@ -3,25 +3,6 @@ import numpy as np
 from typing import List
 from algorithms import *
 
-
-class velocityFunction(Output):
-    def __init__(self):
-        # Sets up an (initially empty numpy array to store velocities at each point)
-        self.__domain = np.empty((self.__line_height, self.__line_length), dtype=np.float32)
-        print(__domain)    
-    def checkInteract(self):
-        return
-
-    def getVariable(self):
-        """Returns associated variable"""
-        return self.__variable
-
-    def setValue(self, function):
-        return
-
-
-
-
 class VectorField(Output):
     class_type = "output"
     __grid_colour =  "#C7C1B8"
@@ -35,10 +16,10 @@ class VectorField(Output):
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
     
+        self.__plane = np.empty((self.__line_height, self.__line_length), dtype=np.float64)
     def __drawVector(self, tail_x : int, tail_y : int):
         return
     
-
     def place(self):
         """Draws the vector field"""
         if self.__display:
@@ -67,7 +48,21 @@ class VectorField(Output):
         self.__rows = rows    
         self.__grid_line_interval = self.__line_height // self.__rows   
 
-        
+class VelocityFunction(Output):
+    def __init__(self, vector_field : VectorField):
+        self.__velocity_function = ""
+        self.__vector_field = vector_field
+
+    def setVelocityFunction(self, function : str):
+        if function != self.__velocity_function:
+            self.__velocity_function = function
+    
+    def getVelocityFunction(self):
+        return self.__velocity_function
+    
+
+
+
 class Particle(pygame.sprite.Sprite):
     def __init__(self,):
         return 
