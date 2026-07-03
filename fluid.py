@@ -48,6 +48,7 @@ class VectorField(Output):
         self.__rows = rows    
         self.__grid_line_interval = self.__line_height // self.__rows   
 
+
 class VelocityFunction(Output):
     def __init__(self, vector_field : VectorField):
         self.__velocity_function = ""

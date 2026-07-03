@@ -2,7 +2,6 @@ import pygame
 from algorithms import *
 from typing import Tuple, List
 import re
-############################### USE REGEX TO FIND SRTINGS ###############################
 
 class Box:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
@@ -86,17 +85,15 @@ class Entry(Label, Input):
     def __errorCorrect(self):
         """Checks text for syntax and logic errors"""
         if self._datatype == float:
-            try:
-                if self._text[0] == "0" and self._text[1] != ".":
-                    self._text = self._text[1:]
-            except IndexError:
-                pass
-
-            if len(self._text) == 0 and not self._in_use:
+            
+            if (re.match(r"^0[.][^0-9]", self._text) or len(self._text) == 0) and not self._in_use:
                 self._text = "0"
             
-            if len(self._text) > 5 :
-                self._text = self._text[:5]
+            if re.match("^0+[0-9]", self._text):
+                self._text = self._text[1:]
+            
+            if len(self._text) > 6 :
+                self._text = self._text[:6]
 
         if self._datatype == str:
             if len(self._text) > 8 :
@@ -106,10 +103,8 @@ class Entry(Label, Input):
                 pi_find = re.search(r"pi", self._text)
                 if pi_find:
                     self._text = self._text[:-2]
-                    self._text += "\u03C0"
+                    self._text += "\u03C0"                
                 
-
-            
 
     def _updateText(self):
         """Cements changes to text"""
@@ -128,15 +123,11 @@ class Entry(Label, Input):
             self._antiClick()
 
         if self._datatype == float:
-            if key.isdigit() or (key == "." and "." not in self._text):
+            if re.match(r"[0-9]", key) or (key == "." and "." not in self._text):
                 self._text += key
         
         if self._datatype == str: 
-            if self._variable == "velocity_function" and (key.isdigit() or key in self._special_characters):
-                self._text += key
-
-            elif self._variable != "velocity_function":
-                self._text += key
+            return
 
         self._updateText()
 
@@ -164,7 +155,12 @@ class Entry(Label, Input):
     def getValue(self):
         """Returns value"""
         if self._datatype == float:
-            return float(self._text)
+            try:
+                return float(self._text)
+            except ValueError:
+                self._text = "0"
+                return float(self._text)
+                
         elif self._datatype == str:
             return self._text.lower()
         return None
@@ -197,7 +193,6 @@ class Dropdown(Entry):
                 pygame.draw.rect(self._window, "#FFFFFF", self.__options_rect[rect], 0)
                 self._window.blit(self._font.render(current_options[rect], True, "#000000", "#FFFFFF"), self.__options_rect[rect])
                 pygame.draw.rect(self._window, "#000000", self.__options_rect[rect], 1)
-
 
     def checkInteract(self, event : pygame.event.Event):
             """Checks for interactions"""
