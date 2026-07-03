@@ -16,7 +16,6 @@ class Box:
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
         pygame.draw.rect(self.__window, "#000000", self.__rect, 1)
 
-
 class Label:
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas", variable : str = None):
         """Creates text label to be placed on screen"""
@@ -49,9 +48,6 @@ class Label:
 class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
-
-    _special_characters = ("^", "*", "e", "p", "i", "z")
-
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25):
         """Creates entry box to be placed on screen"""
         super().__init__(window, x, y, " ", size, self._inactive_colour, "Courier")
@@ -98,13 +94,7 @@ class Entry(Label, Input):
         if self._datatype == str:
             if len(self._text) > 8 :
                 self._text = self._text[:8]
-
-            if self._variable == "velocity_function":
-                pi_find = re.search(r"pi", self._text)
-                if pi_find:
-                    self._text = self._text[:-2]
-                    self._text += "\u03C0"                
-                
+                        
 
     def _updateText(self):
         """Cements changes to text"""

@@ -28,7 +28,8 @@ data = {"show_control":True,
         "field_rows":16,
         "frame_rate":0.0,
         "show_custom":False,
-            "velocity_function":"tunnel",
+            "scenario":"tunnel",
+            "velocity_function": "",
              "speed":0.0,
              "kinetic_energy": 0.0,
              "force": 0.0,
@@ -48,7 +49,10 @@ show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0, 5
 show_streamline_label = ui.Label(screen, SCREEN_WIDTH-278, 250, "Streamline:", 20, ui_bg)
 show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_streamline")
 velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 20, ui_bg)
-velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "velocity_function", str)
+velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "scenario", str)
+custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
+custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350,"", "velocity_function", str)
+
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
 

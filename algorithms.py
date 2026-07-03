@@ -2,7 +2,6 @@ import pygame
 import math
 import cmath
 
-
 # Basic subroutines for interface components 
 
 class Output:
@@ -39,7 +38,11 @@ def kineticEnergy(speed : int | float, mass : int | float):
     """Returns the kinetic energy of an object of given speed and mass"""
     return 0.5*mass*(speed**2)
 
-def getVelocityFunction(name : str):
+def checkExpression(q : str):
+    """Checks if input string is correctly in exponential form"""
     return
 
+def normaliseExpression(q : str):
+    """Turns typed exponential form into one more readable"""
+    return
 

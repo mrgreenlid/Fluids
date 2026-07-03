@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-from typing import List
 from algorithms import *
 
 class VectorField(Output):
@@ -54,16 +53,7 @@ class VelocityFunction(Output):
         self.__velocity_function = ""
         self.__vector_field = vector_field
 
-    def setVelocityFunction(self, function : str):
-        if function != self.__velocity_function:
-            self.__velocity_function = function
     
-    def getVelocityFunction(self):
-        return self.__velocity_function
-    
-
-
-
 class Particle(pygame.sprite.Sprite):
     def __init__(self,):
         return 
