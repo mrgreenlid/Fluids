@@ -30,6 +30,7 @@ data = {"show_control":True,
             "velocity_function":"tunnel",
              "speed":0.0,
              "kinetic_energy": 0.0,
+             "force": 0.0,
              "circulation" : 0.0,
              "flux" : 0.0}
 
@@ -53,20 +54,22 @@ custom_velocity_function_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350, "", "ve
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
 
-energy_label = ui.Label(screen, SCREEN_WIDTH-215, 530, "Kinetic Energy (J):", 17, ui_bg, "Courier")
+energy_label = ui.Label(screen, SCREEN_WIDTH-214, 530, "Kinetic Energy (J):", 17, ui_bg, "Courier")
 energy_data = ui.Label(screen, SCREEN_WIDTH-80, 530, 0.0, 17, ui_bg, "Courier", "kinetic_energy")
-circulation_label = ui.Label(screen, SCREEN_WIDTH-250, 560, "Circulation:", 17, ui_bg, "Courier")
-circulation_data = ui.Label(screen, SCREEN_WIDTH-80, 560, 0.0, 17, ui_bg, "Courier", "circulation")
-flux_label = ui.Label(screen, SCREEN_WIDTH-285, 590, "Flux:", 17, ui_bg, "Courier")
-flux_data = ui.Label(screen, SCREEN_WIDTH-80, 590, 0.0, 17, ui_bg, "Courier", "flux")
-frame_rate_label = ui.Label(screen,SCREEN_WIDTH-222, 620, "Performance (fps):", 17, ui_bg, "Courier")
-frame_rate_data= ui.Label(screen,SCREEN_WIDTH-80, 620, 0.0, 17, ui_bg, "Courier", "frame_rate")
+force_label = ui.Label(screen, SCREEN_WIDTH-245, 560, "Avg Force(N):", 17, ui_bg, "Courier")
+force_data = ui.Label(screen, SCREEN_WIDTH-80, 560, 0.0, 17, ui_bg, "Courier", "force")
+circulation_label = ui.Label(screen, SCREEN_WIDTH-250, 590, "Circulation:", 17, ui_bg, "Courier")
+circulation_data = ui.Label(screen, SCREEN_WIDTH-80, 590, 0.0, 17, ui_bg, "Courier", "circulation")
+flux_label = ui.Label(screen, SCREEN_WIDTH-285, 620, "Flux:", 17, ui_bg, "Courier")
+flux_data = ui.Label(screen, SCREEN_WIDTH-80, 620, 0.0, 17, ui_bg, "Courier", "flux")
+frame_rate_label = ui.Label(screen,SCREEN_WIDTH-222, 650, "Performance (fps):", 17, ui_bg, "Courier")
+frame_rate_data= ui.Label(screen,SCREEN_WIDTH-80, 650, 0.0, 17, ui_bg, "Courier", "frame_rate")
 
 
 control_objects = (control_panel_label, speed_label, speed_entry, speed_unit_label,
                    show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment,
-                   show_streamline_label, show_streamline_checkbox, velocity_function_label, velocity_function_dropdown, border_data_box, energy_label, energy_data, circulation_label, circulation_data,
-                   flux_label, flux_data, frame_rate_label, frame_rate_data, )
+                   show_streamline_label, show_streamline_checkbox, velocity_function_label, velocity_function_dropdown, border_data_box, energy_label, energy_data,force_label,
+                   force_data, circulation_label, circulation_data, flux_label, flux_data, frame_rate_label, frame_rate_data,)
                    
 control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox, velocity_function_dropdown)
 
@@ -111,15 +114,15 @@ while running:
         if data["show_control"]:
             for obj in control_interactable:
                 obj.checkInteract(event)
+                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+                    data[obj.getVariable()] = obj.getValue()
+            # Checks bespoke objects for specific circumstamces
             if data["velocity_function"] == "custom" or custom_velocity_function_entry.getState():
                 custom_velocity_function_entry.checkInteract(event)
-            if tapping(event) or (typing(event) and event.unicode == "\x0D"):
-                    data[obj.getVariable()] = obj.getValue()
             
     # Ensures the velocity function is up to date
     velocity_function.setVelocityFunction(data["velocity_function"])
     data["velocity_function"] = velocity_function.getVelocityFunction()
-
 
     # Places objects, when relevant
     for obj in tank_objects:
@@ -127,15 +130,17 @@ while running:
         
     if data["show_control"]:
         control_panel_box.place()
-        if data["velocity_function"] == "custom":
-                custom_velocity_function_label.place()
-                custom_velocity_function_entry.place()
         for obj in control_objects:
             obj.place()
             try:
                 obj.update(data)
             except AttributeError:
                 pass
+
+        # Checks bespoke objects for specific circumstamces
+        if data["velocity_function"] == "custom":
+                custom_velocity_function_label.place()
+                custom_velocity_function_entry.place()
         
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
@@ -143,6 +148,5 @@ while running:
     # Keeps loop in time with the clock
     dt = clock.tick(FRAME_RATE) / 1000
     data["frame_rate"] = clock.get_fps()
-
     
 pygame.quit()

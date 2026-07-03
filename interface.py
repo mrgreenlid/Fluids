@@ -1,7 +1,8 @@
 import pygame
 from algorithms import *
 from typing import Tuple, List
-
+import re
+############################### USE REGEX TO FIND SRTINGS ###############################
 
 class Box:
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, width : int, height : int, colour : str):
@@ -42,13 +43,15 @@ class Label:
         """Applies changes to the label if the parameters have changed"""
         try:
             if isinstance(data[self.__variable], float):
-                self._render_arguments[0] = str('{0:.10f}'.format(data[self.__variable]))[:5]
+                self._render_arguments[0] = str('{0:.10f}'.format(data[self.__variable]))[:7]
         except KeyError:
             pass
 
 class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
+
+    _special_characters = ("^", "*", "e", "p", "i", "z")
 
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25):
         """Creates entry box to be placed on screen"""
@@ -91,9 +94,22 @@ class Entry(Label, Input):
 
             if len(self._text) == 0 and not self._in_use:
                 self._text = "0"
-
+            
             if len(self._text) > 5 :
                 self._text = self._text[:5]
+
+        if self._datatype == str:
+            if len(self._text) > 8 :
+                self._text = self._text[:8]
+
+            if self._variable == "velocity_function":
+                pi_find = re.search(r"pi", self._text)
+                if pi_find:
+                    self._text = self._text[:-2]
+                    self._text += "\u03C0"
+                
+
+            
 
     def _updateText(self):
         """Cements changes to text"""
@@ -113,6 +129,13 @@ class Entry(Label, Input):
 
         if self._datatype == float:
             if key.isdigit() or (key == "." and "." not in self._text):
+                self._text += key
+        
+        if self._datatype == str: 
+            if self._variable == "velocity_function" and (key.isdigit() or key in self._special_characters):
+                self._text += key
+
+            elif self._variable != "velocity_function":
                 self._text += key
 
         self._updateText()
