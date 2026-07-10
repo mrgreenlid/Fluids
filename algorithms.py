@@ -2,8 +2,19 @@ import pygame
 import cmath
 import sqlite3 as sqlite
 
-# Basic subroutines for interface components 
 
+
+# Creates table in fluids database to store velocity functions
+with sqlite.Connection("fluids.db") as conn:
+    conn.cursor().execute("""CREATE TABLE IF NOT EXISTS function (
+                written TEXT PRIMARY KEY,
+                exponential INTEGER,
+                magnitude TEXT,
+                argument TEXT)
+                """)
+
+
+# Basic subroutines for interface components 
 class Output:
     class_type = "output"
 
