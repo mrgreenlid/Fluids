@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import sqlite3 as sqlite
+from typing import List, Tuple
 from algorithms import *
 
 # Creates table in fluids database to store velocity functions
@@ -13,10 +14,9 @@ with sqlite.Connection("fluids.db") as conn:
                 """)
     conn.commit()
 
-
 class VectorField(Output):
     __grid_colour =  "#C7C1B8"
-    def __init__(self, window : pygame.surface.Surface, rows : int, variable : str, display : bool = False):
+    def __init__(self, window : pygame.surface.Surface, rows : int, variable : List[str] , display : bool = False):
         """Creates a vector field to be displayed and store data"""
         self.__window = window
         self.__rows = rows
@@ -28,6 +28,9 @@ class VectorField(Output):
     
         self.__plane = np.empty((self.__line_height, self.__line_length), dtype=np.float64)
         self.__flow = False
+
+        self.__velocity_function = ()
+
     def __drawVector(self, tail_x : int, tail_y : int):
         return
     
@@ -48,7 +51,15 @@ class VectorField(Output):
 
                     pygame.draw.line(self.__window, self.__grid_colour, (width, 0), (width, self.__line_height))
                     width += self.__grid_line_interval
-                    
+
+    def __map(self):
+        ...
+
+    def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
+        if self.__velocity_function != velocity_function:
+            self.__velocity_function = velocity_function
+            self.__map()
+
     def getVariable(self):
         """Returns associated variable"""
         return self.__variable
@@ -59,14 +70,8 @@ class VectorField(Output):
         self.__rows = rows   
         self.__flow = flow
         self.__grid_line_interval = self.__line_height // self.__rows   
-
-
-class VelocityFunction(Output):
-    def __init__(self, vector_field : VectorField):
-        self.__velocity_function = ""
-        self.__vector_field = vector_field
-
     
+
 class Particle(pygame.sprite.Sprite):
     def __init__(self,):
         return 

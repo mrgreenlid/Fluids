@@ -80,9 +80,6 @@ vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "fie
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]
 
-# Instantiates the complex velocity function
-velocity_function = fluid.VelocityFunction(vector_field)
-
 running = True
 while running:
     # Changes the caption of the window to view framerate and colours the screen blank, to allow for objects to be placed on it
@@ -138,11 +135,17 @@ while running:
                 obj.update(data)
             except AttributeError:
                 pass
-        
+        # Updates the velocity function
+
+        else:
+            vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"]))
+
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
     # Keeps loop in time with the clock
     dt = clock.tick(FRAME_RATE) / 1000
     data["frame_rate"] = clock.get_fps()
+
+
 pygame.quit()

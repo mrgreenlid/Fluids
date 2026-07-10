@@ -41,7 +41,6 @@ def kineticEnergy(speed : int | float, mass : int | float):
 def searchVelocityFunction(function : str):
     """Searches the velocity function table, written attribute, for the criteria"""
     with sqlite.Connection("fluids.db") as conn:
-        return conn.cursor().execute("""SELECT * FROM function WHERE written = (?) """, (function,)).fetchone()
-
-def validVelocityFunction(function : str):
-    ...
+        function_data = conn.cursor().execute("""SELECT * FROM function WHERE written = (?) """, (function,)).fetchone()
+        conn.commit()
+    return function_data
