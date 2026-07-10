@@ -1,6 +1,18 @@
 import pygame
 import numpy as np
+import sqlite3 as sqlite
 from algorithms import *
+
+# Creates table in fluids database to store velocity functions
+with sqlite.Connection("fluids.db") as conn:
+    conn.cursor().execute("""CREATE TABLE IF NOT EXISTS function (
+                written TEXT PRIMARY KEY UNIQUE,
+                exponential INTEGER,
+                magnitude TEXT,
+                argument TEXT)
+                """)
+    conn.commit()
+
 
 class VectorField(Output):
     __grid_colour =  "#C7C1B8"

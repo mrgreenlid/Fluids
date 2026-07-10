@@ -1,18 +1,7 @@
 import pygame
 import cmath
+import math
 import sqlite3 as sqlite
-
-
-
-# Creates table in fluids database to store velocity functions
-with sqlite.Connection("fluids.db") as conn:
-    conn.cursor().execute("""CREATE TABLE IF NOT EXISTS function (
-                written TEXT PRIMARY KEY,
-                exponential INTEGER,
-                magnitude TEXT,
-                argument TEXT)
-                """)
-
 
 # Basic subroutines for interface components 
 class Output:
@@ -43,8 +32,16 @@ def arg(z : complex):
 
 def magnitude(z : complex):
     """Returns the magnitude of a complex number"""
-    return cmath.sqrt(z.real**2 + z.imag**2)
+    return math.sqrt(z.real**2 + z.imag**2)
 
 def kineticEnergy(speed : int | float, mass : int | float):
     """Returns the kinetic energy of an object of given speed and mass"""
     return 0.5*mass*(speed**2)
+
+def searchVelocityFunction(function : str):
+    """Searches the velocity function table, written attribute, for the criteria"""
+    with sqlite.Connection("fluids.db") as conn:
+        return conn.cursor().execute("""SELECT * FROM function WHERE written = (?) """, (function,)).fetchone()
+
+def validVelocityFunction(function : str):
+    ...
