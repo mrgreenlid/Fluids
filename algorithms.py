@@ -1,6 +1,6 @@
 import pygame
-import math
 import cmath
+import sqlite3 as sqlite
 
 # Basic subroutines for interface components 
 
@@ -32,17 +32,8 @@ def arg(z : complex):
 
 def magnitude(z : complex):
     """Returns the magnitude of a complex number"""
-    return math.sqrt(z.real**2 + z.imag**2)
+    return cmath.sqrt(z.real**2 + z.imag**2)
 
 def kineticEnergy(speed : int | float, mass : int | float):
     """Returns the kinetic energy of an object of given speed and mass"""
     return 0.5*mass*(speed**2)
-
-def checkExpression(q : str):
-    """Checks if input string is correctly in exponential form"""
-    return
-
-def normaliseExpression(q : str):
-    """Turns typed exponential form into one more readable"""
-    return
-

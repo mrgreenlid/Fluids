@@ -16,7 +16,7 @@ class Box:
         pygame.draw.rect(self.__window, self.__colour, self.__rect)
         pygame.draw.rect(self.__window, "#000000", self.__rect, 1)
 
-class Label:
+class Label(Output):
     def __init__(self, window : pygame.Surface, x : int, y : int, text : str, size : int, bg : str, font : str = "Consolas", variable : str = None):
         """Creates text label to be placed on screen"""
         self._window = window
@@ -48,7 +48,7 @@ class Label:
 class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
-    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25):
+    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25, width : int = 120 ):
         """Creates entry box to be placed on screen"""
         super().__init__(window, x, y, " ", size, self._inactive_colour, "Courier")
         self._text = f"{text}"
@@ -57,7 +57,7 @@ class Entry(Label, Input):
         self._in_use = False
 
         # Lengthens the box 
-        self._rect.width = 120
+        self._rect.width = width
         self._updateText()
 
     def place(self):
@@ -82,7 +82,7 @@ class Entry(Label, Input):
         """Checks text for syntax and logic errors"""
         if self._datatype == float:
             
-            if (re.match(r"^0[.][^0-9]", self._text) or len(self._text) == 0) and not self._in_use:
+            if (re.match(r"^0[.][^\d]", self._text) or len(self._text) == 0) and not self._in_use:
                 self._text = "0"
             
             if re.match("^0+[0-9]", self._text):
@@ -112,12 +112,13 @@ class Entry(Label, Input):
             self._updateText()
             self._antiClick()
 
-        if self._datatype == float:
-            if re.match(r"[0-9]", key) or (key == "." and "." not in self._text):
+        elif self._datatype == float:
+            if key.isdigit() or (key == "." and "." not in self._text):
                 self._text += key
         
-        if self._datatype == str: 
-            return
+        elif self._datatype == str: 
+            self._text += key
+
 
         self._updateText()
 

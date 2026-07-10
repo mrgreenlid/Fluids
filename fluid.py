@@ -3,7 +3,6 @@ import numpy as np
 from algorithms import *
 
 class VectorField(Output):
-    class_type = "output"
     __grid_colour =  "#C7C1B8"
     def __init__(self, window : pygame.surface.Surface, rows : int, variable : str, display : bool = False):
         """Creates a vector field to be displayed and store data"""
@@ -16,6 +15,7 @@ class VectorField(Output):
         self.__grid_line_interval = self.__line_height // self.__rows
     
         self.__plane = np.empty((self.__line_height, self.__line_length), dtype=np.float64)
+        self.__flow = False
     def __drawVector(self, tail_x : int, tail_y : int):
         return
     
@@ -41,10 +41,11 @@ class VectorField(Output):
         """Returns associated variable"""
         return self.__variable
     
-    def setValue(self, display, rows):
+    def setValue(self, display, rows, flow):
         """Changes variable value"""
         self.__display = display
-        self.__rows = rows    
+        self.__rows = rows   
+        self.__flow = flow
         self.__grid_line_interval = self.__line_height // self.__rows   
 
 

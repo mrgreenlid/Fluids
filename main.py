@@ -51,8 +51,7 @@ show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_stre
 velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 20, ui_bg)
 velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "scenario", str)
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
-custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350,"", "velocity_function", str)
-
+custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350, data["velocity_function"], "velocity_function", str, width=163)
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
 
@@ -76,7 +75,7 @@ control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increm
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows"])
+vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow"])
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]
@@ -117,6 +116,11 @@ while running:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[obj.getVariable()] = obj.getValue()
+            # Checks interaction with bespoke objects 
+            if data["scenario"] == "custom":
+                custom_vf_entry.checkInteract(event)
+                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+                    data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
 
     # Places objects, when relevant
     for obj in tank_objects:
@@ -124,6 +128,10 @@ while running:
         
     if data["show_control"]:
         control_panel_box.place()
+        if data["scenario"] == "custom":
+            # Places bespoke objects
+            custom_vf_label.place()
+            custom_vf_entry.place()
         for obj in control_objects:
             obj.place()
             try:
