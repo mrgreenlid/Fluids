@@ -44,3 +44,11 @@ def searchVelocityFunction(function : str):
         function_data = conn.cursor().execute("""SELECT * FROM function WHERE written = (?) """, (function,)).fetchone()
         conn.commit()
     return function_data
+
+def validVelocityFunction(function : str):
+    """Checks if a string is formatted correctly to be a velocity function"""
+    ...
+
+def saveVelocityFunction():
+    """Adds a new velocity function to the table"""
+    ...

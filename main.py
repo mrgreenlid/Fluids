@@ -129,16 +129,22 @@ while running:
             # Places bespoke objects
             custom_vf_label.place()
             custom_vf_entry.place()
+            # Sets the velocity function for the vector field
+            if searchVelocityFunction(data["velocity_function"]):
+                vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"]))
+            elif validVelocityFunction(data["velocity_function"]):
+                saveVelocityFunction(data["velocity_function"])
+        else:
+            vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"]))
+        # Places control objects
         for obj in control_objects:
             obj.place()
+            # Updates dynamic labels
             try:
                 obj.update(data)
             except AttributeError:
                 pass
-        # Updates the velocity function
-
-        else:
-            vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"]))
+    
 
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
@@ -146,6 +152,5 @@ while running:
     # Keeps loop in time with the clock
     dt = clock.tick(FRAME_RATE) / 1000
     data["frame_rate"] = clock.get_fps()
-
 
 pygame.quit()
