@@ -4,15 +4,19 @@ import sqlite3 as sqlite
 from typing import List, Tuple
 from algorithms import *
 
-# Creates table in fluids database to store velocity functions
+# Creates table in fluids database to store velocity functions and sets up prebuilt functions
 with sqlite.Connection("fluids.db") as conn:
-    conn.cursor().execute("""CREATE TABLE IF NOT EXISTS function (
+    conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS velocity_function (
                 written TEXT PRIMARY KEY UNIQUE,
                 exponential INTEGER,
                 magnitude TEXT,
-                argument TEXT)
+                argument TEXT);
+
+                INSERT or IGNORE INTO velocity_function VALUES ("tunnel", 1, "speed", "pi");
+                
                 """)
     conn.commit()
+    
 
 class VectorField(Output):
     __grid_colour =  "#C7C1B8"

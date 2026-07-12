@@ -42,7 +42,7 @@ control_panel_label = ui.Label(screen, SCREEN_WIDTH-175, 30, "Control Panel", 30
 speed_label = ui.Label(screen, SCREEN_WIDTH-300, 100, "Speed:", 20, ui_bg)
 speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 100, 0, "speed", float)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-50, 100,"ms\u207B\u00B9", 21, ui_bg)
-show_field_label = ui.Label(screen, SCREEN_WIDTH-263, 150, "Vector field:", 20, ui_bg)
+show_field_label = ui.Label(screen, SCREEN_WIDTH-265, 150, "Vector field:", 20, ui_bg)
 field_rows_increment = ui.Increment(screen, SCREEN_WIDTH-45, 150, "field_rows", data["field_rows"], 32, 2)
 show_particle_label = ui.Label(screen, SCREEN_WIDTH-282, 200, "Particles:", 20, ui_bg )
 show_grid_doublecheckbox = ui.DoubleCheckbox(screen, SCREEN_WIDTH-100, 150, 0, 50, "show_field")
@@ -51,7 +51,7 @@ show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_stre
 velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 20, ui_bg)
 velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "scenario", str)
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
-custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350, data["velocity_function"], "velocity_function", str, width=163)
+custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350, data["velocity_function"], "velocity_function", str, width=190, text_length=12)
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
 
@@ -129,12 +129,15 @@ while running:
             # Places bespoke objects
             custom_vf_label.place()
             custom_vf_entry.place()
-            # Sets the velocity function for the vector field
+        # Sets the velocity function for the vector field
             if searchVelocityFunction(data["velocity_function"]):
                 vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"]))
+
             elif validVelocityFunction(data["velocity_function"]):
                 saveVelocityFunction(data["velocity_function"])
+        
         else:
+            
             vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"]))
         # Places control objects
         for obj in control_objects:

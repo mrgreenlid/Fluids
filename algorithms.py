@@ -2,6 +2,7 @@ import pygame
 import cmath
 import math
 import sqlite3 as sqlite
+import re
 
 # Basic subroutines for interface components 
 class Output:
@@ -41,14 +42,17 @@ def kineticEnergy(speed : int | float, mass : int | float):
 def searchVelocityFunction(function : str):
     """Searches the velocity function table, written attribute, for the criteria"""
     with sqlite.Connection("fluids.db") as conn:
-        function_data = conn.cursor().execute("""SELECT * FROM function WHERE written = (?) """, (function,)).fetchone()
+        function_data = conn.cursor().execute("""SELECT * FROM velocity_function WHERE written = (?) """, (function,)).fetchone()
         conn.commit()
     return function_data
 
 def validVelocityFunction(function : str):
     """Checks if a string is formatted correctly to be a velocity function"""
-    ...
+    if re.fullmatch(r"\d+(\.\d+)?e\^\(i(\*(\d+(\.\d+)?|pi))+\)", function):
+        return True
 
 def saveVelocityFunction():
     """Adds a new velocity function to the table"""
     ...
+
+

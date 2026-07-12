@@ -48,17 +48,18 @@ class Label(Output):
 class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
-    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25, width : int = 120 ):
+    def __init__(self, window : pygame.Surface, x : int, y : int, text : str, variable : str, datatype : type, size : int = 25, width : int = 120, text_length : int = 10):
         """Creates entry box to be placed on screen"""
         super().__init__(window, x, y, " ", size, self._inactive_colour, "Courier")
         self._text = f"{text}"
         self._variable = variable
         self._datatype = datatype
         self._in_use = False
+        self._text_length = text_length
 
         # Lengthens the box 
         self._rect.width = width
-        self._updateText()
+        self.__updateText()
 
     def place(self):
         """Places entry box at preset location"""
@@ -70,20 +71,23 @@ class Entry(Label, Input):
         """Changes box to active colours"""
         self._bg = self._active_colour
         self._in_use = True
-        self._updateText()
+        self.__updateText()
 
     def _antiClick(self):
         """Changes box to inactive colours"""
         self._bg = self._inactive_colour
         self._in_use = False
-        self._updateText()
+        self.__updateText()
 
     def __errorCorrect(self):
         """Checks text for syntax and logic errors"""
         if self._datatype == float:
             
-            if (re.match(r"^0[.][^\d]", self._text) or len(self._text) == 0) and not self._in_use:
-                self._text = "0"
+            if not self._in_use:
+                if len(self._text) == 0:
+                    self._text = "0"
+                elif self._text[-1] == ".":
+                    self._text = self._text[:-1]
             
             if re.match("^0+[0-9]", self._text):
                 self._text = self._text[1:]
@@ -92,11 +96,11 @@ class Entry(Label, Input):
                 self._text = self._text[:6]
 
         if self._datatype == str:
-            if len(self._text) > 8 :
-                self._text = self._text[:8]
+            if len(self._text) > self._text_length:
+                self._text = self._text[:-1]
                         
 
-    def _updateText(self):
+    def __updateText(self):
         """Cements changes to text"""
         self.__errorCorrect()
         self._render_arguments[0], self._render_arguments[3] = self._text, self._bg
@@ -109,7 +113,7 @@ class Entry(Label, Input):
             self._text = self._text[:-1]
 
         elif key == "\x0D":
-            self._updateText()
+            self.__updateText()
             self._antiClick()
 
         elif self._datatype == float:
@@ -119,8 +123,7 @@ class Entry(Label, Input):
         elif self._datatype == str: 
             self._text += key
 
-
-        self._updateText()
+        self.__updateText()
 
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
@@ -129,7 +132,7 @@ class Entry(Label, Input):
                 self._click()
 
             else:
-                self._updateText()
+                self.__updateText()
                 self._antiClick()
 
         if self._in_use:
