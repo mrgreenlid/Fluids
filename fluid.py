@@ -17,7 +17,6 @@ with sqlite.Connection("fluids.db") as conn:
                 """)
     conn.commit()
     
-
 class VectorField(Output):
     __grid_colour =  "#C7C1B8"
     def __init__(self, window : pygame.surface.Surface, rows : int, variable : List[str] , display : bool = False):
@@ -62,8 +61,7 @@ class VectorField(Output):
     def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
         if self.__velocity_function != velocity_function:
             self.__velocity_function = velocity_function
-        print(self.__velocity_function)
-        self.__map()
+            self.__map()
 
     def getVariable(self):
         """Returns associated variable"""

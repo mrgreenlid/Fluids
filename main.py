@@ -51,7 +51,7 @@ show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_stre
 velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 20, ui_bg)
 velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "scenario", str)
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
-custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-200, 350, data["velocity_function"], "velocity_function", str, width=190, text_length=12)
+custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["velocity_function"], "velocity_function", str, 22, 230, 17)
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
 
@@ -137,7 +137,6 @@ while running:
                 saveVelocityFunction(data["velocity_function"])
         
         else:
-            
             vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"]))
         # Places control objects
         for obj in control_objects:
