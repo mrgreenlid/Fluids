@@ -48,16 +48,21 @@ def searchVelocityFunction(function : str):
 
 def validVelocityFunction(function : str):
     """Checks if a string is formatted correctly to be a velocity function"""
-    if re.fullmatch(r"\d+(\.\d+)?e\^\(i(\*(\d+(\.\d+)?|pi))+\)", function):
+    if re.fullmatch(r"\d+(\.\d+)?e\^\(i(\*(\d+(\.\d+)?|pi))*\)", function):
         return True
 
 def saveVelocityFunction(function : str):
     """Adds a new velocity function to the table"""
     # May remove selection if not adding general formula adding
     if "e" in function:
+        magnitude = function[:function.index("e")]
+        if "*" in function:
+            argument = function[function.index("*")+1:function.index(")")]
+        else:
+            argument = 1
         with sqlite.Connection("fluids.db") as conn:
             conn.cursor().execute("""INSERT or IGNORE INTO velocity_function VALUES (?,?,?,?)""",
-            (function, 1, function[:function.index("e")], function[function.index("*")+1:function.index(")")]))
+            (function, 1, magnitude, argument))
 
 
 

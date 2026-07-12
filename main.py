@@ -147,7 +147,6 @@ while running:
             except AttributeError:
                 pass
     
-
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 

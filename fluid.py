@@ -61,6 +61,7 @@ class VectorField(Output):
     def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
         if self.__velocity_function != velocity_function:
             self.__velocity_function = velocity_function
+            print(self.__velocity_function)
             self.__map()
 
     def getVariable(self):
