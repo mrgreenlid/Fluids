@@ -94,16 +94,15 @@ while running:
         keys = pygame.key.get_pressed()
 
         # Sets keybinds for control of the ui
-        if typing(event):
-            if keys[pygame.K_c]:
-                data["show_control"] = toggleVariable(data["show_control"])
+        if keys[pygame.K_c]:
+            data["show_control"] = toggleVariable(data["show_control"])
 
         # Checks for interactions with different objects, depending
         for obj in tank_interactable:
             if tapping(event) or typing(event):
                 if obj.class_type == "input":
-                    data[obj.getVariable()] = obj.getValue()
                     obj.checkInteract(event, keys)
+                    data[obj.getVariable()] = obj.getValue()
             if obj.class_type == "output":
                 obj.setValue(*([data[variable] for variable in obj.getVariable()]))
                         
@@ -131,13 +130,13 @@ while running:
             custom_vf_entry.place()
         # Sets the velocity function for the vector field
             if searchVelocityFunction(data["velocity_function"]):
-                vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"]))
+                vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"])[1:])
 
             elif validVelocityFunction(data["velocity_function"]):
                 saveVelocityFunction(data["velocity_function"])
         
         else:
-            vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"]))
+            vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
         # Places control objects
         for obj in control_objects:
             obj.place()
