@@ -35,10 +35,11 @@ class VectorField(Output):
 
         x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2+1)),np.arange(self.__line_height//2, -self.__line_height//2-1,-1 ))
         self.__plane = np.stack([x, y], axis=-1)
-        self.__velocities = np.ones((self.__line_height, self.__line_length, 2))
-        
+        self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
+
        
-    def __drawVector(self, tail_x : int, tail_y : int):
+       
+    def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         ...
 
     def place(self):
@@ -61,10 +62,14 @@ class VectorField(Output):
                     width += self.__grid_line_interval
 
     def __map(self):
-        return
-    
-    def pointVelocity(self):
-        ...
+        if self.__velocity_function[0] == 1:
+            self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
+            
+            
+            
+        
+    def pointVelocity(self, pygame_x, pygame_y):
+        return self.__velocities[*self.__convertFromPygameCoordinate(pygame_x, pygame_y)]
 
     def __convertFromPygameCoordinate(self, pygame_x, pygame_y):
         """Returns the true possition of a pygame coordinate, with the origin in the centre"""
