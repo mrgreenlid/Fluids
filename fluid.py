@@ -34,9 +34,8 @@ class VectorField(Output):
         self.__grid_line_interval = self.__line_height // self.__rows
 
 
-######################REPLACE PLANE WITH COMPLEX NUMBERS##############################
-        x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2+1)),np.arange(self.__line_height//2, -self.__line_height//2-1,-1 ))
-        self.__plane = np.stack([x, y], axis=-1)
+        x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2)),np.arange(self.__line_height//2, -self.__line_height//2, -1))
+        self.__plane = x + y*1j
         self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
 
        
@@ -66,8 +65,7 @@ class VectorField(Output):
     def __map(self):
         if self.__velocity_function[0] == 1:
             self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
-            for v in np.nditer(self.__velocities):
-                v.real = int(self.__velocity_function[1])*np.cos(self.__velocity_function[2])
+            
             ############################################# MAKE VELOCITY FUNCTION CHANGE here
             
             
