@@ -78,7 +78,7 @@ flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.p
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow"])
 
 tank_objects = [vector_field, flow_button]
-tank_interactable = [vector_field, flow_button]
+tank_interactable = [vector_field, flow_button]     
 
 running = True
 while running:
@@ -94,9 +94,10 @@ while running:
         keys = pygame.key.get_pressed()
 
         # Sets keybinds for control of the ui
-        if keys[pygame.K_c]:
-            data["show_control"] = toggleVariable(data["show_control"])
-
+        if typing(event):
+            if keys[pygame.K_c]:
+                data["show_control"] = toggleVariable(data["show_control"])
+            
         # Checks for interactions with different objects, depending
         for obj in tank_interactable:
             if tapping(event) or typing(event):
@@ -119,8 +120,9 @@ while running:
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
 
     # Places objects, when relevant
+    
     for obj in tank_objects:
-        obj.place()
+            obj.place()
         
     if data["show_control"]:
         control_panel_box.place()
@@ -137,6 +139,9 @@ while running:
         
         else:
             vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
+
+        
+
         # Places control objects
         for obj in control_objects:
             obj.place()
@@ -153,4 +158,6 @@ while running:
     dt = clock.tick(FRAME_RATE) / 1000
     data["frame_rate"] = clock.get_fps()
 
+
+      
 pygame.quit()

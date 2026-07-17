@@ -26,22 +26,23 @@ class VectorField(Output):
         self.__variable = variable
         self.__display = display
         self.__flow = False
-        self.__velocity_function = ()
+        self.__velocity_function = []
+        self.__q = ()
         self.__maximum_arrow_length = 0.0
 
         self.__line_length = window.get_width()
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
-
-
-        x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2)),np.arange(self.__line_height//2, -self.__line_height//2, -1))
+        
+        x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2+1)),np.arange(self.__line_height//2, -self.__line_height//2-1, -1))
         self.__plane = x + y*1j
-        self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
+        self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
+        
 
-       
-       
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
-        ...
+        dx, dy = self.pointVelocity(tail_pygame_x, tail_pygame_y).real*10, self.pointVelocity(tail_pygame_x, tail_pygame_y).imag
+        tip_pygame_x, tip_pygame_y = tail_pygame_x +dx, tail_pygame_y +dy
+        pygame.draw.line(self.__window, "red", (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
 
     def place(self):
         """Draws the vector field"""
@@ -53,9 +54,9 @@ class VectorField(Output):
                 height += self.__grid_line_interval
                 for i in range(2):
                     for j in range(1, self.__rows):
-                        if width == 2*self.__rows*self.__grid_line_interval:
+                        if width >= self.__line_length:
                             break
-                    
+
                         if self.__flow:
                             self.__drawVector(width, self.__grid_line_interval*j)
 
@@ -64,21 +65,20 @@ class VectorField(Output):
 
     def __map(self):
         if self.__velocity_function[0] == 1:
-            self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
+            self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
+            self.__velocities *= complex(real=self.__velocity_function[1]*np.cos(self.__velocity_function[2]), imag=self.__velocity_function[1]*np.sin(self.__velocity_function[2]))
+
             
-            ############################################# MAKE VELOCITY FUNCTION CHANGE here
-            
-            
-        
     def pointVelocity(self, pygame_x, pygame_y):
-        return self.__velocities[*self.__convertFromPygameCoordinate(pygame_x, pygame_y)]
+        return self.__velocities[pygame_y][pygame_x]
 
     def __convertFromPygameCoordinate(self, pygame_x, pygame_y):
         """Returns the true possition of a pygame coordinate, with the origin in the centre"""
         return self.__plane[pygame_y][pygame_x]
 
     def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
-        if self.__velocity_function != velocity_function:
+        if self.__q != velocity_function:
+            self.__q = velocity_function
             self.__velocity_function = list(velocity_function)
             
             if self.__velocity_function[0] == 1:
@@ -87,8 +87,10 @@ class VectorField(Output):
                     if term == "pi":
                         argument *= np.pi
                     else:
-                        argument *= np.pi 
+                        argument *= float(term)
                 self.__velocity_function[2] = argument
+                self.__velocity_function[1] = float(self.__velocity_function[1])
+
 
             self.__map()
 
