@@ -33,9 +33,11 @@ class VectorField(Output):
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
 
+
+######################REPLACE PLANE WITH COMPLEX NUMBERS##############################
         x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2+1)),np.arange(self.__line_height//2, -self.__line_height//2-1,-1 ))
         self.__plane = np.stack([x, y], axis=-1)
-        self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
+        self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
 
        
        
@@ -63,8 +65,10 @@ class VectorField(Output):
 
     def __map(self):
         if self.__velocity_function[0] == 1:
-            self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
-            
+            self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
+            for v in np.nditer(self.__velocities):
+                v.real = int(self.__velocity_function[1])*np.cos(self.__velocity_function[2])
+            ############################################# MAKE VELOCITY FUNCTION CHANGE here
             
             
         
@@ -77,7 +81,17 @@ class VectorField(Output):
 
     def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
         if self.__velocity_function != velocity_function:
-            self.__velocity_function = velocity_function
+            self.__velocity_function = list(velocity_function)
+            
+            if self.__velocity_function[0] == 1:
+                argument = 1
+                for term in self.__velocity_function[2].split("*"):
+                    if term == "pi":
+                        argument *= np.pi
+                    else:
+                        argument *= np.pi 
+                self.__velocity_function[2] = argument
+
             self.__map()
 
     def getVariable(self):
