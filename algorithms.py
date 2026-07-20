@@ -60,7 +60,7 @@ def saveVelocityFunction(function : str):
         if "*" in function:
             argument = function[function.index("*")+1:function.index(")")]
         else:
-            argument = 1
+            argument = 0
         with sqlite.Connection("fluids.db") as conn:
             conn.cursor().execute("""INSERT or IGNORE INTO velocity_function VALUES (?,?,?,?)""",
             (function, 1, magnitude, argument))
