@@ -40,7 +40,7 @@ class VectorField(Output):
         self.__line_length = window.get_width()
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
-        self.__maximum_arrow_length = self.__grid_line_interval * 0.9
+        self.__maximum_arrow_length = self.__grid_line_interval * 0.6
         
         x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2+1)),np.arange(self.__line_height//2, -self.__line_height//2-1, -1))
         self.__plane = x + y*1j
@@ -49,10 +49,10 @@ class VectorField(Output):
 
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         velocity = self.pointVelocity(tail_pygame_x, tail_pygame_y)
-        dx, dy = velocity.real*10, velocity.imag*10
-        tip_pygame_x, tip_pygame_y = tail_pygame_x + dx, tail_pygame_y - dy
-
-        pygame.draw.line(self.__window, "red", (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
+        dx, dy = velocity.real, velocity.imag
+        scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
+        tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor
+        pygame.draw.line(self.__window, self.__colourByMagnitude(np.sqrt(dx**2+dy**2)), (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
 
     def place(self):
         """Draws the vector field"""
@@ -63,12 +63,12 @@ class VectorField(Output):
                 pygame.draw.line(self.__window, self.__grid_colour, (0, y_line), (self.__line_length, y_line))
         
             for column in range(self.__rows*2):
-                x_line = column* self.__grid_line_interval
+                x_line = column * self.__grid_line_interval
                 pygame.draw.line(self.__window, self.__grid_colour, (x_line, 0), (x_line, self.__line_height))
 
             if self.__flow:
-                for row in range(1, self.__rows+1):
-                    for column in range(self.__rows*2):
+                for row in range(1, self.__rows):
+                    for column in range(1, self.__rows*2):
                         x = column * self.__grid_line_interval
                         y = row * self.__grid_line_interval
                         self.__drawVector(x, y)
@@ -76,7 +76,7 @@ class VectorField(Output):
     def __map(self):
         if self.__exponential:
             self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
-            self.__velocities *= complex(real= self.__magnitude*np.cos(self.__argument), imag= self.__magnitude*np.sin(self.__argument))
+            self.__velocities *= complex(real= self.__magnitude*np.cos(self.__argument), imag= self.__magnitude*np.sin(self.__argument))*self.__speed
 
 
     def pointVelocity(self, pygame_x, pygame_y):
@@ -88,8 +88,8 @@ class VectorField(Output):
 
     def __colourByMagnitude(self, magnitude):
         """Returns a hex value for a colour based on a given magnitude (0 - grid_line_interval)"""
-        # max = "#FF0000"
-        #min = "#0000FF"
+        colour = "#FF00FF"
+        return colour
 
 
     
