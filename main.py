@@ -104,7 +104,7 @@ while running:
                 if obj.class_type == "input":
                     obj.checkInteract(event, keys)
                     data[obj.getVariable()] = obj.getValue()
-            if obj.class_type == "output":
+            if obj.class_type == "output": 
                 obj.setValue(*([data[variable] for variable in obj.getVariable()]))
                         
                 

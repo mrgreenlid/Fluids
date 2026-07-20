@@ -41,14 +41,33 @@ class VectorField(Output):
 
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         dx, dy = self.pointVelocity(tail_pygame_x, tail_pygame_y).real*10, self.pointVelocity(tail_pygame_x, tail_pygame_y).imag
-        tip_pygame_x, tip_pygame_y = tail_pygame_x +dx, tail_pygame_y +dy
+        tip_pygame_x, tip_pygame_y = tail_pygame_x + dx, tail_pygame_y + dy
         pygame.draw.line(self.__window, "red", (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
 
     def place(self):
         """Draws the vector field"""
+        # Draws vector field grid and sets up vector arrows
         if self.__display:
-            # Draws vector field grid and sets up vector arrows
-            height = width = self.__maximum_arrow_length = self.__grid_line_interval
+            for row in range(self.__rows+1):
+                y_line= row*self.__grid_line_interval
+                pygame.draw.line(self.__window, self.__grid_colour, (0, y_line), (self.__line_length, y_line))
+        
+            for column in range(self.__rows*2):
+                x_line = column* self.__grid_line_interval
+                pygame.draw.line(self.__window, self.__grid_colour, (x_line, 0), (x_line, self.__line_height))
+
+            if self.__flow:
+                for row in range(1, self.__rows+1):
+                    for column in range(self.__rows*2):
+                        x = column * self.__grid_line_interval
+                        y = row * self.__grid_line_interval
+                        self.__drawVector(x, y)
+
+                    
+
+
+
+            """height = width = self.__maximum_arrow_length = self.__grid_line_interval
             for row in range(self.__rows):
                 pygame.draw.line(self.__window, self.__grid_colour, (0, height), (self.__line_length, height))
                 height += self.__grid_line_interval
@@ -61,7 +80,7 @@ class VectorField(Output):
                             self.__drawVector(width, self.__grid_line_interval*j)
 
                     pygame.draw.line(self.__window, self.__grid_colour, (width, 0), (width, self.__line_height))
-                    width += self.__grid_line_interval
+                    width += self.__grid_line_interval"""
 
     def __map(self):
         if self.__velocity_function[0] == 1:
@@ -70,11 +89,11 @@ class VectorField(Output):
 
             
     def pointVelocity(self, pygame_x, pygame_y):
-        return self.__velocities[pygame_y][pygame_x]
+        return self.__velocities[pygame_y-1][pygame_x-1]
 
     def __convertFromPygameCoordinate(self, pygame_x, pygame_y):
         """Returns the true possition of a pygame coordinate, with the origin in the centre"""
-        return self.__plane[pygame_y][pygame_x]
+        return self.__plane[pygame_y-1][pygame_x-1]
 
     def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
         if self.__q != velocity_function:
@@ -105,6 +124,7 @@ class VectorField(Output):
         self.__flow = flow
         self.__grid_line_interval = self.__line_height // self.__rows   
     
+
 
 class Particle(pygame.sprite.Sprite):
     def __init__(self,):
