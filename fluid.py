@@ -13,7 +13,9 @@ with sqlite.Connection("fluids.db") as conn:
                 argument TEXT);
 
                 INSERT or IGNORE INTO velocity_function VALUES ("tunnel", 1, "1", "pi");
-                
+                INSERT or IGNORE INTO velocity_function VALUES ("vortex", 0, "1", "pi*0.25");
+                INSERT or IGNORE INTO velocity_function VALUES ("falling", 1, "1", "pi*0.5");
+
                 """)
     conn.commit()
     
@@ -26,22 +28,30 @@ class VectorField(Output):
         self.__variable = variable
         self.__display = display
         self.__flow = False
-        self.__velocity_function = []
-        self.__q = ()
-        self.__maximum_arrow_length = 0.0
 
+        self.__speed = 1
+        self.__velocity_function = []
+        self.__magnitude = ""
+        self.__argument = ""
+        self.__exponential = False
+
+        self.__q = ()
+    
         self.__line_length = window.get_width()
         self.__line_height = window.get_height()
         self.__grid_line_interval = self.__line_height // self.__rows
+        self.__maximum_arrow_length = self.__grid_line_interval * 0.9
         
         x, y = np.meshgrid((np.arange(-self.__line_length//2, self.__line_length//2+1)),np.arange(self.__line_height//2, -self.__line_height//2-1, -1))
         self.__plane = x + y*1j
-        self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
+        self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
         
 
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
-        dx, dy = self.pointVelocity(tail_pygame_x, tail_pygame_y).real*10, self.pointVelocity(tail_pygame_x, tail_pygame_y).imag
-        tip_pygame_x, tip_pygame_y = tail_pygame_x + dx, tail_pygame_y + dy
+        velocity = self.pointVelocity(tail_pygame_x, tail_pygame_y)
+        dx, dy = velocity.real*10, velocity.imag*10
+        tip_pygame_x, tip_pygame_y = tail_pygame_x + dx, tail_pygame_y - dy
+
         pygame.draw.line(self.__window, "red", (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
 
     def place(self):
@@ -63,37 +73,26 @@ class VectorField(Output):
                         y = row * self.__grid_line_interval
                         self.__drawVector(x, y)
 
-                    
-
-
-
-            """height = width = self.__maximum_arrow_length = self.__grid_line_interval
-            for row in range(self.__rows):
-                pygame.draw.line(self.__window, self.__grid_colour, (0, height), (self.__line_length, height))
-                height += self.__grid_line_interval
-                for i in range(2):
-                    for j in range(1, self.__rows):
-                        if width >= self.__line_length:
-                            break
-
-                        if self.__flow:
-                            self.__drawVector(width, self.__grid_line_interval*j)
-
-                    pygame.draw.line(self.__window, self.__grid_colour, (width, 0), (width, self.__line_height))
-                    width += self.__grid_line_interval"""
-
     def __map(self):
-        if self.__velocity_function[0] == 1:
+        if self.__exponential:
             self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
-            self.__velocities *= complex(real=self.__velocity_function[1]*np.cos(self.__velocity_function[2]), imag=self.__velocity_function[1]*np.sin(self.__velocity_function[2]))
+            self.__velocities *= complex(real= self.__magnitude*np.cos(self.__argument), imag= self.__magnitude*np.sin(self.__argument))
 
-            
+
     def pointVelocity(self, pygame_x, pygame_y):
         return self.__velocities[pygame_y-1][pygame_x-1]
 
     def __convertFromPygameCoordinate(self, pygame_x, pygame_y):
         """Returns the true possition of a pygame coordinate, with the origin in the centre"""
         return self.__plane[pygame_y-1][pygame_x-1]
+
+    def __colourByMagnitude(self, magnitude):
+        """Returns a hex value for a colour based on a given magnitude (0 - grid_line_interval)"""
+        # max = "#FF0000"
+        #min = "#0000FF"
+
+
+    
 
     def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
         if self.__q != velocity_function:
@@ -110,6 +109,9 @@ class VectorField(Output):
                 self.__velocity_function[2] = argument
                 self.__velocity_function[1] = float(self.__velocity_function[1])
 
+                self.__exponential = True
+                self.__magnitude = self.__velocity_function[1]
+                self.__argument = self.__velocity_function[2]
 
             self.__map()
 
@@ -117,13 +119,19 @@ class VectorField(Output):
         """Returns associated variable"""
         return self.__variable
     
-    def setValue(self, display, rows, flow):
+    def setValue(self, display, rows, flow, speed):
         """Changes variable value"""
         self.__display = display
-        self.__rows = rows   
         self.__flow = flow
-        self.__grid_line_interval = self.__line_height // self.__rows   
-    
+        
+        if speed != self.__speed:
+            self.__speed = speed
+            self.__map()
+
+        if self.__rows != rows:
+            self.__rows = rows
+            self.__grid_line_interval = self.__line_height // self.__rows
+
 
 
 class Particle(pygame.sprite.Sprite):

@@ -64,6 +64,3 @@ def saveVelocityFunction(function : str):
         with sqlite.Connection("fluids.db") as conn:
             conn.cursor().execute("""INSERT or IGNORE INTO velocity_function VALUES (?,?,?,?)""",
             (function, 1, magnitude, argument))
-
-
-

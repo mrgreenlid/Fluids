@@ -30,7 +30,7 @@ data = {"show_control":True,
         "show_custom":False,
             "scenario":"tunnel",
             "velocity_function": "",
-             "speed":0.0,
+             "speed":1.0,
              "kinetic_energy": 0.0,
              "force": 0.0,
              "circulation" : 0.0,
@@ -40,7 +40,7 @@ data = {"show_control":True,
 control_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
 control_panel_label = ui.Label(screen, SCREEN_WIDTH-175, 30, "Control Panel", 30, ui_bg)
 speed_label = ui.Label(screen, SCREEN_WIDTH-300, 100, "Speed:", 20, ui_bg)
-speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 100, 0, "speed", float)
+speed_entry = ui.Entry(screen, SCREEN_WIDTH-200, 100, data["speed"], "speed", float)
 speed_unit_label = ui.Label(screen, SCREEN_WIDTH-50, 100,"ms\u207B\u00B9", 21, ui_bg)
 show_field_label = ui.Label(screen, SCREEN_WIDTH-265, 150, "Vector field:", 20, ui_bg)
 field_rows_increment = ui.Increment(screen, SCREEN_WIDTH-45, 150, "field_rows", data["field_rows"], 32, 2)
@@ -75,7 +75,7 @@ control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increm
 
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow"])
+vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]     
@@ -141,7 +141,6 @@ while running:
             vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
 
         
-
         # Places control objects
         for obj in control_objects:
             obj.place()
