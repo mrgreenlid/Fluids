@@ -52,25 +52,19 @@ class VectorField(Output):
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         """Draws coloured vector arrow with the tail at the specified point"""
         velocity = self.pointVelocity(tail_pygame_x, tail_pygame_y)
-        wobble = random.uniform(-0.5, 0.5)
-        dx, dy = velocity.real+wobble, velocity.imag+wobble
+       
+        dx, dy = velocity.real, velocity.imag
 
-        arrow_points = transpose(rotate(np.array([(self.__maximum_arrow_length, 0), 
-                                 (0.8*self.__maximum_arrow_length, 0.1*self.__maximum_arrow_length),
-                                 (0.8*self.__maximum_arrow_length, -0.1*self.__maximum_arrow_length)]), self.__argument))
+        arrow_points = translate(rotate(np.array([(self.__maximum_arrow_length, 0), 
+                                                  (0.7*self.__maximum_arrow_length, 0.2*self.__maximum_arrow_length),
+                                                  (0.7*self.__maximum_arrow_length, -0.2*self.__maximum_arrow_length)]), self.__argument), tail_pygame_x, tail_pygame_y)
     
 
-        
         vector_colour = self.__colourByMagnitude(magnitude(velocity))
         
         scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
         tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor
 
-
-        
-        
-       
-        
 
         pygame.draw.line(self.__window,vector_colour, (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
         pygame.draw.polygon(self.__window, vector_colour, arrow_points)
@@ -114,9 +108,7 @@ class VectorField(Output):
         return colour
 
 
-    
-
-    def setVelocityFunction(self, velocity_function : Tuple[str] | Tuple[int]):
+    def setVelocityFunction(self, velocity_function : Tuple[str]):
         """Updates the velocity function of the vector field"""
         if self.__q != velocity_function:
             self.__q = velocity_function

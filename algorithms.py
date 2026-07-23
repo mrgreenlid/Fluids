@@ -44,10 +44,8 @@ def kineticEnergy(speed : int | float, mass : int | float):
 def rotate(point : Tuple[int] | np.array, radians : float):
     """Rotates a tuple coordinate, or np.array group of coordinates about the origin"""
     point = np.array(point)
-
-    if radians < 0:
-        radians = 2*np.pi - abs(radians)
-
+    radians *= -1
+    
     rotation_matrix = np.array([[np.cos(radians), -np.sin(radians)],
                                 [np.sin(radians), np.cos(radians)]])
 
@@ -56,8 +54,11 @@ def rotate(point : Tuple[int] | np.array, radians : float):
     else:
         return point @ rotation_matrix.T
         
-def transpose(point, pygame_x, pygame_y):
-    ...
+def translate(point: Tuple[int] | np.array, pygame_x : int, pygame_y : int):
+    """Translates a tuple coordinate, or np.array group of coordinates"""
+    point = np.array(point)
+    point += [pygame_x, pygame_y]
+    return point
 
 def searchVelocityFunction(function : str):
     """Searches the velocity function table, written attribute, for the criteria"""
