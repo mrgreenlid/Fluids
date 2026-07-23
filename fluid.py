@@ -3,6 +3,7 @@ import numpy as np
 import sqlite3 as sqlite
 from typing import List, Tuple
 from algorithms import *
+import random
 
 # Creates table in fluids database to store velocity functions and sets up prebuilt functions
 with sqlite.Connection("fluids.db") as conn:
@@ -13,7 +14,7 @@ with sqlite.Connection("fluids.db") as conn:
                 argument TEXT);
 
                 INSERT or IGNORE INTO velocity_function VALUES ("tunnel", 1, "1", "pi");
-                INSERT or IGNORE INTO velocity_function VALUES ("vortex", 1, "1", "pi*0.25");
+                INSERT or IGNORE INTO velocity_function VALUES ("vortex", 1, "1", "pi*-0.25");
                 INSERT or IGNORE INTO velocity_function VALUES ("falling", 1, "1", "pi*0.5");
 
                 """)
@@ -29,6 +30,7 @@ class VectorField(Output):
         self.__display = display
         self.__flow = False
 
+    
         self.__speed = 1
         self.__velocity_function = []
         self.__magnitude = ""
@@ -50,17 +52,28 @@ class VectorField(Output):
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         """Draws coloured vector arrow with the tail at the specified point"""
         velocity = self.pointVelocity(tail_pygame_x, tail_pygame_y)
-        dx, dy = velocity.real, velocity.imag
+        wobble = random.uniform(-0.5, 0.5)
+        dx, dy = velocity.real+wobble, velocity.imag+wobble
+
+        arrow_points = transpose(rotate(np.array([(self.__maximum_arrow_length, 0), 
+                                 (0.8*self.__maximum_arrow_length, 0.1*self.__maximum_arrow_length),
+                                 (0.8*self.__maximum_arrow_length, -0.1*self.__maximum_arrow_length)]), self.__argument))
+    
+
+        
+        vector_colour = self.__colourByMagnitude(magnitude(velocity))
+        
         scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
         tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor
 
+
+        
+        
        
-
-
-        vector_colour = self.__colourByMagnitude(np.sqrt(dx**2+dy**2))
+        
 
         pygame.draw.line(self.__window,vector_colour, (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
-        #pygame.draw.polygon(self.__window, vector_colour, arrow_points)
+        pygame.draw.polygon(self.__window, vector_colour, arrow_points)
 
     def place(self):
         """Draws the vector field"""
@@ -75,8 +88,8 @@ class VectorField(Output):
                 pygame.draw.line(self.__window, self.__grid_colour, (x_line, 0), (x_line, self.__line_height))
 
             if self.__flow:
-                for row in range(1, self.__rows):
-                    for column in range(1, self.__rows*2):
+                for row in range(self.__rows+1):
+                    for column in range(self.__rows*2+1):
                         x = column * self.__grid_line_interval
                         y = row * self.__grid_line_interval
                         self.__drawVector(x, y)

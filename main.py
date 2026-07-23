@@ -18,7 +18,6 @@ pygame.display.set_icon(pygame.image.load("icon_image.png"))
 
 # Sets clock to measure and regulate frame rate
 clock = pygame.time.Clock()
-dt = 0
 
 # Creates variables to be used throughout
 data = {"show_control":True,
@@ -154,9 +153,7 @@ while running:
     pygame.display.flip()
 
     # Keeps loop in time with the clock
-    dt = clock.tick(FRAME_RATE) / 1000
     data["frame_rate"] = clock.get_fps()
+    dt = clock.tick(60) / 1000
 
-
-      
 pygame.quit()

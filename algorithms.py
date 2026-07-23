@@ -1,9 +1,10 @@
 import pygame
 import cmath
 import math
-from typing import Tuple
 import sqlite3 as sqlite
+from typing import Tuple
 import re
+import numpy as np
 
 # Basic subroutines for interface components 
 class Output:
@@ -40,6 +41,24 @@ def kineticEnergy(speed : int | float, mass : int | float):
     """Returns the kinetic energy of an object of given speed and mass"""
     return 0.5*mass*(speed**2)
 
+def rotate(point : Tuple[int] | np.array, radians : float):
+    """Rotates a tuple coordinate, or np.array group of coordinates about the origin"""
+    point = np.array(point)
+
+    if radians < 0:
+        radians = 2*np.pi - abs(radians)
+
+    rotation_matrix = np.array([[np.cos(radians), -np.sin(radians)],
+                                [np.sin(radians), np.cos(radians)]])
+
+    if point.ndim == 1:
+        return rotation_matrix @ point
+    else:
+        return point @ rotation_matrix.T
+        
+def transpose(point, pygame_x, pygame_y):
+    ...
+
 def searchVelocityFunction(function : str):
     """Searches the velocity function table, written attribute, for the criteria"""
     with sqlite.Connection("fluids.db") as conn:
@@ -64,3 +83,5 @@ def saveVelocityFunction(function : str):
         with sqlite.Connection("fluids.db") as conn:
             conn.cursor().execute("""INSERT or IGNORE INTO velocity_function VALUES (?,?,?,?)""",
             (function, 1, magnitude, argument))
+
+
