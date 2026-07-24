@@ -4,6 +4,7 @@ import sqlite3 as sqlite
 from typing import List, Tuple
 from algorithms import *
 import random
+import numba as nb
 
 # Creates table in fluids database to store velocity functions and sets up prebuilt functions
 with sqlite.Connection("fluids.db") as conn:
@@ -48,10 +49,10 @@ class VectorField(Output):
         self.__plane = x + y*1j
         self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
         
-
+    
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         """Draws coloured vector arrow with the tail at the specified point"""
-        velocity = self.pointVelocity(tail_pygame_x, tail_pygame_y)
+        velocity = self.getPointVelocity(tail_pygame_x, tail_pygame_y)
        
         dx, dy = velocity.real, velocity.imag
 
@@ -59,8 +60,7 @@ class VectorField(Output):
                                                   (0.7*self.__maximum_arrow_length, 0.2*self.__maximum_arrow_length),
                                                   (0.7*self.__maximum_arrow_length, -0.2*self.__maximum_arrow_length)]), self.__argument), tail_pygame_x, tail_pygame_y)
     
-
-        vector_colour = self.__colourByMagnitude(magnitude(velocity))
+        vector_colour = self.__colourByMagnitude(abs(velocity))
         
         scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
         tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor
@@ -94,7 +94,7 @@ class VectorField(Output):
             self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
             self.__velocities *= complex(real= self.__magnitude*np.cos(self.__argument), imag= self.__magnitude*np.sin(self.__argument))*self.__speed
 
-    def pointVelocity(self, pygame_x, pygame_y):
+    def getPointVelocity(self, pygame_x, pygame_y):
         """Returns the velocity at a specific point on the field"""
         return self.__velocities[pygame_y-1][pygame_x-1]
 
@@ -102,10 +102,14 @@ class VectorField(Output):
         """Returns the true possition of a pygame coordinate, with the origin in the centre"""
         return self.__plane[pygame_y-1][pygame_x-1]
 
-    def __colourByMagnitude(self, magnitude):
+    
+    def __colourByMagnitude(self, magnitude : float ):
         """Returns a hex value for a temperature colour based on a given magnitude"""
-        colour = "#0000ff"
-        return colour
+        magnitude = round(magnitude)
+
+
+
+        return "#FF00FF"
 
 
     def setVelocityFunction(self, velocity_function : Tuple[str]):
