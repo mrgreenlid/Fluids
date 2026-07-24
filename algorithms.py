@@ -47,12 +47,20 @@ def rotate(point : np.array, radians : float):
     else:
         return point @ rotation_matrix.T
         
-
+@nb.njit
 def translate(point: np.array, pygame_x : int, pygame_y : int):
     """Translates a tuple coordinate, or np.array group of coordinates"""
-    point += [pygame_x, pygame_y]
+    for dot in range(point.shape[0]):
+        point[dot][0] += pygame_x
+        point[dot][1] += pygame_y
     return point
 
+
+
+def colourByMagnitude(magnitude : float ):
+    """Returns a hex value for a temperature colour based on a given magnitude"""
+    
+    return "#0000FF"
 
 
 def searchVelocityFunction(function : str):

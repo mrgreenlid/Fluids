@@ -3,6 +3,7 @@ from algorithms import *
 import interface as ui
 import fluid
 
+
 pygame.init()
 
 # Sets the constants of the screen surface

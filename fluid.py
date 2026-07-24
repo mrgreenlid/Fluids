@@ -60,7 +60,7 @@ class VectorField(Output):
                                                   (0.7*self.__maximum_arrow_length, 0.2*self.__maximum_arrow_length),
                                                   (0.7*self.__maximum_arrow_length, -0.2*self.__maximum_arrow_length)]), self.__argument), tail_pygame_x, tail_pygame_y)
     
-        vector_colour = self.__colourByMagnitude(abs(velocity))
+        vector_colour = colourByMagnitude(abs(velocity))
         
         scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
         tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor
@@ -101,15 +101,6 @@ class VectorField(Output):
     def __convertFromPygameCoordinate(self, pygame_x, pygame_y):
         """Returns the true possition of a pygame coordinate, with the origin in the centre"""
         return self.__plane[pygame_y-1][pygame_x-1]
-
-    
-    def __colourByMagnitude(self, magnitude : float ):
-        """Returns a hex value for a temperature colour based on a given magnitude"""
-        magnitude = round(magnitude)
-
-
-
-        return "#FF00FF"
 
 
     def setVelocityFunction(self, velocity_function : Tuple[str]):
