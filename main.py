@@ -2,7 +2,7 @@ import pygame
 from algorithms import *
 import interface as ui
 import fluid
-
+import numpy as np
 
 pygame.init()
 
@@ -12,6 +12,13 @@ SCREEN_WIDTH = 1600
 FRAME_RATE = 60
 bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
+
+
+# JIT Compiles subroutines to be used later on
+rotate(np.array([(0,0)]),0)
+translate(np.array([(0,0)]), 0, 0)
+colourByMagnitude(0)
+
 
 # Creates screen with specific attributes
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -73,6 +80,9 @@ control_objects = (control_panel_label, speed_label, speed_entry, speed_unit_lab
                    
 control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox, velocity_function_dropdown)
 
+
+
+
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
@@ -80,12 +90,17 @@ vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "fie
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]     
 
+
+
+
+
 running = True
 while running:
     # Changes the caption of the window to view framerate and colours the screen blank, to allow for objects to be placed on it
     pygame.display.set_caption(f"Fluid Mechanics Simulator")
     screen.fill(bg_colour)
 
+    
     # Starts event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -98,6 +113,16 @@ while running:
             if keys[pygame.K_c]:
                 data["show_control"] = toggleVariable(data["show_control"])
             
+
+
+
+
+
+
+
+
+
+
         # Checks for interactions with different objects, depending
         for obj in tank_interactable:
             if tapping(event) or typing(event):
@@ -113,23 +138,40 @@ while running:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[obj.getVariable()] = obj.getValue()
+
             # Checks interaction with bespoke objects 
             if data["scenario"] == "custom":
                 custom_vf_entry.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
 
-    # Places objects, when relevant
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # Places objects, when relevant    
     for obj in tank_objects:
             obj.place()
         
     if data["show_control"]:
         control_panel_box.place()
         if data["scenario"] == "custom":
+
             # Places bespoke objects
             custom_vf_label.place()
             custom_vf_entry.place()
+
         # Sets the velocity function for the vector field
             if searchVelocityFunction(data["velocity_function"]):
                 vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"])[1:])
@@ -140,7 +182,6 @@ while running:
         else:
             vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
 
-        
         # Places control objects
         for obj in control_objects:
             obj.place()
@@ -150,6 +191,14 @@ while running:
             except AttributeError:
                 pass
     
+
+
+
+
+
+
+
+
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 

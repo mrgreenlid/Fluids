@@ -26,6 +26,7 @@ def typing(event : pygame.event.Event):
         return True
     return False
 
+
 def toggleVariable(var : bool):
     """Returns the opposite value to the one passed in"""
     return not var
@@ -36,31 +37,48 @@ def kineticEnergy(speed : int | float, mass : int | float):
 
 @nb.njit
 def rotate(point : np.array, radians : float):
-    """Rotates a tuple coordinate, or np.array group of coordinates about the origin"""
+    """Rotates np.array group of coordinates about the origin"""
     radians *= -1
-    
+    point = point.astype(np.float64)
     rotation_matrix = np.array([[np.cos(radians), -np.sin(radians)],
-                                [np.sin(radians), np.cos(radians)]])
+                                [np.sin(radians), np.cos(radians)]], dtype=np.float64)
+                                
+    return point @ rotation_matrix.T
 
-    if point.ndim == 1:
-        return rotation_matrix @ point
-    else:
-        return point @ rotation_matrix.T
-        
 @nb.njit
 def translate(point: np.array, pygame_x : int, pygame_y : int):
-    """Translates a tuple coordinate, or np.array group of coordinates"""
+    """Translates np.array group of coordinates"""
+    point = point.astype(np.float64)
     for dot in range(point.shape[0]):
         point[dot][0] += pygame_x
         point[dot][1] += pygame_y
     return point
 
+##### Is the checker in vector field too inefficiet?
+@nb.njit
+def colourByMagnitude(magnitude: float):
+    """Returns an RGB value for a temperature colour based on a given magnitude"""
+    value = round(magnitude)
 
+    colours = np.array([(0,0,255),(10,0,245),(20,0,235),(31,0,224),(41,0,214),(51,0,204),
+    (61,0,194),(71,0,184),(82,0,173),(92,0,163),(102,0,153),(112,0,143),(122,0,133),
+    (133,0,122),(143,0,112),(153,0,102),(163,0,92),(173,0,82),(184,0,71),(194,0,61),
+    (204,0,51),(214,0,41),(224,0,31),(235,0,20),(255,0,0)], dtype=np.float64)
+        
+    parameters = np.array([1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120], dtype=np.float64)
 
-def colourByMagnitude(magnitude : float ):
-    """Returns a hex value for a temperature colour based on a given magnitude"""
+    place_check = np.sort(np.append(parameters, value))
+    position = np.where(place_check == value)[0][0]
+
+    if position == 0 or value in parameters:
+        return colours[position]
+    elif value == place_check[-1]:
+        return colours[-1]
     
-    return "#0000FF"
+    proportion = (value-parameters[position-1])/(parameters[position]-parameters[position-1])
+    addition = np.array([colours[position][0]-colours[position-1][0], 0, colours[position][2]-colours[position-1][2]])*proportion
+    return colours[position-1]+addition
+
 
 
 def searchVelocityFunction(function : str):
