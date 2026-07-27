@@ -180,6 +180,6 @@ while running:
 
     # Keeps loop in time with the clock
     data["frame_rate"] = clock.get_fps()
-    dt = clock.tick(60) / 1000
+    dt = clock.tick(FRAME_RATE) / 1000
 
 pygame.quit()
