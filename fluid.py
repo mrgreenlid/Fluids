@@ -62,7 +62,6 @@ class VectorField(Output):
                                                     (0.6*self.__maximum_arrow_length, -0.2*self.__maximum_arrow_length)]), self.__argument), tail_pygame_x, tail_pygame_y)
         
             vector_colour = colourByMagnitude(abs(velocity))
-            #vector_colour = f"#{int(vector_colour[0]):02X}{int(vector_colour[1]):02X}{int(vector_colour[2]):02X}"
             
             scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
             tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor

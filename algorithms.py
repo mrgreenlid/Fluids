@@ -54,31 +54,37 @@ def translate(point: np.array, pygame_x : int, pygame_y : int):
         point[dot][1] += pygame_y
     return point
 
-##### Is the checker in vector field too inefficiet?
+
+COLOURS = np.array([(0,0,255),(13,0,242),(26,0,229),(39,0,216),(52,0,203),(65,0,190),
+(78,0,177),(91,0,164),(104,0,151),(117,0,138),(130,0,125),(143,0,112),(156,0,99),
+(169,0,86),(182,0,73),(195,0,60),(208,0,47),(221,0,34),(234,0,21),(247,0,8),(255,0,0)], dtype=np.float64)
+
+PARAMETERS = np.array([5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100], dtype=np.float64)
+
 @nb.njit
 def colourByMagnitude(magnitude: float):
     """Returns an RGB value for a temperature colour based on a given magnitude"""
     value = round(magnitude)
 
-    colours = np.array([(0,0,255),(10,0,245),(20,0,235),(31,0,224),(41,0,214),(51,0,204),
-    (61,0,194),(71,0,184),(82,0,173),(92,0,163),(102,0,153),(112,0,143),(122,0,133),
-    (133,0,122),(143,0,112),(153,0,102),(163,0,92),(173,0,82),(184,0,71),(194,0,61),
-    (204,0,51),(214,0,41),(224,0,31),(235,0,20),(255,0,0)], dtype=np.float64)
-        
-    parameters = np.array([1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120], dtype=np.float64)
+    position = np.searchsorted(PARAMETERS, value)
 
-    place_check = np.sort(np.append(parameters, value))
-    position = np.where(place_check == value)[0][0]
+    if value >= PARAMETERS[-1]:
+        return COLOURS[-1]
 
-    if position == 0 or value in parameters:
-        return colours[position]
-    elif value == place_check[-1]:
-        return colours[-1]
+    elif value <= PARAMETERS[0]:
+        return COLOURS[0]
+
+    higher_parameter = PARAMETERS[position]
+    lower_parameter = PARAMETERS[position-1]
+
+    higher_colour = COLOURS[position]
+    lower_colour = COLOURS[position-1]
+
+    proportion = (value-lower_parameter)/(higher_parameter-lower_parameter)
+    red = (higher_colour[0] - lower_colour[0])
+    blue = (higher_colour[2] - lower_colour[2])
     
-    proportion = (value-parameters[position-1])/(parameters[position]-parameters[position-1])
-    addition = np.array([colours[position][0]-colours[position-1][0], 0, colours[position][2]-colours[position-1][2]])*proportion
-    return colours[position-1]+addition
-
+    return np.array([red, 0, blue])*proportion + lower_colour
 
 
 def searchVelocityFunction(function : str):

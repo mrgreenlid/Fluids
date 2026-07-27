@@ -4,20 +4,35 @@ import interface as ui
 import fluid
 import numpy as np
 
+import time
+
 pygame.init()
 
 # Sets the constants of the screen surface
 SCREEN_HEIGHT = 800
 SCREEN_WIDTH = 1600
 FRAME_RATE = 60
+
 bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
 
 
 # JIT Compiles subroutines to be used later on
+# rotate_s = time.time()
 rotate(np.array([(0,0)]),0)
+# rotate_f = time.time()
+
+# translate_s = time.time()
 translate(np.array([(0,0)]), 0, 0)
-colourByMagnitude(0)
+# translate_f = time.time()
+
+# colour_s =  time.time()
+colourByMagnitude(0.0)
+# colour_f = time.time()
+
+# print(f"Rotate function initialised: {rotate_f-rotate_s} seconds")
+# print(f"Translate function initialised: {translate_f-translate_s} seconds")
+# print(f"Colouring function initialised: {colour_f-colour_s} seconds")
 
 
 # Creates screen with specific attributes
@@ -81,18 +96,12 @@ control_objects = (control_panel_label, speed_label, speed_entry, speed_unit_lab
 control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox, velocity_function_dropdown)
 
 
-
-
 # Instantiates tank components
 flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]     
-
-
-
-
 
 running = True
 while running:
@@ -113,16 +122,6 @@ while running:
             if keys[pygame.K_c]:
                 data["show_control"] = toggleVariable(data["show_control"])
             
-
-
-
-
-
-
-
-
-
-
         # Checks for interactions with different objects, depending
         for obj in tank_interactable:
             if tapping(event) or typing(event):
@@ -144,21 +143,6 @@ while running:
                 custom_vf_entry.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     # Places objects, when relevant    
     for obj in tank_objects:
@@ -191,14 +175,6 @@ while running:
             except AttributeError:
                 pass
     
-
-
-
-
-
-
-
-
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
