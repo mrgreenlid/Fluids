@@ -17,33 +17,25 @@ bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
 
 
+# Initialises database tables
+initialiseVelocityFunctionTable()
+
 # JIT Compiles subroutines to be used later on
-# rotate_s = time.time()
 rotate(np.array([(0,0)]),0)
-# rotate_f = time.time()
-
-# translate_s = time.time()
 translate(np.array([(0,0)]), 0, 0)
-# translate_f = time.time()
-
-# colour_s =  time.time()
 colourByMagnitude(0.0)
-# colour_f = time.time()
-
-# print(f"Rotate function initialised: {rotate_f-rotate_s} seconds")
-# print(f"Translate function initialised: {translate_f-translate_s} seconds")
-# print(f"Colouring function initialised: {colour_f-colour_s} seconds")
 
 
 # Creates screen with specific attributes
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_icon(pygame.image.load("icon_image.png"))
+pygame.display.set_icon(pygame.image.load("images\\icon_image.png"))
 
 # Sets clock to measure and regulate frame rate
 clock = pygame.time.Clock()
 
 # Creates variables to be used throughout
 data = {"show_control":True,
+        "show_objects" : False,
         "flow":False,
         "show_field":True,
         "show_streamline":False,
@@ -75,7 +67,9 @@ velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
 custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["velocity_function"], "velocity_function", str, 22, 230, 17)
 
-border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 220, 1, "#000000")
+select_object_button = ui.Image_Button(screen, SCREEN_WIDTH-175, 450, "show_objects", "images\\select_object.png", scale_factor_1=[0.5,0.5])
+
+border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 240, 1, "#000000")
 
 energy_label = ui.Label(screen, SCREEN_WIDTH-214, 530, "Kinetic Energy (J):", 17, ui_bg, "Courier")
 energy_data = ui.Label(screen, SCREEN_WIDTH-80, 530, 0.0, 17, ui_bg, "Courier", "kinetic_energy")
@@ -86,22 +80,27 @@ circulation_data = ui.Label(screen, SCREEN_WIDTH-80, 590, 0.0, 17, ui_bg, "Couri
 flux_label = ui.Label(screen, SCREEN_WIDTH-285, 620, "Flux:", 17, ui_bg, "Courier")
 flux_data = ui.Label(screen, SCREEN_WIDTH-80, 620, 0.0, 17, ui_bg, "Courier", "flux")
 frame_rate_label = ui.Label(screen,SCREEN_WIDTH-222, 650, "Performance (fps):", 17, ui_bg, "Courier")
-frame_rate_data= ui.Label(screen,SCREEN_WIDTH-80, 650, 0.0, 17, ui_bg, "Courier", "frame_rate")
+frame_rate_data = ui.Label(screen,SCREEN_WIDTH-80, 650, 0.0, 17, ui_bg, "Courier", "frame_rate")
 
 control_objects = (control_panel_label, speed_label, speed_entry, speed_unit_label,
                    show_grid_doublecheckbox, show_field_label, show_particle_label, field_rows_increment,
-                   show_streamline_label, show_streamline_checkbox, velocity_function_label, velocity_function_dropdown, border_data_box, energy_label, energy_data,force_label,
+                   show_streamline_label, show_streamline_checkbox, velocity_function_label, velocity_function_dropdown, select_object_button, border_data_box, energy_label, energy_data,force_label,
                    force_data, circulation_label, circulation_data, flux_label, flux_data, frame_rate_label, frame_rate_data,)
                    
-control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox, velocity_function_dropdown)
+control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox, velocity_function_dropdown, select_object_button)
 
+
+# Instantiates object selection components:
+back_from_objects_button = ui.Image_Button(screen, SCREEN_WIDTH-300, 30, "show_control", "images\\back_from_objects.png", scale_factor_1=[0.2, 0.2])
+
+object_objects = (back_from_objects_button, )
 
 # Instantiates tank components
-flow_button = ui.Button(screen, 22, 30, "flow", "play_image.png", "pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
+flow_button = ui.Image_Button(screen, 22, 30, "flow", "images\\play_image.png", "images\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
 
-tank_objects = [vector_field, flow_button]
-tank_interactable = [vector_field, flow_button]     
+tank_objects = (vector_field, flow_button)
+tank_interactable = (vector_field, flow_button)     
 
 running = True
 while running:
@@ -121,6 +120,7 @@ while running:
         if typing(event):
             if keys[pygame.K_c]:
                 data["show_control"] = toggleVariable(data["show_control"])
+                data["show_objects"] = False
             
         # Checks for interactions with different objects, depending
         for obj in tank_interactable:
@@ -151,7 +151,6 @@ while running:
     if data["show_control"]:
         control_panel_box.place()
         if data["scenario"] == "custom":
-
             # Places bespoke objects
             custom_vf_label.place()
             custom_vf_entry.place()
@@ -159,10 +158,8 @@ while running:
         # Sets the velocity function for the vector field
             if searchVelocityFunction(data["velocity_function"]):
                 vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"])[1:])
-
             elif validVelocityFunction(data["velocity_function"]):
                 saveVelocityFunction(data["velocity_function"])
-        
         else:
             vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
 
@@ -175,6 +172,11 @@ while running:
             except AttributeError:
                 pass
     
+    if data["show_objects"]:
+        control_panel_box.place()
+        for obj in object_objects:
+            obj.place()
+
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
@@ -182,4 +184,5 @@ while running:
     data["frame_rate"] = clock.get_fps()
     dt = clock.tick(FRAME_RATE) / 1000
 
+    print(data)
 pygame.quit()

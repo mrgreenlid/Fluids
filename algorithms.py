@@ -87,6 +87,27 @@ def colourByMagnitude(magnitude: float):
     return np.array([red, 0, blue])*proportion + lower_colour
 
 
+
+
+
+
+def initialiseVelocityFunctionTable():
+    """Creates table in fluids database to store velocity functions and sets up prebuilt functions"""
+    with sqlite.Connection("fluids.db") as conn:
+        conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS velocity_function (
+                    written TEXT UNIQUE,
+                    exponential INTEGER,
+                    magnitude TEXT,
+                    argument TEXT);
+
+                    INSERT or IGNORE INTO velocity_function VALUES ("tunnel", 1, "1", "pi");
+                    INSERT or IGNORE INTO velocity_function VALUES ("vortex", 1, "1", "pi*-0.25");
+                    INSERT or IGNORE INTO velocity_function VALUES ("falling", 1, "1", "pi*0.5");
+
+                    """)
+        conn.commit()
+
+
 def searchVelocityFunction(function : str):
     """Searches the velocity function table, written attribute, for the criteria"""
     with sqlite.Connection("fluids.db") as conn:
@@ -113,3 +134,18 @@ def saveVelocityFunction(function : str):
             (function, 1, magnitude, argument))
 
 
+
+def initialiseObjectTable():
+    """Creates table in fluids database to store object names, their properties and asscociated image paths"""
+    with sqlite.Connection("fluids.db") as conn:
+        conn.cursor("""CREATE TABLE IF NOT EXISTS object
+        (name TEXT UNIQUE,
+        path TEXT,
+        fixed INTEGER,
+        mass REAL,
+        
+
+        
+        )
+        
+        """)

@@ -6,20 +6,7 @@ from algorithms import *
 import random
 import numba as nb
 
-# Creates table in fluids database to store velocity functions and sets up prebuilt functions
-with sqlite.Connection("fluids.db") as conn:
-    conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS velocity_function (
-                written TEXT PRIMARY KEY UNIQUE,
-                exponential INTEGER,
-                magnitude TEXT,
-                argument TEXT);
 
-                INSERT or IGNORE INTO velocity_function VALUES ("tunnel", 1, "1", "pi");
-                INSERT or IGNORE INTO velocity_function VALUES ("vortex", 1, "1", "pi*-0.25");
-                INSERT or IGNORE INTO velocity_function VALUES ("falling", 1, "1", "pi*0.5");
-
-                """)
-    conn.commit()
     
 class VectorField(Output):
     __grid_colour =  "#C7C1B8"
