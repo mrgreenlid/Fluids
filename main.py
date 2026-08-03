@@ -131,7 +131,13 @@ while running:
                     data[obj.getVariable()] = obj.getValue()
             if obj.class_type == "output": 
                 obj.setValue(*([data[variable] for variable in obj.getVariable()]))
-                        
+
+        
+        if data["show_objects"]:
+            for obj in object_interactable:
+                obj.checkInteract(event)
+                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+                        data[obj.getVariable()] = obj.getValue()  
                 
         if data["show_control"]:
             for obj in control_interactable:
@@ -145,11 +151,6 @@ while running:
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
 
-        if data["show_objects"]:
-            for obj in object_interactable:
-                obj.checkInteract(event)
-                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
-                        data[obj.getVariable()] = obj.getValue()
 
 
     # Places objects, when relevant    
@@ -157,8 +158,8 @@ while running:
             obj.place()
         
     if data["show_control"]:
+        
         control_panel_box.place()
-
         if data["scenario"] == "custom":
             # Places bespoke objects
             custom_vf_label.place()
@@ -182,9 +183,11 @@ while running:
                 pass
     
     if data["show_objects"]:
+        data["show_control"] = False
         control_panel_box.place()
         for obj in object_objects:
             obj.place()
+            
     
 
 
@@ -193,8 +196,6 @@ while running:
 
     # Keeps loop in time with the clock
     data["frame_rate"] = clock.get_fps()
-    dt = clock.tick(FRAME_RATE) / 1000
-
-    print(data)    
+    dt = clock.tick(FRAME_RATE) / 1000  
 
 pygame.quit()

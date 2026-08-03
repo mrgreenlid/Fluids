@@ -287,6 +287,7 @@ class DoubleCheckbox(Checkbox):
             elif self.__rect2.collidepoint(*pygame.mouse.get_pos()[:2]):
                 self._antiClick()
 
+
 class Image_Button(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, image_path : str, scale_factor : Tuple[int] = (1,1), key_bind : str = None):
         """Creates image button to be placed on screen"""
@@ -320,21 +321,23 @@ class Image_Button(Input):
             if typing(event):
                 if keys[self.__key_bind]:
                     self.__state = toggleVariable(self.__state)
-                    
 
-    def flip(self):
+
+    def __flip(self):
         """Forces the variable to flip states"""
         self.__state = toggleVariable(self.__state)
 
     def getVariable(self):
         """Returns associated variable"""
-        
         return self.__variable
 
 
     def getValue(self):
         """Returns value"""
-        return self.__state 
+        state = self.__state
+        if state:
+            self.__flip()
+        return state
 
 
             
