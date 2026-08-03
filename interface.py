@@ -286,64 +286,107 @@ class DoubleCheckbox(Checkbox):
                 self._click()
             elif self.__rect2.collidepoint(*pygame.mouse.get_pos()[:2]):
                 self._antiClick()
-            
+
 class Image_Button(Input):
-    def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str = None, scale_factor_1 : Tuple[int] = None, scale_factor_2 : Tuple[int] = None, key_bind : str = None):
-        """Creates button to be placed on screen"""
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, image_path : str, scale_factor : Tuple[int] = (1,1), key_bind : str = None):
+        """Creates image button to be placed on screen"""
         self.__window = window
         self.__variable = variable
         self.__state = False
-        self.__off_shape = pygame.transform.scale_by(pygame.image.load(path_1).convert_alpha(), scale_factor_1)
-        self.__off_rect = self.__off_shape.get_rect()
-        self.__off_rect.center = (x, y)
-        self.__two_image_state = False
-        
 
-        if path_2:
-            self.__on_shape = pygame.transform.scale_by(pygame.image.load(path_2).convert_alpha(), scale_factor_2)
-            self.__on_rect = self.__on_shape.get_rect()
-            self.__on_rect.center = (x, y)
-            self.__two_image_state = True
-        
-        
+        self.__shape = pygame.transform.scale_by(pygame.image.load(image_path).convert_alpha(), scale_factor)
+        self.__rect = self.__shape.get_rect()
+        self.__rect.center = (x,y)
+
         try:
             self.__key_bind = pygame.key.key_code(key_bind)
         except TypeError:
             self.__key_bind = False
 
+
+    def place(self):
+        """Blits the image of the button"""
+        self.__window.blit(self.__shape, self.__rect)
+        
+    
+    def checkInteract(self, event : pygame.event.Event, keys : List[bool] = None):
+        """Checks for interactions"""
+        if tapping(event):
+            if self.__rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                self.__state = True
+                print("Yes")
+
+        if self.__key_bind:
+            if typing(event):
+                if keys[self.__key_bind]:
+                    self.__state = toggleVariable(self.__state)
+                    
+
+    def flip(self):
+        """Forces the variable to flip states"""
+        self.__state = toggleVariable(self.__state)
+
+    def getVariable(self):
+        """Returns associated variable"""
+        
+        return self.__variable
+
+
+    def getValue(self):
+        """Returns value"""
+        return self.__state 
+
+
+            
+class Dual_Image_Button(Input):
+    def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = (1,1), scale_factor_2 : Tuple[int] = (1,1), key_bind : str = None):
+        """Creates dual image button to be placed on screen"""
+        self.__window = window
+        self.__variable = variable
+        self.__state = False
+
+        self.__off_shape = pygame.transform.scale_by(pygame.image.load(path_1).convert_alpha(), scale_factor_1)
+        self.__off_rect = self.__off_shape.get_rect()
+        self.__off_rect.center = (x, y)
+   
+    
+        self.__on_shape = pygame.transform.scale_by(pygame.image.load(path_2).convert_alpha(), scale_factor_2)
+        self.__on_rect = self.__on_shape.get_rect()
+        self.__on_rect.center = (x, y)
+       
+       
+        try:
+            self.__key_bind = pygame.key.key_code(key_bind)
+        except TypeError:
+            self.__key_bind = False
+        
     def place(self):
         """Blits the relevant image"""
-        if self.__two_image_state:
-            if self.__state:
-                    self.__window.blit(self.__on_shape, self.__on_rect)
-            else:
-                self.__window.blit(self.__off_shape, self.__off_rect)
+        if self.__state:
+            self.__window.blit(self.__on_shape, self.__on_rect)
         else:
             self.__window.blit(self.__off_shape, self.__off_rect)
-       
-
 
     def checkInteract(self, event : pygame.event.Event, keys : List[bool] = None):
         """Checks for interactions"""
         if tapping(event):
-            if self.__two_image_state:
-                if self.__state:
-                    if self.__on_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
-                        self.__state = False
-                else:
-                    if self.__off_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
-                        self.__state = True
+            if self.__state:
+                if self.__on_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                    self.__state = False
             else:
                 if self.__off_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
-                        self.__state = toggleVariable(self.__state)
+                    self.__state = True
+        
         if self.__key_bind:
             if typing(event):
                 if keys[self.__key_bind]:
                     self.__state = toggleVariable(self.__state)
 
+
     def getVariable(self):
         """Returns associated variable"""
         return self.__variable
+
 
     def getValue(self):
         """Returns value"""

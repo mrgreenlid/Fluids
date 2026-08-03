@@ -8,7 +8,7 @@ import time
 
 pygame.init()
 
-# Sets the constants of the screen surface
+# Sets the constants of the screen surfaced
 SCREEN_HEIGHT = 800
 SCREEN_WIDTH = 1600
 FRAME_RATE = 60
@@ -67,7 +67,7 @@ velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
 custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["velocity_function"], "velocity_function", str, 22, 230, 17)
 
-select_object_button = ui.Image_Button(screen, SCREEN_WIDTH-175, 450, "show_objects", "images\\select_object.png", scale_factor_1=[0.5,0.5])
+select_object_button = ui.Image_Button(screen, SCREEN_WIDTH-175, 450, "show_objects", "images\\select_object.png", (0.5,0.5))
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 240, 1, "#000000")
 
@@ -91,12 +91,13 @@ control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increm
 
 
 # Instantiates object selection components:
-back_from_objects_button = ui.Image_Button(screen, SCREEN_WIDTH-300, 30, "show_control", "images\\back_from_objects.png", scale_factor_1=[0.2, 0.2])
+back_from_objects_button = ui.Image_Button(screen, SCREEN_WIDTH-320, 30, "show_control", "images\\back_from_objects.png", (0.2, 0.2))
 
 object_objects = (back_from_objects_button, )
+object_interactable = (back_from_objects_button,)
 
 # Instantiates tank components
-flow_button = ui.Image_Button(screen, 22, 30, "flow", "images\\play_image.png", "images\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
+flow_button = ui.Dual_Image_Button(screen, 22, 30, "flow", "images\\play_image.png", "images\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
 
 tank_objects = (vector_field, flow_button)
@@ -144,12 +145,20 @@ while running:
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
 
+        if data["show_objects"]:
+            for obj in object_interactable:
+                obj.checkInteract(event)
+                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+                        data[obj.getVariable()] = obj.getValue()
+
+
     # Places objects, when relevant    
     for obj in tank_objects:
             obj.place()
         
     if data["show_control"]:
         control_panel_box.place()
+
         if data["scenario"] == "custom":
             # Places bespoke objects
             custom_vf_label.place()
@@ -176,6 +185,8 @@ while running:
         control_panel_box.place()
         for obj in object_objects:
             obj.place()
+    
+
 
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
@@ -184,5 +195,6 @@ while running:
     data["frame_rate"] = clock.get_fps()
     dt = clock.tick(FRAME_RATE) / 1000
 
-    print(data)
+    print(data)    
+
 pygame.quit()
