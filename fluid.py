@@ -36,6 +36,7 @@ class VectorField(Output):
         self.__plane = x + y*1j
         self.__velocities = np.zeros((self.__line_height, self.__line_length), dtype=np.complex128)
         
+        
     
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         """Draws coloured vector arrow with the tail at the specified point"""
@@ -81,6 +82,7 @@ class VectorField(Output):
             self.__velocities = np.ones((self.__line_height, self.__line_length), dtype=np.complex128)
             self.__velocities *= complex(real= self.__magnitude*np.cos(self.__argument), imag= self.__magnitude*np.sin(self.__argument))*self.__speed
 
+        print(self.__velocities)
     def getPointVelocity(self, pygame_x, pygame_y):
         """Returns the velocity at a specific point on the field"""
         return self.__velocities[pygame_y-1][pygame_x-1]
@@ -136,6 +138,6 @@ class Particle(pygame.sprite.Sprite):
     def __init__(self,):
         return 
 
-class Body(pygame.sprite.Sprite):
+class Object(pygame.sprite.Sprite):
     def __init__(self,):
         return

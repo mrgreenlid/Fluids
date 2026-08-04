@@ -20,6 +20,8 @@ ui_bg = "#ECECEC"
 # Initialises database tables
 initialiseVelocityFunctionTable()
 
+#initialiseObjectTable()
+
 # JIT Compiles subroutines to be used later on
 rotate(np.array([(0,0)]),0)
 translate(np.array([(0,0)]), 0, 0)
@@ -28,7 +30,7 @@ colourByMagnitude(0.0)
 
 # Creates screen with specific attributes
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_icon(pygame.image.load("images\\icon_image.png"))
+pygame.display.set_icon(pygame.image.load("images\\ui\\icon_image.png"))
 
 # Sets clock to measure and regulate frame rate
 clock = pygame.time.Clock()
@@ -67,7 +69,7 @@ velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
 custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["velocity_function"], "velocity_function", str, 22, 230, 17)
 
-select_object_button = ui.Image_Button(screen, SCREEN_WIDTH-175, 450, "show_objects", "images\\select_object.png", (0.5,0.5))
+select_object_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-175, 450, "show_objects", "images\\ui\\select_object.png", (0.5,0.5))
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 240, 1, "#000000")
 
@@ -91,13 +93,13 @@ control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increm
 
 
 # Instantiates object selection components:
-back_from_objects_button = ui.Image_Button(screen, SCREEN_WIDTH-320, 30, "show_control", "images\\back_from_objects.png", (0.2, 0.2))
+back_from_objects_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-320, 30, "show_control", "images\\ui\\back_from_objects.png", (0.2, 0.2))
 
 object_objects = (back_from_objects_button, )
 object_interactable = (back_from_objects_button,)
 
 # Instantiates tank components
-flow_button = ui.Dual_Image_Button(screen, 22, 30, "flow", "images\\play_image.png", "images\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
+flow_button = ui.Dual_Image_Boolean_Button(screen, 22, 30, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
 
 tank_objects = (vector_field, flow_button)
@@ -197,5 +199,7 @@ while running:
     # Keeps loop in time with the clock
     data["frame_rate"] = clock.get_fps()
     dt = clock.tick(FRAME_RATE) / 1000  
+
+ 
 
 pygame.quit()

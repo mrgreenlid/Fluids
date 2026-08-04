@@ -288,7 +288,7 @@ class DoubleCheckbox(Checkbox):
                 self._antiClick()
 
 
-class Image_Button(Input):
+class Image_Boolean_Button(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, image_path : str, scale_factor : Tuple[int] = (1,1), key_bind : str = None):
         """Creates image button to be placed on screen"""
         self.__window = window
@@ -296,9 +296,12 @@ class Image_Button(Input):
         self.__state = False
 
         self.__shape = pygame.transform.scale_by(pygame.image.load(image_path).convert_alpha(), scale_factor)
+        self.__clickable_rect = self.__shape.get_bounding_rect()
         self.__rect = self.__shape.get_rect()
-        self.__rect.center = (x,y)
-
+        self.__rect.center = self.__clickable_rect.center =(x,y)
+        
+        
+        
         try:
             self.__key_bind = pygame.key.key_code(key_bind)
         except TypeError:
@@ -309,13 +312,14 @@ class Image_Button(Input):
         """Blits the image of the button"""
         self.__window.blit(self.__shape, self.__rect)
         
+        
     
     def checkInteract(self, event : pygame.event.Event, keys : List[bool] = None):
         """Checks for interactions"""
         if tapping(event):
-            if self.__rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+            if self.__clickable_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
                 self.__state = True
-                print("Yes")
+             
 
         if self.__key_bind:
             if typing(event):
@@ -341,7 +345,7 @@ class Image_Button(Input):
 
 
             
-class Dual_Image_Button(Input):
+class Dual_Image_Boolean_Button(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, path_1 : str, path_2 : str, scale_factor_1 : Tuple[int] = (1,1), scale_factor_2 : Tuple[int] = (1,1), key_bind : str = None):
         """Creates dual image button to be placed on screen"""
         self.__window = window
@@ -350,13 +354,16 @@ class Dual_Image_Button(Input):
 
         self.__off_shape = pygame.transform.scale_by(pygame.image.load(path_1).convert_alpha(), scale_factor_1)
         self.__off_rect = self.__off_shape.get_rect()
-        self.__off_rect.center = (x, y)
+        self.__off_clickable_rect = self.__off_shape.get_bounding_rect()
+        self.__off_rect.center = self.__off_clickable_rect.center =(x, y)
+        
    
     
         self.__on_shape = pygame.transform.scale_by(pygame.image.load(path_2).convert_alpha(), scale_factor_2)
         self.__on_rect = self.__on_shape.get_rect()
-        self.__on_rect.center = (x, y)
-       
+        self.__on_clickable_rect = self.__on_shape.get_bounding_rect()
+        self.__on_rect.center = self.__on_clickable_rect.center = (x, y)
+
        
         try:
             self.__key_bind = pygame.key.key_code(key_bind)
@@ -374,10 +381,10 @@ class Dual_Image_Button(Input):
         """Checks for interactions"""
         if tapping(event):
             if self.__state:
-                if self.__on_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                if self.__on_clickable_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
                     self.__state = False
             else:
-                if self.__off_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                if self.__off_clickable_rect.collidepoint(*pygame.mouse.get_pos()[:2]):
                     self.__state = True
         
         if self.__key_bind:
@@ -395,6 +402,9 @@ class Dual_Image_Button(Input):
         """Returns value"""
         return self.__state
 
+
+class SelectionButton(Input):
+    ...
 
 class Increment(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, minimum : int | float, maximium : int | float, increment : int | float,):

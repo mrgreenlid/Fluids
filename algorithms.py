@@ -7,12 +7,13 @@ import re
 import numpy as np
 import numba as nb
 
-# Basic subroutines for interface components 
 class Output:
     class_type = "output"
 
 class Input:
     class_type = "input"
+
+# Pygame specific subroutines
 
 def tapping(event : pygame.event.Event):
     """Checks for tapping"""
@@ -27,13 +28,11 @@ def typing(event : pygame.event.Event):
     return False
 
 
+# General, mathematical subroutines
+
 def toggleVariable(var : bool):
     """Returns the opposite value to the one passed in"""
     return not var
-
-def kineticEnergy(speed : int | float, mass : int | float):
-    """Returns the kinetic energy of an object of given speed and mass"""
-    return 0.5*mass*(speed**2)
 
 @nb.njit
 def rotate(point : np.array, radians : float):
@@ -87,10 +86,7 @@ def colourByMagnitude(magnitude: float):
     return np.array([red, 0, blue])*proportion + lower_colour
 
 
-
-
-
-
+# Database subroutines
 def initialiseVelocityFunctionTable():
     """Creates table in fluids database to store velocity functions and sets up prebuilt functions"""
     with sqlite.Connection("fluids.db") as conn:
@@ -143,6 +139,7 @@ def initialiseObjectTable():
         path TEXT,
         fixed INTEGER,
         mass REAL,
+        
         
 
         
