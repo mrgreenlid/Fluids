@@ -6,8 +6,7 @@ import numpy as np
 
 
 # JIT Compiles subroutines to be used later on
-rotate(np.array([(0,0)]),0)
-translate(np.array([(0,0)]), 0, 0)
+translate(rotate(np.array([(1.0, 0), (1.0, 1.0),(1.0, -1.0)]),np.pi), 0, 0)
 colourByMagnitude(0.0)
 addVariation(0.0, 1.0)
 mapVelocities(1, 1.0, np.pi, 800, 1600, 1.0)
@@ -31,6 +30,9 @@ ui_bg = "#ECECEC"
 
 # Creates screen with specific attributes
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen.fill(bg_colour)
+pygame.display.flip()
+
 pygame.display.set_icon(pygame.image.load("images\\ui\\icon_image.png"))
 
 # Sets clock to measure and regulate frame rate
@@ -112,6 +114,9 @@ vector_field = fluid.VectorField(screen, data["field_rows"], data["speed"], data
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]     
+
+
+vector_field.updateVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
 
 
 

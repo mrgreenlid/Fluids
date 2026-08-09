@@ -7,20 +7,21 @@ from algorithms import *
     
 class VectorField(Output):
     __grid_colour =  "#C7C1B8"
-    def __init__(self, window : pygame.surface.Surface, rows : int, speed : float = 1, flow : bool = False, display : bool = False):
+    __variables = ["show_field", "field_rows", "flow", "speed"]
+    def __init__(self, window : pygame.surface.Surface, display : bool = False, rows : int = 10,  flow : bool = False, speed : float = 1.0):
         """Creates a vector field to be displayed and store data"""
         self.__window = window
-        self.__rows = rows
-
 
         self.__display = display
+        self.__rows = rows
         self.__flow = flow
-    
         self.__speed = speed
 
         self.__velocity_function = []
         self.__q = ()
     
+        self.__argument = ""
+
         self.__length = window.get_width()
         self.__height = window.get_height()
         self.__grid_line_interval = self.__height // self.__rows
@@ -31,21 +32,23 @@ class VectorField(Output):
         self.__velocities = np.zeros((self.__height, self.__length), dtype=np.complex128)
         
         
-    
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         """Draws coloured vector arrow with the tail at the specified point"""
         
         velocity = self.getPointVelocity(tail_pygame_x, tail_pygame_y)
+        
         if abs(velocity) != 0:
             dx, dy = velocity.real, velocity.imag
 
+            line_points = np.array([0, __maximum_arrow_length])
+
             arrow_points = translate(rotate(np.array([(self.__maximum_arrow_length, 0), 
                                                     (0.6*self.__maximum_arrow_length, 0.2*self.__maximum_arrow_length),
-                                                    (0.6*self.__maximum_arrow_length, -0.2*self.__maximum_arrow_length)]), self.__velocity_function[2]), tail_pygame_x, tail_pygame_y)
+                                                    (0.6*self.__maximum_arrow_length, -0.2*self.__maximum_arrow_length)], dtype=np.float64), self.__velocity_function[2]), tail_pygame_x, tail_pygame_y)
         
             vector_colour = colourByMagnitude(abs(velocity))
             
-            scale_factor = np.sqrt( (self.__maximum_arrow_length**2)/(dx**2 +dy**2) )
+            scale_factor = np.sqrt((self.__maximum_arrow_length**2)/(dx**2 +dy**2))
             tip_pygame_x, tip_pygame_y = tail_pygame_x + dx*scale_factor, tail_pygame_y - dy*scale_factor
 
             pygame.draw.line(self.__window,vector_colour, (tail_pygame_x, tail_pygame_y), (tip_pygame_x, tip_pygame_y))
@@ -99,18 +102,20 @@ class VectorField(Output):
                     else:
                         argument *= float(term)
                 self.__velocity_function[2] = argument
+                self.__argument = argument
                 self.__velocity_function[1] = float(self.__velocity_function[1])
-            
+                
             self.__mapVelocities()
 
     def getVariable(self):
         """Returns associated variable"""
-        return self.__variable
+        return self.__variables
     
     def setValue(self, display, rows, flow, speed):
         """Changes variable value"""
         self.__display = display
         self.__flow = flow
+        
         
         
         if speed != self.__speed:

@@ -17,7 +17,6 @@ class Input:
 
 
 # Pygame specific subroutines
-
 def tapping(event : pygame.event.Event):
     """Checks for tapping"""
     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -41,16 +40,16 @@ def toggleVariable(var : bool):
 def rotate(point : np.array, radians : float):
     """Rotates np.array group of coordinates about the origin"""
     radians *= -1
-    point = point.astype(np.float64)
+    
     rotation_matrix = np.array([[np.cos(radians), -np.sin(radians)],
                                 [np.sin(radians), np.cos(radians)]], dtype=np.float64)
-                                
+    
     return point @ rotation_matrix.T
 
 @nb.njit
 def translate(point: np.array, pygame_x : int, pygame_y : int):
     """Translates np.array group of coordinates"""
-    point = point.astype(np.float64)
+    
     for dot in range(point.shape[0]):
         point[dot][0] += pygame_x
         point[dot][1] += pygame_y
@@ -135,6 +134,8 @@ def validVelocityFunction(function : str):
     """Checks if a string is formatted correctly to be a velocity function"""
     if re.fullmatch(r"\d+(\.\d+)?e\^\(i(\*(\d+(\.\d+)?|pi))*\)", function):
         return True
+    else:
+        return False
 
 def saveVelocityFunction(function : str):
     """Adds a new velocity function to the table"""
@@ -160,4 +161,4 @@ def initialiseObjectTable():
         fixed INTEGER,
         mass REAL);
     """)
-
+        conn.commit()
