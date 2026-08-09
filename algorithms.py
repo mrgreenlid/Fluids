@@ -1,17 +1,20 @@
 import pygame
-import cmath
-import math
 import sqlite3 as sqlite
 from typing import Tuple
 import re
 import numpy as np
 import numba as nb
 
+
+
+#### Need to sort out the origin location of a particle before instantiating
+
 class Output:
     class_type = "output"
 
 class Input:
     class_type = "input"
+
 
 # Pygame specific subroutines
 
@@ -85,6 +88,23 @@ def colourByMagnitude(magnitude: float):
     
     return np.array([red, 0, blue])*proportion + lower_colour
 
+@nb.njit
+def addVariation(minimum : float, maximum : float):
+    return np.random.choice(np.linspace(minimum, maximum))
+
+@nb.njit
+def mapVelocities(exponential : int, magnitude : float, argument : float, height : int, width : int , speed : float):
+    """Updates a velocities array for each point"""
+    if exponential == 1:
+        velocities = np.ones((height, width), dtype=np.complex128)
+        complex_point = magnitude*np.cos(argument) + 1j*magnitude*np.sin(argument)
+        velocities *= complex_point*speed
+    else:
+        velocities = np.zeros((height,width), dtype=np.complex128)
+    return velocities
+
+       
+
 
 # Database subroutines
 def initialiseVelocityFunctionTable():
@@ -134,15 +154,10 @@ def saveVelocityFunction(function : str):
 def initialiseObjectTable():
     """Creates table in fluids database to store object names, their properties and asscociated image paths"""
     with sqlite.Connection("fluids.db") as conn:
-        conn.cursor("""CREATE TABLE IF NOT EXISTS object
+        conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS object
         (name TEXT UNIQUE,
         path TEXT,
         fixed INTEGER,
-        mass REAL,
-        
-        
+        mass REAL);
+    """)
 
-        
-        )
-        
-        """)

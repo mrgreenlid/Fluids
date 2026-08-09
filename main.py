@@ -4,7 +4,18 @@ import interface as ui
 import fluid
 import numpy as np
 
-import time
+
+# JIT Compiles subroutines to be used later on
+rotate(np.array([(0,0)]),0)
+translate(np.array([(0,0)]), 0, 0)
+colourByMagnitude(0.0)
+addVariation(0.0, 1.0)
+mapVelocities(1, 1.0, np.pi, 800, 1600, 1.0)
+
+
+# Initialises database tables
+initialiseVelocityFunctionTable()
+initialiseObjectTable()
 
 pygame.init()
 
@@ -13,19 +24,9 @@ SCREEN_HEIGHT = 800
 SCREEN_WIDTH = 1600
 FRAME_RATE = 60
 
+
 bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
-
-
-# Initialises database tables
-initialiseVelocityFunctionTable()
-
-#initialiseObjectTable()
-
-# JIT Compiles subroutines to be used later on
-rotate(np.array([(0,0)]),0)
-translate(np.array([(0,0)]), 0, 0)
-colourByMagnitude(0.0)
 
 
 # Creates screen with specific attributes
@@ -43,14 +44,15 @@ data = {"show_control":True,
         "show_streamline":False,
         "field_rows":16,
         "frame_rate":0.0,
+        "dt":0,
         "show_custom":False,
             "scenario":"tunnel",
-            "velocity_function": "",
-             "speed":1.0,
-             "kinetic_energy": 0.0,
-             "force": 0.0,
-             "circulation" : 0.0,
-             "flux" : 0.0}
+            "q": "",
+            "speed":1.0,
+            "kinetic_energy": 0.0,
+            "force": 0.0,
+            "circulation" : 0.0,
+            "flux" : 0.0}
 
 # Instantiates control panel components
 control_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
@@ -67,7 +69,7 @@ show_streamline_checkbox = ui.Checkbox(screen, SCREEN_WIDTH-100, 250, "show_stre
 velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 20, ui_bg)
 velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "scenario", str)
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
-custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["velocity_function"], "velocity_function", str, 22, 230, 17)
+custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["q"], "q", str, 22, 230, 17)
 
 select_object_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-175, 450, "show_objects", "images\\ui\\select_object.png", (0.5,0.5))
 
@@ -92,18 +94,26 @@ control_objects = (control_panel_label, speed_label, speed_entry, speed_unit_lab
 control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increment, show_streamline_checkbox, velocity_function_dropdown, select_object_button)
 
 
+
+
+
 # Instantiates object selection components:
 back_from_objects_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-320, 30, "show_control", "images\\ui\\back_from_objects.png", (0.2, 0.2))
 
 object_objects = (back_from_objects_button, )
 object_interactable = (back_from_objects_button,)
 
+
+
+
 # Instantiates tank components
 flow_button = ui.Dual_Image_Boolean_Button(screen, 22, 30, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
-vector_field = fluid.VectorField(screen, data["field_rows"], ["show_field", "field_rows", "flow", "speed"])
+vector_field = fluid.VectorField(screen, data["field_rows"], data["speed"], data["flow"], data["show_field"])
 
-tank_objects = (vector_field, flow_button)
-tank_interactable = (vector_field, flow_button)     
+tank_objects = [vector_field, flow_button]
+tank_interactable = [vector_field, flow_button]     
+
+
 
 running = True
 while running:
@@ -131,6 +141,7 @@ while running:
                 if obj.class_type == "input":
                     obj.checkInteract(event, keys)
                     data[obj.getVariable()] = obj.getValue()
+
             if obj.class_type == "output": 
                 obj.setValue(*([data[variable] for variable in obj.getVariable()]))
 
@@ -146,34 +157,44 @@ while running:
                 obj.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[obj.getVariable()] = obj.getValue()
+                    if data["scenario"] != "custom":
+                        vector_field.updateVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
 
             # Checks interaction with bespoke objects 
             if data["scenario"] == "custom":
                 custom_vf_entry.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
+                    # Updates the velocity function
+                    if validVelocityFunction(data["q"]):
+                        if not searchVelocityFunction(data["q"]):
+                            saveVelocityFunction(data["q"])
+                        vector_field.updateVelocityFunction(searchVelocityFunction(data["q"])[1:])
+            
+                            
 
 
 
-    # Places objects, when relevant    
+    # Places tank objects, when relevant    
     for obj in tank_objects:
             obj.place()
         
+
+    # Displays particles, when relevent
+    if not data["show_field"] and data["flow"]:
+        ...
+
+
+
+
     if data["show_control"]:
-        
         control_panel_box.place()
+
         if data["scenario"] == "custom":
             # Places bespoke objects
             custom_vf_label.place()
-            custom_vf_entry.place()
-
-        # Sets the velocity function for the vector field
-            if searchVelocityFunction(data["velocity_function"]):
-                vector_field.setVelocityFunction(searchVelocityFunction(data["velocity_function"])[1:])
-            elif validVelocityFunction(data["velocity_function"]):
-                saveVelocityFunction(data["velocity_function"])
-        else:
-            vector_field.setVelocityFunction(searchVelocityFunction(data["scenario"])[1:])
+            custom_vf_entry.place()            
+            
 
         # Places control objects
         for obj in control_objects:
@@ -184,6 +205,7 @@ while running:
             except AttributeError:
                 pass
     
+    # Places object addition objects
     if data["show_objects"]:
         data["show_control"] = False
         control_panel_box.place()
@@ -191,15 +213,12 @@ while running:
             obj.place()
             
     
-
-
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
     # Keeps loop in time with the clock
     data["frame_rate"] = clock.get_fps()
-    dt = clock.tick(FRAME_RATE) / 1000  
+    data["dt"] = clock.tick(FRAME_RATE) / 1000  
 
- 
-
+    
 pygame.quit()

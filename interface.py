@@ -403,8 +403,14 @@ class Dual_Image_Boolean_Button(Input):
         return self.__state
 
 
-class SelectionButton(Input):
-    ...
+class ObjectSelectionButton(Input):
+    def __init__(self,):
+        """Creates bespoke button to be placed on screen"""
+    
+
+
+
+
 
 class Increment(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, minimum : int | float, maximium : int | float, increment : int | float,):
