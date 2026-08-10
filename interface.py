@@ -26,7 +26,7 @@ class Label(Output):
         self.__variable = variable
     
         # Creates a set of arguments to be used to render the text
-        self._render_arguments = [self._text, True, "black", self._bg]
+        self._render_arguments = [self._text, True, "#000000", self._bg]
 
         # Creates the font object, rect and sets position
         self._font = pygame.font.SysFont(font, self._size)
@@ -403,15 +403,55 @@ class Dual_Image_Boolean_Button(Input):
         return self.__state
 
 
-class ObjectSelectionButton(Input):
-    def __init__(self,):
+class BodySelectionButton(Input):
+    def __init__(self, window, x : int, y : int, index : int, image_scale_factor : Tuple[int, int]):
         """Creates bespoke button to be placed on screen"""
+        self.__window = window
+        self.index = index
+        
+        properties = getBodyProperties(index)
+        
+        self.__name = properties[0]
+        self.__path = properties[1]
+        self.__mass = properties[3]
+
+        self.__fixed = False
+        if properties[2] == 1:
+            self.__fixed = True
+
+
+        self.__rect = pygame.rect.Rect(0,0, 150, 100)
+        
+        
+        self.__image = pygame.transform.scale_by(pygame.image.load(self.__path).convert_alpha(), image_scale_factor)
+        self.__image_rect = self.__image.get_rect()
+        self.__image_rect.center = self.__rect.center = (x,y)
+
+        
+        self.__font = pygame.font.SysFont("consolas", 20)
+        self.__text_rect = self.__font.render(self.__name, True, "#000000", "#FFFFFF").get_rect()
     
 
+        self.__text_box_rect = self.__text_rect.copy()
+        self.__text_box_rect.width = 150
+        self.__text_box_rect.height = 30
+        self.__text_box_rect.center = self.__text_rect.center = (x, y+75)
+       
+
+    def place(self):
+        pygame.draw.rect(self.__window, "#FFFFFF", self.__rect)
+        pygame.draw.rect(self.__window, "#000000", self.__rect, 1)
+        self.__window.blit(self.__image, self.__image_rect)
+        pygame.draw.rect(self.__window, "#FFFFFF", self.__text_box_rect)
+        pygame.draw.rect(self.__window, "#000000", self.__text_box_rect, 1)
+        self.__window.blit(self.__font.render(self.__name, True, "#000000", "#FFFFFF"), self.__text_rect)
 
 
 
+        
 
+      
+    
 class Increment(Input):
     def __init__(self, window : pygame.surface.Surface, x : int, y : int, variable : str, minimum : int | float, maximium : int | float, increment : int | float,):
         """Creates increment buttons to be placed on screen"""

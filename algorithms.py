@@ -123,7 +123,7 @@ def initialiseVelocityFunctionTable():
         conn.commit()
 
 
-def searchVelocityFunction(function : str):
+def getVelocityFunction(function : str):
     """Searches the velocity function table, written attribute, for the criteria"""
     with sqlite.Connection("fluids.db") as conn:
         function_data = conn.cursor().execute("""SELECT * FROM velocity_function WHERE written = (?) """, (function,)).fetchone()
@@ -152,13 +152,21 @@ def saveVelocityFunction(function : str):
 
 
 
-def initialiseObjectTable():
-    """Creates table in fluids database to store object names, their properties and asscociated image paths"""
+def initialiseBodyTable():
+    """Creates table in fluids database to store body names, their properties and asscociated image paths"""
     with sqlite.Connection("fluids.db") as conn:
-        conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS object
-        (name TEXT UNIQUE,
+        conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS body
+        (num INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
         path TEXT,
         fixed INTEGER,
         mass REAL);
-    """)
+        
+        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, "10")""")
         conn.commit()
+
+def getBodyProperties(index : int):
+    with sqlite.Connection("fluids.db") as conn:
+        return conn.cursor().execute("""SELECT * FROM body WHERE num = ?""", (index,)).fetchone()[1:]
+
+
