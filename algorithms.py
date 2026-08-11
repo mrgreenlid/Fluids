@@ -162,7 +162,10 @@ def initialiseBodyTable():
         fixed INTEGER,
         mass REAL);
         
-        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, "10")""")
+        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, 10.0);
+        INSERT or IGNORE INTO body VALUES (2, "square", "images\\body\\square.png", 0, 10.0);
+        INSERT or IGNORE INTO body VALUES (3, "airfoil", "images\\body\\airfoil.png", 1, 0.0);
+        INSERT or IGNORE INTO body VALUES (4, "f1 car", "images\\body\\car.png", 1, 0.0);""")
         conn.commit()
 
 def getBodyProperties(index : int):

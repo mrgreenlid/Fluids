@@ -404,30 +404,25 @@ class Dual_Image_Boolean_Button(Input):
 
 
 class BodySelectionButton(Input):
+    __variable = "body_index"
     def __init__(self, window, x : int, y : int, index : int, image_scale_factor : Tuple[int, int]):
         """Creates bespoke button to be placed on screen"""
         self.__window = window
-        self.index = index
-        
+
+        self.__index = index
         properties = getBodyProperties(index)
-        
-        self.__name = properties[0]
+        self.__value = 0
+
+
+        self.__name = properties[0][0].upper() + properties[0][1:]
         self.__path = properties[1]
-        self.__mass = properties[3]
-
-        self.__fixed = False
-        if properties[2] == 1:
-            self.__fixed = True
-
-
+      
         self.__rect = pygame.rect.Rect(0,0, 150, 100)
-        
-        
+          
         self.__image = pygame.transform.scale_by(pygame.image.load(self.__path).convert_alpha(), image_scale_factor)
         self.__image_rect = self.__image.get_rect()
         self.__image_rect.center = self.__rect.center = (x,y)
 
-        
         self.__font = pygame.font.SysFont("consolas", 20)
         self.__text_rect = self.__font.render(self.__name, True, "#000000", "#FFFFFF").get_rect()
     
@@ -445,6 +440,19 @@ class BodySelectionButton(Input):
         pygame.draw.rect(self.__window, "#FFFFFF", self.__text_box_rect)
         pygame.draw.rect(self.__window, "#000000", self.__text_box_rect, 1)
         self.__window.blit(self.__font.render(self.__name, True, "#000000", "#FFFFFF"), self.__text_rect)
+
+    def checkInteract(self, event : pygame.event.Event):
+        if tapping(event):
+            if self.__rect.collidepoint(*pygame.mouse.get_pos()[:2]):
+                self.__value = self.__index
+
+    def getVariable(self):
+        return self.__variable
+    
+    def getValue(self):
+        value = self.__value
+        self.__value = 0
+        return value
 
 
 

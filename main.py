@@ -40,21 +40,23 @@ clock = pygame.time.Clock()
 
 # Creates variables to be used throughout
 data = {"show_control":True,
-        "show_body" : False,
+        "show_body":False,
         "flow":False,
         "show_field":True,
         "show_streamline":False,
         "field_rows":16,
         "frame_rate":0.0,
-        "dt": 0,
+        "dt":0,
+        "body_index":0,
+        "clear_body":False,
         "show_custom":False,
             "scenario":"tunnel",
-            "q": "",
+            "q":"",
             "speed":1.0,
-            "kinetic_energy": 0.0,
-            "force": 0.0,
-            "circulation" : 0.0,
-            "flux" : 0.0}
+            "kinetic_energy":0.0,
+            "force":0.0,
+            "circulation":0.0,
+            "flux":0.0}
 
 # Instantiates control panel components
 control_panel_box = ui.Box(screen, SCREEN_WIDTH-175, SCREEN_HEIGHT/2, 350, SCREEN_HEIGHT, ui_bg)
@@ -101,15 +103,16 @@ control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increm
 
 # Instantiates body selection components:
 back_from_body_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-320, 30, "show_control", "images\\ui\\back_from_body.png", (0.2, 0.2))
+clear_body_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-100, 40, "clear_body","images\\ui\\clear_body.png", (0.6, 0.6) )
 
-body_select_1 = ui.BodySelectionButton(screen, SCREEN_WIDTH-200, 100, 1, (0.2, 0.2))
+body_select_1 = ui.BodySelectionButton(screen, SCREEN_WIDTH-250, 150, 1, (0.2, 0.2))
+body_select_2 = ui.BodySelectionButton(screen, SCREEN_WIDTH-95, 150, 2, (0.3, 0.3) )
+body_select_3 = ui.BodySelectionButton(screen, SCREEN_WIDTH-250, 300, 3, (0.3, 0.3))
+#body_select_4 = ui.BodySelectionButton(screen, SCREEN_WIDTH-95, 300, 4, (0.2, 0.2))
 
 
-
-
-
-body_objects = (back_from_body_button, body_select_1)
-body_interactable = (back_from_body_button,)
+body_objects = (back_from_body_button, body_select_1, body_select_2, body_select_3, clear_body_button)
+body_interactable = (back_from_body_button, body_select_1, body_select_2, body_select_3, clear_body_button)
 
 
 
@@ -157,8 +160,8 @@ while running:
         if data["show_body"]:
             for obj in body_interactable:
                 obj.checkInteract(event)
-                if tapping(event) or (typing(event) and event.unicode == "\x0D"):
-                        data[obj.getVariable()] = obj.getValue()  
+                if tapping(event):
+                    data[obj.getVariable()] = obj.getValue()  
 
 
         if data["show_control"]:
@@ -169,15 +172,18 @@ while running:
                     if data["scenario"] != "custom":
                         vector_field.updateVelocityFunction(getVelocityFunction(data["scenario"])[1:])
 
+
             # Checks interaction with bespoke objects 
             if data["scenario"] == "custom":
                 custom_vf_entry.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                     data[custom_vf_entry.getVariable()] = custom_vf_entry.getValue()
+
                     # Updates the velocity function
                     if validVelocityFunction(data["q"]):
                         if not getVelocityFunction(data["q"]):
                             saveVelocityFunction(data["q"])
+
                         vector_field.updateVelocityFunction(getVelocityFunction(data["q"])[1:])
             
                             
@@ -219,6 +225,13 @@ while running:
     # Places object addition objects
     if data["show_body"]:
         data["show_control"] = False
+
+        # Checks if the tank needs clearing of a body
+        if data["clear_body"]:
+            data["body_index"] = 0
+            data["clear_body"] = False
+
+
         control_panel_box.place()
         for obj in body_objects:
             obj.place()
@@ -230,6 +243,8 @@ while running:
     # Keeps loop in time with the clock
     data["frame_rate"] = clock.get_fps()
     data["dt"] = clock.tick(FRAME_RATE) / 1000  
+
+    print(data)
 
     
 pygame.quit()
