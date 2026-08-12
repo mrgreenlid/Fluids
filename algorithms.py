@@ -49,7 +49,7 @@ def rotate(point : np.array, radians : float):
 @nb.njit
 def translate(point: np.array, pygame_x : int, pygame_y : int):
     """Translates np.array group of coordinates"""
-    
+    point = np.copy(point)
     for dot in range(point.shape[0]):
         point[dot][0] += pygame_x
         point[dot][1] += pygame_y
@@ -153,7 +153,7 @@ def saveVelocityFunction(function : str):
 
 
 def initialiseBodyTable():
-    """Creates table in fluids database to store body names, their properties and asscociated image paths"""
+    """Creates table in fluids database to store body names, their properties and associated image paths"""
     with sqlite.Connection("fluids.db") as conn:
         conn.cursor().executescript("""CREATE TABLE IF NOT EXISTS body
         (num INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,6 +169,7 @@ def initialiseBodyTable():
         conn.commit()
 
 def getBodyProperties(index : int):
+    """Returns the properties of an object of a given index"""
     with sqlite.Connection("fluids.db") as conn:
         return conn.cursor().execute("""SELECT * FROM body WHERE num = ?""", (index,)).fetchone()[1:]
 

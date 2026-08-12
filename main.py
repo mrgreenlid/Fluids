@@ -4,7 +4,7 @@ import interface as ui
 import fluid
 import numpy as np
 
-
+###################################Flip look of airfoil
 
 # JIT Compiles subroutines to be used later on
 translate(rotate(np.array([(1.0, 0), (1.0, 1.0),(1.0, -1.0)]),np.pi), 0, 0)
@@ -103,23 +103,22 @@ control_interactable = (speed_entry, show_grid_doublecheckbox, field_rows_increm
 
 # Instantiates body selection components:
 back_from_body_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-320, 30, "show_control", "images\\ui\\back_from_body.png", (0.2, 0.2))
-clear_body_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-100, 40, "clear_body","images\\ui\\clear_body.png", (0.6, 0.6) )
+clear_body_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-100, 40, "clear_body","images\\ui\\clear_body.png", (0.6, 0.6))
 
 body_select_1 = ui.BodySelectionButton(screen, SCREEN_WIDTH-250, 150, 1, (0.2, 0.2))
-body_select_2 = ui.BodySelectionButton(screen, SCREEN_WIDTH-95, 150, 2, (0.3, 0.3) )
+body_select_2 = ui.BodySelectionButton(screen, SCREEN_WIDTH-95, 150, 2, (0.3, 0.3))
 body_select_3 = ui.BodySelectionButton(screen, SCREEN_WIDTH-250, 300, 3, (0.3, 0.3))
-#body_select_4 = ui.BodySelectionButton(screen, SCREEN_WIDTH-95, 300, 4, (0.2, 0.2))
+body_select_4 = ui.BodySelectionButton(screen, SCREEN_WIDTH-95, 300, 4, (0.2, 0.2))
 
-
-body_objects = (back_from_body_button, body_select_1, body_select_2, body_select_3, clear_body_button)
-body_interactable = (back_from_body_button, body_select_1, body_select_2, body_select_3, clear_body_button)
-
+body_objects = (back_from_body_button, body_select_1, body_select_2, body_select_3, body_select_4, clear_body_button)
+body_interactable = (back_from_body_button, body_select_1, body_select_2, body_select_3, body_select_4, clear_body_button)
 
 
 
 # Instantiates tank components
 flow_button = ui.Dual_Image_Boolean_Button(screen, 22, 30, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], data["speed"], data["flow"], data["show_field"])
+body = fluid.Body()
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]     
@@ -161,8 +160,12 @@ while running:
             for obj in body_interactable:
                 obj.checkInteract(event)
                 if tapping(event):
-                    data[obj.getVariable()] = obj.getValue()  
-
+                    if isinstance(obj, ui.BodySelectionButton):
+                        if obj.getClickFlag():
+                            data[obj.getVariable()] = obj.getValue()
+                            print("Yes")
+                    else:
+                        data[obj.getVariable()] = obj.getValue()
 
         if data["show_control"]:
             for obj in control_interactable:
@@ -246,5 +249,4 @@ while running:
 
     print(data)
 
-    
 pygame.quit()

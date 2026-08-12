@@ -139,8 +139,6 @@ class Entry(Label, Input):
             if typing(event):
                 self._typeText(event)
 
-    def getState(self):
-        return self._in_use
 
     def getVariable(self):
         """Returns associated variable"""
@@ -298,10 +296,9 @@ class Image_Boolean_Button(Input):
         self.__shape = pygame.transform.scale_by(pygame.image.load(image_path).convert_alpha(), scale_factor)
         self.__clickable_rect = self.__shape.get_bounding_rect()
         self.__rect = self.__shape.get_rect()
-        self.__rect.center = self.__clickable_rect.center =(x,y)
+        self.__rect.center = self.__clickable_rect.center = (x,y)
         
-        
-        
+    
         try:
             self.__key_bind = pygame.key.key_code(key_bind)
         except TypeError:
@@ -311,7 +308,6 @@ class Image_Boolean_Button(Input):
     def place(self):
         """Blits the image of the button"""
         self.__window.blit(self.__shape, self.__rect)
-        
         
     
     def checkInteract(self, event : pygame.event.Event, keys : List[bool] = None):
@@ -408,29 +404,29 @@ class BodySelectionButton(Input):
     def __init__(self, window, x : int, y : int, index : int, image_scale_factor : Tuple[int, int]):
         """Creates bespoke button to be placed on screen"""
         self.__window = window
-
         self.__index = index
-        properties = getBodyProperties(index)
-        self.__value = 0
 
+        properties = getBodyProperties(index)[0:2]
+        
+        self.__click_flag = False
 
         self.__name = properties[0][0].upper() + properties[0][1:]
         self.__path = properties[1]
       
         self.__rect = pygame.rect.Rect(0,0, 150, 100)
-          
+        self.__rect.center = (x,y)  
+        
         self.__image = pygame.transform.scale_by(pygame.image.load(self.__path).convert_alpha(), image_scale_factor)
         self.__image_rect = self.__image.get_rect()
-        self.__image_rect.center = self.__rect.center = (x,y)
+        self.__image_rect.center = (x,y)
 
         self.__font = pygame.font.SysFont("consolas", 20)
         self.__text_rect = self.__font.render(self.__name, True, "#000000", "#FFFFFF").get_rect()
     
-
         self.__text_box_rect = self.__text_rect.copy()
         self.__text_box_rect.width = 150
         self.__text_box_rect.height = 30
-        self.__text_box_rect.center = self.__text_rect.center = (x, y+75)
+        self.__text_box_rect.center = self.__text_rect.center = (x, y + 75)
        
 
     def place(self):
@@ -444,18 +440,18 @@ class BodySelectionButton(Input):
     def checkInteract(self, event : pygame.event.Event):
         if tapping(event):
             if self.__rect.collidepoint(*pygame.mouse.get_pos()[:2]):
-                self.__value = self.__index
+                self.__click_flag = True
+                
+    def getClickFlag(self):
+        return self.__click_flag
 
     def getVariable(self):
         return self.__variable
     
     def getValue(self):
-        value = self.__value
-        self.__value = 0
-        return value
-
-
-
+        self.__click_flag = False
+    
+        return self.__index
         
 
       
