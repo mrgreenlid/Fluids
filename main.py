@@ -3,8 +3,8 @@ from algorithms import *
 import interface as ui
 import fluid
 import numpy as np
+from os.path import isfile
 
-###################################Flip look of airfoil
 
 # JIT Compiles subroutines to be used later on
 translate(rotate(np.array([(1.0, 0), (1.0, 1.0),(1.0, -1.0)]),np.pi), 0, 0)
@@ -13,9 +13,11 @@ addVariation(0.0, 1.0)
 mapVelocities(1, 1.0, np.pi, 800, 1600, 1.0)
 
 
+
 # Initialises database tables
-initialiseVelocityFunctionTable()
-initialiseBodyTable()
+if not isfile("fluids.db"):
+    initialiseVelocityFunctionTable()
+    initialiseBodyTable()
 
 pygame.init()
 
@@ -24,7 +26,6 @@ SCREEN_HEIGHT = 800
 SCREEN_WIDTH = 1600
 FRAME_RATE = 60
 
-
 bg_colour = "#FFFFFF"
 ui_bg = "#ECECEC"
 
@@ -32,7 +33,6 @@ ui_bg = "#ECECEC"
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 screen.fill(bg_colour)
 pygame.display.flip()
-
 pygame.display.set_icon(pygame.image.load("images\\ui\\icon_image.png"))
 
 # Sets clock to measure and regulate frame rate
@@ -74,7 +74,6 @@ velocity_function_label = ui.Label(screen, SCREEN_WIDTH-290, 300, "Scenario:", 2
 velocity_function_dropdown = ui.Dropdown(screen, SCREEN_WIDTH-200, 300, ["Tunnel", "Falling", "Vortex", "Custom"], "scenario", str)
 custom_vf_label = ui.Label(screen, SCREEN_WIDTH-300, 350, "Custom:", 20, ui_bg)
 custom_vf_entry = ui.Entry(screen, SCREEN_WIDTH-240, 350, data["q"], "q", str, 22, 230, 17)
-
 select_body_button = ui.Image_Boolean_Button(screen, SCREEN_WIDTH-175, 450, "show_body", "images\\ui\\select_body.png", (0.5,0.5))
 
 border_data_box = ui.Box(screen,SCREEN_WIDTH-175, 500, 240, 1, "#000000")
@@ -114,11 +113,11 @@ body_objects = (back_from_body_button, body_select_1, body_select_2, body_select
 body_interactable = (back_from_body_button, body_select_1, body_select_2, body_select_3, body_select_4, clear_body_button)
 
 
-
 # Instantiates tank components
 flow_button = ui.Dual_Image_Boolean_Button(screen, 22, 30, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", (0.2, 0.2), (0.2, 0.2), "space")
 vector_field = fluid.VectorField(screen, data["field_rows"], data["speed"], data["flow"], data["show_field"])
-body = fluid.Body()
+
+body = fluid.Body(screen)
 
 tank_objects = [vector_field, flow_button]
 tank_interactable = [vector_field, flow_button]     
@@ -132,8 +131,7 @@ while running:
     pygame.display.set_caption(f"Fluid Mechanics Simulator")
     screen.fill(bg_colour)
 
-    
-    # Starts event loop
+    # Starts the event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -156,14 +154,15 @@ while running:
             if obj.class_type == "output": 
                 obj.setValue(*([data[variable] for variable in obj.getVariable()]))
 
+            body.checkInteract(event)
+
         if data["show_body"]:
             for obj in body_interactable:
-                obj.checkInteract(event)
                 if tapping(event):
+                    obj.checkInteract(event)
                     if isinstance(obj, ui.BodySelectionButton):
                         if obj.getClickFlag():
                             data[obj.getVariable()] = obj.getValue()
-                            print("Yes")
                     else:
                         data[obj.getVariable()] = obj.getValue()
 
@@ -176,7 +175,7 @@ while running:
                         vector_field.updateVelocityFunction(getVelocityFunction(data["scenario"])[1:])
 
 
-            # Checks interaction with bespoke objects 
+            # Checks interaction with bespoke entry fields
             if data["scenario"] == "custom":
                 custom_vf_entry.checkInteract(event)
                 if tapping(event) or (typing(event) and event.unicode == "\x0D"):
@@ -191,20 +190,19 @@ while running:
             
                             
        
-                
-
-
+        
 
     # Places tank objects, when relevant    
     for obj in tank_objects:
             obj.place()
         
-
+    # Places the current body on the screen
+    body.update(data["body_index"])
+    body.place()
+    
     # Displays particles, when relevent
     if not data["show_field"] and data["flow"]:
         ...
-
-
 
 
     if data["show_control"]:
@@ -225,7 +223,8 @@ while running:
             except AttributeError:
                 pass
     
-    # Places object addition objects
+
+    # Places body select objectss
     if data["show_body"]:
         data["show_control"] = False
 
@@ -234,19 +233,18 @@ while running:
             data["body_index"] = 0
             data["clear_body"] = False
 
-
         control_panel_box.place()
+
         for obj in body_objects:
             obj.place()
             
-    
+
+
     # Updates the screen with changes that have been set in each loop
     pygame.display.flip()
 
     # Keeps loop in time with the clock
     data["frame_rate"] = clock.get_fps()
     data["dt"] = clock.tick(FRAME_RATE) / 1000  
-
-    print(data)
 
 pygame.quit()

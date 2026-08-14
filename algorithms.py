@@ -31,10 +31,13 @@ def typing(event : pygame.event.Event):
 
 
 # General, mathematical subroutines
-
 def toggleVariable(var : bool):
     """Returns the opposite value to the one passed in"""
     return not var
+
+@nb.njit
+def kineticEnergy(mass : float, speed : float):
+    return 0.5*mass*speed*speed
 
 @nb.njit
 def rotate(point : np.array, radians : float):
@@ -160,13 +163,15 @@ def initialiseBodyTable():
         name TEXT UNIQUE,
         path TEXT,
         fixed INTEGER,
-        mass REAL);
+        mass REAL,
+        display_scale_factor REAL);
         
-        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, 10.0);
-        INSERT or IGNORE INTO body VALUES (2, "square", "images\\body\\square.png", 0, 10.0);
-        INSERT or IGNORE INTO body VALUES (3, "airfoil", "images\\body\\airfoil.png", 1, 0.0);
-        INSERT or IGNORE INTO body VALUES (4, "f1 car", "images\\body\\car.png", 1, 0.0);""")
+        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, 10.0, 0.7);
+        INSERT or IGNORE INTO body VALUES (2, "square", "images\\body\\square.png", 0, 10.0, 0.8);
+        INSERT or IGNORE INTO body VALUES (3, "airfoil", "images\\body\\airfoil.png", 1, 0.0, 0.9);
+        INSERT or IGNORE INTO body VALUES (4, "f1 car", "images\\body\\car.png", 1, 0.0, 0.7);""")
         conn.commit()
+        
 
 def getBodyProperties(index : int):
     """Returns the properties of an object of a given index"""

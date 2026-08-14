@@ -410,6 +410,7 @@ class BodySelectionButton(Input):
         
         self.__click_flag = False
 
+
         self.__name = properties[0][0].upper() + properties[0][1:]
         self.__path = properties[1]
       
@@ -430,6 +431,7 @@ class BodySelectionButton(Input):
        
 
     def place(self):
+        """Draws body selection button"""
         pygame.draw.rect(self.__window, "#FFFFFF", self.__rect)
         pygame.draw.rect(self.__window, "#000000", self.__rect, 1)
         self.__window.blit(self.__image, self.__image_rect)
@@ -438,19 +440,22 @@ class BodySelectionButton(Input):
         self.__window.blit(self.__font.render(self.__name, True, "#000000", "#FFFFFF"), self.__text_rect)
 
     def checkInteract(self, event : pygame.event.Event):
+        """Checks for interactions"""
         if tapping(event):
             if self.__rect.collidepoint(*pygame.mouse.get_pos()[:2]):
                 self.__click_flag = True
                 
     def getClickFlag(self):
+        """Returns whether the button was clicked more recently than a call of self.getValue()"""
         return self.__click_flag
 
     def getVariable(self):
+        """Returns associated variable"""
         return self.__variable
     
     def getValue(self):
+        """Returns value"""
         self.__click_flag = False
-    
         return self.__index
         
 

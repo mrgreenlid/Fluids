@@ -9,13 +9,14 @@ class VectorField(Output):
     __grid_colour =  "#C7C1B8"
     __variables = ["show_field", "field_rows", "flow", "speed", "dt"]
     def __init__(self, window : pygame.surface.Surface, display : bool = False, rows : int = 10,  flow : bool = False, speed : float = 1.0):
-        """Creates a vector field to be displayed and store data"""
+        """A velocity vector field"""
         self.__window = window
 
         self.__display = display
         self.__rows = rows
         self.__flow = flow
         self.__speed = speed
+        self.__body = body
 
         self.__velocity_function = []
         self.__q = ()
@@ -32,6 +33,7 @@ class VectorField(Output):
         self.__velocities = np.zeros((self.__height, self.__length), dtype=np.complex128)
         
         self.__delta_time = 1
+
     def __drawVector(self, tail_pygame_x : int, tail_pygame_y : int):
         """Draws coloured vector arrow with the tail at the specified point"""
         velocity = self.getPointVelocity(tail_pygame_x, tail_pygame_y)
@@ -102,17 +104,18 @@ class VectorField(Output):
                 
             self.__mapVelocities()
 
+    def getBody(self, body : pygame.mask.Mask):
+        self.__body = body
+
     def getVariable(self):
         """Returns associated variable"""
         return self.__variables
     
-    def setValue(self, display, rows, flow, speed, dt):
+    def setValue(self, display, rows, flow, speed):
         """Changes variable value"""
         self.__display = display
         self.__flow = flow
         self.__delta_time = dt
-        
-        
         
         if speed != self.__speed:
             self.__speed = speed
@@ -125,30 +128,70 @@ class VectorField(Output):
         
 
 
+class Body():
+    def __init__(self, window :  pygame.surface.Surface):
+        """A body (object)"""
+        self.__window = window
+
+        self.__body_index = 0
+        
+        self.__fixed = False
+        self.__pull = False
+        
+
+    def update(self, body_index : int):
+        """Updates properties of the body if required"""
+        if self.__pull:
+            self.__rect.centerx, self.__rect.centery = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
+
+        if body_index != self.__body_index:
+            self.__body_index = body_index
+            if body_index == 0:
+                self.__mass = 0
+                self.__fixed = False
+                return None
+
+            properties = getBodyProperties(self.__body_index)
+            scale_factor = properties[4]
+            self.__mass = properties[3]
+
+            if properties[2] == 1:
+                self.__fixed = True
+            elif properties[2] == 0:
+                self.__fixed = False
+
+            self.__shape = self.__image = pygame.transform.scale_by(pygame.image.load(properties[1]).convert_alpha(), (scale_factor,scale_factor))
+            self.__rect = self.__shape.get_rect()
+            self.__rect.center = (self.__window.get_width()//2, self.__window.get_height()//2)
+            self.__mask = pygame.mask.from_surface(self.__shape)
+
+        
+
+    def place(self):
+        """Places the body on the screen"""
+        if self.__body_index != 0:
+            self.__window.blit(self.__shape, self.__rect)
+            
+    
+    def checkInteract(self, event):
+        """Checks for interactions"""
+        if self.__body_index != 0:
+            if not self.__fixed:
+                mouse_x, mouse_y = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
+                if self.__rect.collidepoint(mouse_x, mouse_y):
+                    if self.__mask.get_at((mouse_x-self.__rect.x, mouse_y-self.__rect.y)):
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            self.__pull = True
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.__pull = False
+                    
+    
 
 
 class Particle(pygame.sprite.Sprite):
-    def __init__(self, window: pygame.surface.Surface, start_side, vector_field : VectorField):
+    def __init__(self, window : pygame.surface.Surface, start_side, vector_field : VectorField):
         """A fluid particle"""
-        self.__window = window
-        self.__vector_field = vector_field
-
-        self.__initial_x, self.__inital_y, self.__x, self.__y = x, y
-        
-        self.__colour = "#000000"
-
-            
-    def update(self, delta_time : pygame.time.Clock.tick):
-        velocity = self.__vector_field.getPointVelocity(self.__x, self.__y)
-        ...
-    
-    
-    def place(self):
         ...
 
 
 
-
-class Body():
-    def __init__(self,):
-        ...
