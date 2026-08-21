@@ -15,22 +15,17 @@ class Input:
     def __init__(self):
         """Defines an object as providing variables to perform a task"""
         return None
-
-class Keyable:
-    def __init__(self):
-        """Defines an object as accepting keyboard inputs"""
-        return None
-
+        
 # Pygame specific algorithms
-def tapping():
+def tapping(event : pygame.event.Event):
     """Returns True when a left click is detected, else False"""
-    if pygame.mouse.get_pressed()[0]:
+    if event.type == pygame.MOUSEBUTTONDOWN:
         return True
     return False
 
-def typing(keys : list[bool]):
+def typing(event : pygame.event.Event):
     """Returns True when any keypress is detected, else False"""
-    if any(keys):
+    if event.type == pygame.KEYDOWN:
         return True
     return False
 

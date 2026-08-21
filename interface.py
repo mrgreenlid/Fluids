@@ -1,5 +1,5 @@
 import pygame
-from rewriteAlgorithms import *
+from algorithms import *
 import re
 from typing import Tuple, List
 import databaseManagement as db
@@ -62,7 +62,7 @@ class DataLabel(Label, Output):
         return self.__variable
     
     
-class Entry(Label, Input, Keyable):
+class Entry(Label, Input):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, text : str, variable : str, max_length : int = 10, width : int = 120, dtype : type = float):
@@ -115,18 +115,17 @@ class Entry(Label, Input, Keyable):
             self._state = False
             self._updateText()
 
-    def checkInteract(self, event : pygame.event.Event, keys : List[bool]):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self._rect.collidepoint(*pygame.mouse.get_pos()):
                 self._click()
             else:
                 self._antiClick()
             
         if self._state:
-            if typing(keys):
+            if typing(event):
                 # Changes the text stored in the textbox
-                if event.type == pygame.KEYDOWN:
                     key = event.unicode
 
                     if key == "\x08":
@@ -186,9 +185,9 @@ class Dropdown(Entry):
                 self._screen.blit(self._font.render(self.__current_options[option], True, "#000000", "#FFFFFF"), self.__options_rect[option])
                 pygame.draw.rect(self._screen, "#000000", self.__options_rect[option], 1)
 
-    def checkInteract(self, event : pygame.event.Event, keys : List[bool]):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if not self._state:
                 self.__configOptions()
                 if self.__arrow_rect.collidepoint(*pygame.mouse.get_pos()):
@@ -200,7 +199,7 @@ class Dropdown(Entry):
                 self._antiClick()
 
         if self._state:
-                if typing(keys):
+                if typing(event):
                     if event.unicode == "\x0D":
                         self._antiClick()
 
@@ -242,9 +241,9 @@ class Checkbox(Input):
         self._state = False
         self._bg = self._inactive_colour
     
-    def checkInteract(self):
+    def checkInteract(self, event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self._rect.collidepoint(*pygame.mouse.get_pos()):
                 if not self._state:
                     self._click()
@@ -286,9 +285,9 @@ class RadioButton(Checkbox):
         self.__bg2 = self._active_colour
         self._state = False
 
-    def checkInteract(self):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self._rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__click()
             elif self.__rect2.collidepoint(*pygame.mouse.get_pos()):
@@ -310,11 +309,10 @@ class ImageBooleanButton(Input):
         """Places the boolean button on the screen"""
         self.__screen.blit(self.__shape, self.__rect)
 
-    def checkInteract(self):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self.__clickable_rect.collidepoint(*pygame.mouse.get_pos()):
-                
                     self.__state = True
 
     def getVariable(self):
@@ -350,9 +348,9 @@ class DualImageBooleanButton(Input):
         else:
             self.__screen.blit(self.__off_shape, self.__off_rect)
 
-    def checkInteract(self):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self.__state:
                 if self.__on_clickable_rect.collidepoint(*pygame.mouse.get_pos()):
                     self.__state = False
@@ -399,9 +397,9 @@ class Increment(Input):
         pygame.draw.rect(self.__screen, "#000000", self.__down_rect, 1)
         pygame.draw.polygon(self.__screen, "#000000", self.__down_arrow_coordinates)
 
-    def checkInteract(self):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self.__up_rect.collidepoint(*pygame.mouse.get_pos()):
                 if (self.__value + self.__increment) <= self.__maximum:
                     self.__value += self.__increment
@@ -453,9 +451,9 @@ class BodySelectionButton(Input):
         pygame.draw.rect(self.__screen, "#000000", self.__text_box_rect, 1)
         self.__screen.blit(self.__font.render(self.__name, True, "#000000", "#FFFFFF"), self.__text_rect)
 
-    def checkInteract(self):
+    def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if tapping():
+        if tapping(event):
             if self.__rect.collidepoint(*pygame.mouse.get_pos()) or self.__text_box_rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__click_flag = True
                 

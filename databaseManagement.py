@@ -46,8 +46,6 @@ def saveVelocityFunction(function : str):
 
 
 
-
-
 def initialiseBodyTable():
     """Creates table in fluids database to store body properties and sets up preset bodies"""
     with sqlite.Connection("fluids.db") as conn:
@@ -59,12 +57,12 @@ def initialiseBodyTable():
         mass REAL,
         display_scale_factor REAL);
         
-        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, 10.0, 0.7);
-        INSERT or IGNORE INTO body VALUES (2, "square", "images\\body\\square.png", 0, 10.0, 0.8);
-        INSERT or IGNORE INTO body VALUES (3, "airfoil", "images\\body\\airfoil.png", 1, 0.0, 0.9);
-        INSERT or IGNORE INTO body VALUES (4, "f1 car", "images\\body\\car.png", 1, 0.0, 0.7);
-        INSERT or IGNORE INTO body VALUES (5, "regan", "images\\body\\regan.png", 1, 100.0, 0.7);
-        INSERT or IGNORE INTO body VALUES (6, "rod", "images\\body\\rod.png", 0, 10.0, 0.7)""")
+        INSERT or IGNORE INTO body VALUES (1, "circle", "images\\body\\circle.png", 0, 10.0, 0.9);
+        INSERT or IGNORE INTO body VALUES (2, "square", "images\\body\\square.png", 0, 10.0, 0.9);
+        INSERT or IGNORE INTO body VALUES (3, "airfoil", "images\\body\\airfoil.png", 1, 0.0, 1.1);
+        INSERT or IGNORE INTO body VALUES (4, "f1 car", "images\\body\\car.png", 1, 0.0, 1.1);
+        INSERT or IGNORE INTO body VALUES (5, "regan", "images\\body\\regan.png", 0, 100.0, 0.85);
+        INSERT or IGNORE INTO body VALUES (6, "rod", "images\\body\\rod.png", 0, 10.0, 0.9)""")
         conn.commit()
 
 def getBodyProperties(index : int):

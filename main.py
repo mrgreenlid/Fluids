@@ -1,7 +1,7 @@
 import pygame
-import rewriteInterface as ui
-import rewriteFluid as fluid
-from rewriteAlgorithms import *
+import interface as ui
+import fluid as fluid
+from algorithms import *
 import databaseManagement as db
 from os.path import isfile
 
@@ -47,8 +47,7 @@ data = {"show_tank":True,
         "flow":False,
         "q": "",
         
-        
-        
+
         "speed":1.0,
         "scenario":"falling",
         "circulation":0.0,
@@ -72,18 +71,22 @@ streamline_box_label = ui.Label(screen, WIDTH-258, 250, "Streamline:", bg=UIBG)
 streamline_box_checkbox = ui.Checkbox(screen, WIDTH-100, 250, "show_streamline")
 scenario_label = ui.Label(screen, WIDTH-270, 300, "Scenario:", bg=UIBG)
 scenario_dropdown = ui.Dropdown(screen, WIDTH-200, 300, ("Tunnel", "Falling", "Vortex", "Custom"), "scenario", dtype=str)
-select_body_button = ui.ImageBooleanButton(screen, WIDTH-175, 450, "show_body", "images\\ui\\select_body.png", 0.5)
+
 custom_scenario_box_label = ui.Label(screen, WIDTH-283, 350, "Custom:", bg=UIBG) 
 custom_scenario_box_entry = ui.Entry(screen, WIDTH-230, 350, data["q"], "q", 14, 220, str)
-control_panel_data_divider_box = ui.Box(screen, WIDTH-175, 500, 240, 1, "#000000")
-circulation_data_label = ui.Label(screen, WIDTH-250, 530, "Circulation:", 17, bg=UIBG, font="Courier")
-circulation_data_datalabel = ui.DataLabel(screen, WIDTH-110, 530, data["circulation"], "circulation", 17, bg=UIBG, font="Courier")
-flux_data_label = ui.Label(screen, WIDTH-285, 560, "Flux:", 17, bg=UIBG, font="Courier")
-flux_data_datalabel = ui.DataLabel(screen, WIDTH-110, 560, data["flux"], "flux", 17, bg=UIBG, font="Courier")
-ke_data_label = ui.Label(screen, WIDTH-257, 590, "Obj KE (J):", 17, bg=UIBG, font="Courier")
-ke_data_datalabel = ui.DataLabel(screen, WIDTH-110, 590, data["ke"], "ke", 17, bg=UIBG, font="Courier")
-frames_data_label = ui.Label(screen, WIDTH-222, 650, "Performance (fps):", 17, bg=UIBG, font="Courier")
-frames_data_datalabel = ui.DataLabel(screen, WIDTH-110, 650, data["frames"], "frames", 17, bg=UIBG, font="Courier")
+
+select_body_button = ui.ImageBooleanButton(screen, WIDTH-175, 450, "show_body", "images\\ui\\select_body.png", 0.5)
+
+control_panel_data_divider_box = ui.Box(screen, WIDTH-175, 600, 240, 1, "#000000")
+
+circulation_data_label = ui.Label(screen, WIDTH-250, 630, "Circulation:", 17, bg=UIBG, font="Courier")
+circulation_data_datalabel = ui.DataLabel(screen, WIDTH-110, 630, data["circulation"], "circulation", 17, bg=UIBG, font="Courier")
+flux_data_label = ui.Label(screen, WIDTH-285, 660, "Flux:", 17, bg=UIBG, font="Courier")
+flux_data_datalabel = ui.DataLabel(screen, WIDTH-110, 660, data["flux"], "flux", 17, bg=UIBG, font="Courier")
+ke_data_label = ui.Label(screen, WIDTH-257, 690, "Obj KE (J):", 17, bg=UIBG, font="Courier")
+ke_data_datalabel = ui.DataLabel(screen, WIDTH-110, 690, data["ke"], "ke", 17, bg=UIBG, font="Courier")
+frames_data_label = ui.Label(screen, WIDTH-222, 720, "Performance (fps):", 17, bg=UIBG, font="Courier")
+frames_data_datalabel = ui.DataLabel(screen, WIDTH-110, 720, data["frames"], "frames", 17, bg=UIBG, font="Courier")
 
 control_visual = (control_panel_title_label, speed_box_label, 
                     speed_box_entry, speed_box_units_label, show_field_box_label,
@@ -125,6 +128,9 @@ body_interact = (back_from_body_button, body_select_1, body_select_2, body_selec
 flow_button = ui.DualImageBooleanButton(screen, 22, 30, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", 0.2, 0.2)
 vector_field = fluid.VectorField(screen, data["show_field"], data["field_rows"], data["flow"])
 
+body = fluid.Body(screen)
+vector_field.linkBody(body)
+
 tank_visual = (vector_field, flow_button,)
 tank_interact = (flow_button,)
 
@@ -143,8 +149,7 @@ while running:
         keys = pygame.key.get_pressed()
 
         # Checks and acts on keybind presses
-        if typing(keys):
-            if event.type == pygame.KEYDOWN:
+        if typing(event):
                 if keys[pygame.K_c]:
                     data["show_control"] = not data["show_control"]
                     data["show_body"] = False
@@ -152,18 +157,24 @@ while running:
         # Checks for interaction with tank interactables
         if data["show_tank"]:
             for obj in tank_interact:
-                obj.checkInteract()
-                if tapping() or typing(keys):
+                if isinstance(obj, Input):
+                        obj.checkInteract(event)
+                else:
+                    obj.checkInteract()
+                if tapping(event) or typing(event):
                     data[obj.getVariable()] = obj.getValue()
+
+            if data["body_index"] != 0:
+                body.checkInteract(event)
 
             # Checks for interaction with control interactables
             if data["show_control"]:
                 for obj in control_interact:
-                    if isinstance(obj, Keyable):
-                        obj.checkInteract(event, keys)
+                    if isinstance(obj, Input):
+                        obj.checkInteract(event)
                     else:
                         obj.checkInteract()
-                    if tapping() or (typing(keys) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
+                    if tapping(event) or (typing(event) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
                         data[obj.getVariable()] = obj.getValue()
                         if data["scenario"] != "custom" :
                             vector_field.updateFunction(db.searchVelocityFunction(data["scenario"]))
@@ -172,7 +183,7 @@ while running:
                 if data["scenario"] == "custom":
                     for obj in custom_interact:
                         obj.checkInteract(event, keys)
-                        if tapping() or (typing(keys) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
+                        if tapping(event) or (typing(event) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
                             data[obj.getVariable()] = obj.getValue()
                             if validVelocityFunction(data["q"]):
                                 if not db.searchVelocityFunction(data["q"]):
@@ -180,12 +191,14 @@ while running:
                                 vector_field.updateFunction(db.searchVelocityFunction(data["q"]))
 
 
-
             # Checks for interaction with body selection interactables
             if data["show_body"]:
                 for obj in body_interact:
-                    obj.checkInteract()
-                    if tapping() or (typing(keys) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
+                    if isinstance(obj, Input):
+                        obj.checkInteract(event)
+                    else:
+                        obj.checkInteract()
+                    if tapping(event) or (typing(event) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
                         if isinstance(obj, ui.BodySelectionButton):
                             if obj.getClickFlag():
                                 data[obj.getVariable()] = obj.getValue()
@@ -193,13 +206,16 @@ while running:
                             data[obj.getVariable()] = obj.getValue()
 
 
-           
     # Places visual elements of tank
     if data["show_tank"]:
         for obj in tank_visual:
             obj.place()
             if isinstance(obj, fluid.VectorField):
                 obj.update(*[data[variable] for variable in obj.getVariable()])
+
+        if data["body_index"] != 0:
+            body.update(data["body_index"])
+            body.place()
 
         # Places visual elements of control panel 
         if data["show_control"]:
@@ -237,7 +253,3 @@ while running:
 
 pygame.quit()
 
-
-
-
-### Make body class and add to screen
