@@ -323,7 +323,6 @@ class ImageBooleanButton(Input):
 
     def getValue(self):
         """Returns associated value"""
-       
         state = self.__state
         if state:
             self.__state = not self.__state    
