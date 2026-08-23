@@ -24,6 +24,8 @@ FRAMES = 60
 BG = "#FFFFFF"
 UIBG = "#ECECEC"
 
+MAX_PARTICLES = 1000
+
 # Creates the pygame display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen.fill(BG)
@@ -131,6 +133,11 @@ vector_field = fluid.VectorField(screen, data["show_field"], data["field_rows"],
 body = fluid.Body(screen)
 vector_field.linkBody(body)
 
+particles = pygame.sprite.Group()
+
+for _ in range(MAX_PARTICLES):
+    particles.add(fluid.Particle(screen, vector_field))
+
 tank_visual = (vector_field, flow_button,)
 tank_interact = (flow_button,)
 
@@ -164,6 +171,7 @@ while running:
                 if tapping(event) or typing(event):
                     data[obj.getVariable()] = obj.getValue()
 
+
             if data["body_index"] != 0:
                 body.checkInteract(event)
 
@@ -182,7 +190,7 @@ while running:
                 # Checks for interaction with custom interactables
                 if data["scenario"] == "custom":
                     for obj in custom_interact:
-                        obj.checkInteract(event, keys)
+                        obj.checkInteract(event)
                         if tapping(event) or (typing(event) and event.type == pygame.KEYDOWN and event.unicode == "\x0D"):
                             data[obj.getVariable()] = obj.getValue()
                             if validVelocityFunction(data["q"]):
@@ -209,13 +217,20 @@ while running:
     # Places visual elements of tank
     if data["show_tank"]:
         for obj in tank_visual:
-            obj.place()
             if isinstance(obj, fluid.VectorField):
                 obj.update(*[data[variable] for variable in obj.getVariable()])
+            obj.place()
+
+        if data["flow"] and not data["show_field"]:
+            ### Logic to facilitate placing particles
+            particles.update()
+            for particle in particles:
+                particle.place()
 
         if data["body_index"] != 0:
             body.update(data["body_index"])
             body.place()
+            ### TODO Make logic for updating vector field for object
 
         # Places visual elements of control panel 
         if data["show_control"]:

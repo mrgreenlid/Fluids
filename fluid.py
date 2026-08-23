@@ -20,7 +20,7 @@ class Body:
         self.mask = pygame.mask.Mask((0,0))
         
     def update(self, body_index : int):
-        """Updates the bodies attributes"""
+        """Updates the body's attributes"""
         if self.__pull:
             self.__rect.center = (*pygame.mouse.get_pos(),)
 
@@ -60,6 +60,10 @@ class Body:
             if self.mask.get_at((x-self.__rect.x, y-self.__rect.y)):
                 return True
         return False
+
+
+
+            
 
 
 class VectorField(Output):
@@ -137,6 +141,7 @@ class VectorField(Output):
     def updateFunction(self, function : Tuple[str]):
         """Updates the velocity function of the field"""
         if function != self.__velocity_function:
+            
             self.__velocity_function = function
 
             # Finds attributes of an exponential form function
@@ -150,12 +155,13 @@ class VectorField(Output):
                     if arg[term+1] == ")":
                         break
                     if arg[term] == "*":
-                        if arg[term+1] == "pi":
+                        if arg[term+1] == "pi" or arg[term+1] == "-pi":
                             argument *= np.pi
                         else:
                             argument *= float(arg[term+1])
+
                     elif arg[term] == "/":
-                        if arg[term+1] == "pi":
+                        if arg[term+1] == "pi" or  arg[term+1] == "-pi":
                             argument /= np.pi
                         else:
                             argument /= float(arg[term+1])
@@ -180,5 +186,41 @@ class VectorField(Output):
             self.__speed = speed
             self.__mapExponential()
             
-           
-        
+
+
+
+
+
+class Particle(pygame.sprite.Sprite):
+    def __init__(self, screen : pygame.surface.Surface, vector_field : VectorField):
+        """A pygame fluid particle"""
+        super().__init__()
+        self.__screen = screen
+        self.__vector_field = vector_field
+
+        self.__source_bound_x = self.__screen.get_width()
+        self.__source_bound_y = self.__screen.get_height()
+
+        self.__alive = True
+
+        self.__rect = pygame.rect.Rect(self.__source_bound_x//2, self.__source_bound_y//2, 2, 2)
+
+
+    def place(self):
+        """Places the particle on the screen"""
+        if self.__alive:
+            pygame.draw.rect(self.__screen, "#000000", self.__rect)
+            
+    
+    def update(self, ):
+        """Updates the particle's attributes"""
+        if self.__alive:
+                velocity = self.__vector_field.getPointVelocity(self.__rect.centerx, self.__rect.centery)
+                dx, dy = velocity.real, velocity.imag
+                self.__rect.x += dx
+                self.__rect.y += dy
+            
+                if (self.__rect.x <= 0 or self.__rect.x >= self.__source_bound_x) or (self.__rect.y <= 0 or self.__rect.x >= self.__source_bound_y):
+                    self.__alive = False
+                
+

@@ -80,7 +80,7 @@ def colourByMagnitude(magnitude: float):
 
 def validVelocityFunction(function : str):
     """Checks a string for being a valid velocity function"""
-    if re.fullmatch(r" *\d+(\.\d+)?e\^\(i((\*|\/)((\d+(\.\d+)?)|pi))*\)?", function):
+    if re.fullmatch(r" *\d+(\.\d+)?e\^\(i((\*|\/)((-?\d+(\.\d+)?)|-?pi))*\)?", function):
         return True
     return False
 
