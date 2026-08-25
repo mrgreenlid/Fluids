@@ -44,7 +44,7 @@ data = {"show_tank":True,
         "body_index":0,
         "clear_body":False,
         "field_rows":16,
-        "particle_count":20,
+        "particle_count":100,
         "show_streamline":False,
         "flow":False,
         "q": "",
@@ -66,7 +66,7 @@ speed_box_entry = ui.Entry(screen, WIDTH-200, 100, data["speed"], "speed", max_l
 speed_box_units_label = ui.Label(screen, WIDTH-50, 100, "ms\u207B\u00B9", bg=UIBG)
 show_field_box_label = ui.Label(screen, WIDTH-248, 150, "Vector field:", bg=UIBG)
 field_rows_increment = ui.Increment(screen, WIDTH-60, 150, 30, 0 , "field_rows", data["field_rows"], 30, 2)
-particle_count_increment = ui.Increment(screen, WIDTH-60, 200, 30, 0 , "particle_count", data["particle_count"], 100, 5)
+particle_count_increment = ui.Increment(screen, WIDTH-60, 200, 30, 0 , "particle_count", data["particle_count"], MAX_PARTICLES, 100)
 show_field_box_radiobutton = ui.RadioButton(screen, WIDTH-100, 150, 0, 50, "show_field")
 not_show_field_box_label = ui.Label(screen, WIDTH-263, 200, "Particles:", bg=UIBG)
 streamline_box_label = ui.Label(screen, WIDTH-258, 250, "Streamline:", bg=UIBG)
@@ -130,16 +130,25 @@ body_interact = (back_from_body_button, body_select_1, body_select_2, body_selec
 flow_button = ui.DualImageBooleanButton(screen, 22, 30, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", 0.2, 0.2)
 vector_field = fluid.VectorField(screen, data["show_field"], data["field_rows"], data["flow"])
 
+tank_visual = (vector_field, flow_button,)
+tank_interact = (flow_button,)
+
+
+
 body = fluid.Body(screen)
 vector_field.linkBody(body)
+
+source = fluid.Source(screen)
 
 particles = pygame.sprite.Group()
 
 for _ in range(MAX_PARTICLES):
-    particles.add(fluid.Particle(screen, vector_field))
+    p = fluid.Particle(screen, vector_field)
+    p.linkSource(source)
+    particles.add(p)
 
-tank_visual = (vector_field, flow_button,)
-tank_interact = (flow_button,)
+
+
 
 
 vector_field.updateFunction(db.searchVelocityFunction(data["scenario"]))
@@ -150,9 +159,11 @@ while running:
     pygame.display.set_caption("Fluid Mechanics NEA")
     screen.fill(BG)
 
+    # 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
         keys = pygame.key.get_pressed()
 
         # Checks and acts on keybind presses
@@ -172,8 +183,10 @@ while running:
                     data[obj.getVariable()] = obj.getValue()
 
 
+            # Checks for interaction with the body
             if data["body_index"] != 0:
                 body.checkInteract(event)
+
 
             # Checks for interaction with control interactables
             if data["show_control"]:
@@ -186,6 +199,8 @@ while running:
                         data[obj.getVariable()] = obj.getValue()
                         if data["scenario"] != "custom" :
                             vector_field.updateFunction(db.searchVelocityFunction(data["scenario"]))
+
+
 
                 # Checks for interaction with custom interactables
                 if data["scenario"] == "custom":
@@ -221,16 +236,22 @@ while running:
                 obj.update(*[data[variable] for variable in obj.getVariable()])
             obj.place()
 
+        # Places particles as they flow
         if data["flow"] and not data["show_field"]:
-            ### Logic to facilitate placing particles
+            
             particles.update()
+            # Make so change number of particles being added
             for particle in particles:
                 particle.place()
 
+
+        # Places the body
         if data["body_index"] != 0:
             body.update(data["body_index"])
             body.place()
             ### TODO Make logic for updating vector field for object
+
+
 
         # Places visual elements of control panel 
         if data["show_control"]:

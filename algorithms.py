@@ -31,7 +31,7 @@ def typing(event : pygame.event.Event):
 
 @nb.njit
 def rotate(point : np.array, radians : float):
-    """Rotates a point or group of points about the origin"""
+    """Rotates a numpy array of coordinates about the origin"""
     radians *= -1
     rotation_matrix = np.array([[np.cos(radians), -np.sin(radians)],
                                 [np.sin(radians), np.cos(radians)]], dtype=np.float64)
@@ -40,7 +40,7 @@ def rotate(point : np.array, radians : float):
 
 @nb.njit
 def translate(point : np.array, dx : int, dy : int):
-    """Translates np.array group of coordinates"""
+    """Translates a numpy group of coordinates"""
     for dot in range(point.shape[0]):
         point[dot][0] += dx
         point[dot][1] += dy

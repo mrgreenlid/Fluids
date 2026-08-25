@@ -63,8 +63,21 @@ class Body:
 
 
 
-            
+class Source:
+    def __init__(self, screen : pygame.surface.Surface):
+        """A pygame fluid source"""
+        self.__screen = screen
+        self.__vector_field = None
 
+        self.__length = np.sqrt(self.__screen.get_width()**2 + self.__screen.get_height()**2)
+
+    def update(self):
+            ...
+
+
+
+
+    
 
 class VectorField(Output):
     __grid_colour = "#C7C1B8"
@@ -80,9 +93,9 @@ class VectorField(Output):
         self.__body = None
     
         self.__velocity_function = ()
-
-        self.__exponential_magnitude = 0
-        self.__exponential_argument = 0
+        self.__exponential = None
+        self.exponential_magnitude = 0
+        self.exponential_argument = 0
 
         self.__width = screen.get_width()
         self.__height = screen.get_height()
@@ -136,16 +149,18 @@ class VectorField(Output):
         self.__velocities *= complex_point*self.__speed
 
     def linkBody(self, body : Body):
+        """Links a body to the field"""
         self.__body = body
+        
 
     def updateFunction(self, function : Tuple[str]):
         """Updates the velocity function of the field"""
         if function != self.__velocity_function:
-            
             self.__velocity_function = function
 
             # Finds attributes of an exponential form function
             if self.__velocity_function[0] == 1:
+                self.__exponential = True
                 
                 self.__exponential_magnitude = float(self.__velocity_function[1])
                 argument = 1
@@ -184,8 +199,14 @@ class VectorField(Output):
         
         if speed != self.__speed:
             self.__speed = speed
-            self.__mapExponential()
+
+            if self.__exponential:
+                self.__mapExponential()
             
+
+
+
+
 
 
 
@@ -198,21 +219,22 @@ class Particle(pygame.sprite.Sprite):
         self.__screen = screen
         self.__vector_field = vector_field
 
-        self.__source_bound_x = self.__screen.get_width()
-        self.__source_bound_y = self.__screen.get_height()
+        self.__boundx = self.__screen.get_width()
+        self.__boundy = self.__screen.get_height()
+        self.__rect = pygame.rect.Rect(self.__boundx//2, self.__boundy//2, 2, 2)
 
-        self.__alive = True
+        self.__alive = False
 
-        self.__rect = pygame.rect.Rect(self.__source_bound_x//2, self.__source_bound_y//2, 2, 2)
+        self.__source = None
 
-
+        
     def place(self):
         """Places the particle on the screen"""
         if self.__alive:
             pygame.draw.rect(self.__screen, "#000000", self.__rect)
             
     
-    def update(self, ):
+    def update(self):
         """Updates the particle's attributes"""
         if self.__alive:
                 velocity = self.__vector_field.getPointVelocity(self.__rect.centerx, self.__rect.centery)
@@ -220,7 +242,17 @@ class Particle(pygame.sprite.Sprite):
                 self.__rect.x += dx
                 self.__rect.y += dy
             
-                if (self.__rect.x <= 0 or self.__rect.x >= self.__source_bound_x) or (self.__rect.y <= 0 or self.__rect.x >= self.__source_bound_y):
+                if (self.__rect.x <= 0 or self.__rect.x >= self.__boundx) or (self.__rect.y <= 0 or self.__rect.x >= self.__boundy):
                     self.__alive = False
+
+        if not self.__alive:
+            # Set coord to a slit
+            self.__alive = True     
+            
+    def linkSource(self, source : Source):
+        """Links a fluid source to the particle"""
+        self.__source = source
+
+
                 
 
