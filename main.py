@@ -24,7 +24,7 @@ FRAMES = 60
 BG = "#FFFFFF"
 UIBG = "#ECECEC"
 
-MAX_PARTICLES = 1000
+MAX_PARTICLES = 5000
 
 # Creates the pygame display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -34,7 +34,6 @@ pygame.display.set_icon(pygame.image.load("images\\ui\\icon_image.png"))
 
 # Creates a clock to measure and regulate frames
 clock = pygame.time.Clock()
-dt = 0.0
 
 # Stores variables to be used across the program
 data = {"show_tank":True,
@@ -139,15 +138,12 @@ body = fluid.Body(screen)
 vector_field.linkBody(body)
 
 source = fluid.Source(screen)
+source.linkVectorField(vector_field)
 
 particles = pygame.sprite.Group()
 
 for _ in range(MAX_PARTICLES):
-    p = fluid.Particle(screen, vector_field)
-    p.linkSource(source)
-    particles.add(p)
-
-
+    particles.add(fluid.Particle(screen, vector_field, source))
 
 
 
@@ -187,6 +183,11 @@ while running:
             if data["body_index"] != 0:
                 body.checkInteract(event)
 
+            # Checks for interaction with the source
+            if data["flow"] and not data["show_field"]:
+                if tapping(event):
+                    source.update()
+
 
             # Checks for interaction with control interactables
             if data["show_control"]:
@@ -199,7 +200,6 @@ while running:
                         data[obj.getVariable()] = obj.getValue()
                         if data["scenario"] != "custom" :
                             vector_field.updateFunction(db.searchVelocityFunction(data["scenario"]))
-
 
 
                 # Checks for interaction with custom interactables
@@ -238,19 +238,16 @@ while running:
 
         # Places particles as they flow
         if data["flow"] and not data["show_field"]:
-            
             particles.update()
-            # Make so change number of particles being added
-            for particle in particles:
-                particle.place()
+           
+            
 
 
         # Places the body
-        if data["body_index"] != 0:
-            body.update(data["body_index"])
-            body.place()
-            ### TODO Make logic for updating vector field for object
-
+        body.update(data["body_index"], data["show_streamline"])
+        body.place()
+        
+        ### TODO Make logic for updating vector field for object
 
 
         # Places visual elements of control panel 
@@ -262,6 +259,7 @@ while running:
             if data["scenario"] == "custom":
                 for obj in custom_visual:
                     obj.place()
+
             for obj in control_visual:
                 if isinstance(obj, Output):
                     obj.update(data[obj.getVariable()])
@@ -271,6 +269,7 @@ while running:
         # Places visual elements of body selection
         if data["show_body"]:
             data["show_control"] = False
+
             # Checks if the tank needs clearing of a body
             if data["clear_body"]:
                 data["body_index"] = 0
@@ -285,7 +284,9 @@ while running:
 
     # Keeps the clock ticking
     data["frames"] = clock.get_fps()
-    dt = clock.tick(FRAMES) / 1000
+    clock.tick(FRAMES) 
+
+
 
 pygame.quit()
 

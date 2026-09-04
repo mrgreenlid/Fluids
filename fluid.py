@@ -17,15 +17,20 @@ class Body:
         self.__pull = False
 
         self.__rect = pygame.rect.Rect(0,0,0,0)
-        self.mask = pygame.mask.Mask((0,0))
+        self.__mask = pygame.mask.Mask((0,0))
+
+        self.__streamline = False
         
-    def update(self, body_index : int):
+    def update(self, body_index : int, show_streamline : bool = False):
         """Updates the body's attributes"""
         if self.__pull:
             self.__rect.center = (*pygame.mouse.get_pos(),)
 
         if body_index != self.__body_index:
             self.__body_index = body_index
+            if self.__body_index == 0:
+                return None
+
             properties = db.getBodyProperties(self.__body_index)
             self.__mass = properties[3]
 
@@ -34,21 +39,29 @@ class Body:
             else:
                 self.__fixed = False
 
+            
             self.__shape = pygame.transform.scale_by(pygame.image.load(properties[1]), (properties[4], properties[4]))
             self.__rect = self.__shape.get_rect()
             self.__rect.center = (self.__screen.get_width()//2, self.__screen.get_height()//2)
-            self.mask = pygame.mask.from_surface(self.__shape)
+            self.__mask = pygame.mask.from_surface(self.__shape)
+        
+        self.__streamline = show_streamline
 
     def place(self):
         """Places the body on the screen"""
-        self.__screen.blit(self.__shape, self.__rect)
+        if self.__streamline:
+            # Constantly add to a group of coords and draw pygame line from them
+            ...
+        if self.__body_index != 0:
+            self.__screen.blit(self.__shape, self.__rect)
+        
 
     def checkInteract(self, event):
         """Checks for interactions"""
         if not self.__fixed:
             mouse_x, mouse_y = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
             if self.__rect.collidepoint(mouse_x, mouse_y):
-                if self.mask.get_at((mouse_x-self.__rect.x, mouse_y-self.__rect.y)):
+                if self.__mask.get_at((mouse_x-self.__rect.x, mouse_y-self.__rect.y)):
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             self.__pull = True
                         elif event.type == pygame.MOUSEBUTTONUP:
@@ -56,28 +69,13 @@ class Body:
 
     def collide(self, x : int, y : int):
         """Checks if the body collides with a point"""
-        if self.__rect.collidepoint(x, y):
-            if self.mask.get_at((x-self.__rect.x, y-self.__rect.y)):
-                return True
+        if self.__body_index != 0:
+            if self.__rect.collidepoint(x, y):
+                if self.__mask.get_at((x-self.__rect.x, y-self.__rect.y)):
+                    return True
         return False
 
 
-
-class Source:
-    def __init__(self, screen : pygame.surface.Surface):
-        """A pygame fluid source"""
-        self.__screen = screen
-        self.__vector_field = None
-
-        self.__length = np.sqrt(self.__screen.get_width()**2 + self.__screen.get_height()**2)
-
-    def update(self):
-            ...
-
-
-
-
-    
 
 class VectorField(Output):
     __grid_colour = "#C7C1B8"
@@ -93,7 +91,7 @@ class VectorField(Output):
         self.__body = None
     
         self.__velocity_function = ()
-        self.__exponential = None
+        self.exponential = None
         self.exponential_magnitude = 0
         self.exponential_argument = 0
 
@@ -140,7 +138,8 @@ class VectorField(Output):
 
     def getPointVelocity(self, x : int | float, y : int | float):
         """Returns the velocity at a point on the field"""
-        return self.__velocities[round(y-1)][round(x-1)]
+        return self.__velocities[y-1][x-1]
+        
 
     def __mapExponential(self):
         """Cements changes made to field attributes"""
@@ -152,7 +151,6 @@ class VectorField(Output):
         """Links a body to the field"""
         self.__body = body
         
-
     def updateFunction(self, function : Tuple[str]):
         """Updates the velocity function of the field"""
         if function != self.__velocity_function:
@@ -160,26 +158,26 @@ class VectorField(Output):
 
             # Finds attributes of an exponential form function
             if self.__velocity_function[0] == 1:
-                self.__exponential = True
+                self.exponential = True
                 
                 self.__exponential_magnitude = float(self.__velocity_function[1])
                 argument = 1
-
                 arg = re.split(r"(\*|\/)", self.__velocity_function[2])
                 for term in range(1, len(arg), 2):
                     if arg[term+1] == ")":
                         break
                     if arg[term] == "*":
-                        if arg[term+1] == "pi" or arg[term+1] == "-pi":
+                        if re.match(r"pi", arg[term+1]):
                             argument *= np.pi
                         else:
                             argument *= float(arg[term+1])
 
                     elif arg[term] == "/":
-                        if arg[term+1] == "pi" or  arg[term+1] == "-pi":
+                        if re.match(r"pi", arg[term+1]):
                             argument /= np.pi
                         else:
                             argument /= float(arg[term+1])
+
                 self.__exponential_argument = argument
                 self.__mapExponential()
 
@@ -200,58 +198,90 @@ class VectorField(Output):
         if speed != self.__speed:
             self.__speed = speed
 
-            if self.__exponential:
+            if self.exponential:
                 self.__mapExponential()
+            
+
+class Source:
+    def __init__(self, screen : pygame.surface.Surface):
+        """A pygame fluid source"""
+        self.__screen = screen
+        self.__vector_field = None
+
+        self.__screen_height, self.__screen_width = self.__screen.get_height(), self.__screen.get_width()
+        slit_spacing = 100
+
+        # Defines the location of every possible slit
+        self.__lhs_slits = np.column_stack((np.full(shape=(self.__screen_height//slit_spacing)-1, fill_value=0, dtype=np.int64), np.arange(slit_spacing, self.__screen_height, slit_spacing)))
+        self.__rhs_slits = np.column_stack((np.full(shape=(self.__screen_height//slit_spacing)-1, fill_value=self.__screen_width, dtype=np.int64), np.arange(slit_spacing, self.__screen_height, slit_spacing)))
+        self.__uhs_slits = np.column_stack((np.arange(slit_spacing, self.__screen_width, slit_spacing), np.full(shape=(self.__screen_width//slit_spacing)-1, fill_value=0, dtype=np.int64)))
+        self.__dhs_slits = np.column_stack((np.arange(slit_spacing, self.__screen_width, slit_spacing), np.full(shape=(self.__screen_width//slit_spacing)-1, fill_value=self.__screen_height, dtype=np.int64)))
+
+        self.available_slits = self.__all_slits = np.concatenate((self.__lhs_slits, self.__rhs_slits, self.__uhs_slits, self.__dhs_slits))
+        
+        self.__scout_coords = np.array([(0,0), (np.sqrt(self.__screen_height**2 + self.__screen_width**2), 0)])
+
+    def update(self):
+        """Updates the current sources"""
+        if not self.__vector_field.exponential:
+            self.available_slits = self.__all_slits
+
+        else:
+            positive = True
+            if self.__vector_field.exponential_argument > 0:
+                positive = False
+            scout = rotate(self.__scout_coords, self.__vector_field.exponential_argument)
+            print(scout)
+            if positive:
+                scout = translate(scout, 0, self.__screen_height)
+               
+                pygame.draw.line(self.__screen, "#000000", scout[0], scout[1])
             
 
 
 
-
+            
+    def linkVectorField(self, vector_field : VectorField):
+        """Links a vector field to the fluid source"""
+        self.__vector_field = vector_field
 
 
 
 
 
 class Particle(pygame.sprite.Sprite):
-    def __init__(self, screen : pygame.surface.Surface, vector_field : VectorField):
-        """A pygame fluid particle"""
+    __width = 2
+ 
+    def __init__(self, screen : pygame.surface.Surface, vector_field : VectorField, source : Source):
         super().__init__()
         self.__screen = screen
         self.__vector_field = vector_field
-
-        self.__boundx = self.__screen.get_width()
-        self.__boundy = self.__screen.get_height()
-        self.__rect = pygame.rect.Rect(self.__boundx//2, self.__boundy//2, 2, 2)
-
-        self.__alive = False
-
-        self.__source = None
-
-        
-    def place(self):
-        """Places the particle on the screen"""
-        if self.__alive:
-            pygame.draw.rect(self.__screen, "#000000", self.__rect)
-            
-    
-    def update(self):
-        """Updates the particle's attributes"""
-        if self.__alive:
-                velocity = self.__vector_field.getPointVelocity(self.__rect.centerx, self.__rect.centery)
-                dx, dy = velocity.real, velocity.imag
-                self.__rect.x += dx
-                self.__rect.y += dy
-            
-                if (self.__rect.x <= 0 or self.__rect.x >= self.__boundx) or (self.__rect.y <= 0 or self.__rect.x >= self.__boundy):
-                    self.__alive = False
-
-        if not self.__alive:
-            # Set coord to a slit
-            self.__alive = True     
-            
-    def linkSource(self, source : Source):
-        """Links a fluid source to the particle"""
         self.__source = source
+
+        self.__boundx, self.__boundy = screen.get_width(), screen.get_height()
+        self.__rect = pygame.rect.Rect(self.__boundx//2, self.__boundy//2, self.__width, self.__width)
+
+    def place(self):
+        pygame.draw.rect(self.__screen, "#000000", self.__rect)
+
+    def update(self):
+        if not (0 <= self.__rect.centerx <= self.__boundx) or not (0 <= self.__rect.centery <= self.__boundy):
+                self.__relocate()
+                return None
+
+        velocity = self.__vector_field.getPointVelocity(self.__rect.centerx, self.__rect.centery)
+        self.__rect.centerx += velocity.real
+        self.__rect.centery -= velocity.imag
+    
+        self.place()
+
+    def __relocate(self):
+        slit_coords = self.__source.available_slits[np.random.choice(self.__source.available_slits.shape[0]-1)]
+
+        self.__rect.centerx, self.__rect.centery = slit_coords[0], slit_coords[1] 
+        
+            
+
 
 
                 
