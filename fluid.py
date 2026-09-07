@@ -140,11 +140,10 @@ class VectorField(Output):
         """Returns the velocity at a point on the field"""
         return self.__velocities[y-1][x-1]
         
-
     def __mapExponential(self):
         """Cements changes made to field attributes"""
         self.__velocities = np.ones((self.__height, self.__width), dtype=np.complex128)
-        complex_point = self.__exponential_magnitude*np.cos(self.__exponential_argument) + 1j*self.__exponential_magnitude*np.sin(self.__exponential_argument)
+        complex_point = self.exponential_magnitude*np.cos(self.exponential_argument) + 1j*self.exponential_magnitude*np.sin(self.exponential_argument)
         self.__velocities *= complex_point*self.__speed
 
     def linkBody(self, body : Body):
@@ -160,7 +159,7 @@ class VectorField(Output):
             if self.__velocity_function[0] == 1:
                 self.exponential = True
                 
-                self.__exponential_magnitude = float(self.__velocity_function[1])
+                self.exponential_magnitude = float(self.__velocity_function[1])
                 argument = 1
                 arg = re.split(r"(\*|\/)", self.__velocity_function[2])
                 for term in range(1, len(arg), 2):
@@ -178,7 +177,7 @@ class VectorField(Output):
                         else:
                             argument /= float(arg[term+1])
 
-                self.__exponential_argument = argument
+                self.exponential_argument = argument
                 self.__mapExponential()
 
     def getVariable(self):
@@ -207,9 +206,8 @@ class Source:
         """A pygame fluid source"""
         self.__screen = screen
         self.__vector_field = None
-
         self.__screen_height, self.__screen_width = self.__screen.get_height(), self.__screen.get_width()
-        slit_spacing = 100
+        slit_spacing = 20
 
         # Defines the location of every possible slit
         self.__lhs_slits = np.column_stack((np.full(shape=(self.__screen_height//slit_spacing)-1, fill_value=0, dtype=np.int64), np.arange(slit_spacing, self.__screen_height, slit_spacing)))
@@ -218,7 +216,7 @@ class Source:
         self.__dhs_slits = np.column_stack((np.arange(slit_spacing, self.__screen_width, slit_spacing), np.full(shape=(self.__screen_width//slit_spacing)-1, fill_value=self.__screen_height, dtype=np.int64)))
 
         self.available_slits = self.__all_slits = np.concatenate((self.__lhs_slits, self.__rhs_slits, self.__uhs_slits, self.__dhs_slits))
-        
+    
         self.__scout_coords = np.array([(0,0), (np.sqrt(self.__screen_height**2 + self.__screen_width**2), 0)])
 
     def update(self):
@@ -227,19 +225,25 @@ class Source:
             self.available_slits = self.__all_slits
 
         else:
-            positive = True
+            positive = False
             if self.__vector_field.exponential_argument > 0:
-                positive = False
-            scout = rotate(self.__scout_coords, self.__vector_field.exponential_argument)
-            print(scout)
-            if positive:
-                scout = translate(scout, 0, self.__screen_height)
-               
-                pygame.draw.line(self.__screen, "#000000", scout[0], scout[1])
-            
+                positive = True
 
+            theta = self.__vector_field.exponential_argument-np.pi/2
+            scout = rotate(self.__scout_coords, theta)
 
+            base = (self.__screen_width//2,self.__screen_height)
 
+            # if positive:
+            #     self.available_slits = np.array([])
+            #     for slit in self.__all_slits:
+            #         print(base[1] - base[0]*np.tan(theta))
+            #         if base[1] - base[0]*np.tan(theta) < slit[0] - slit[1]*np.tan(theta):
+            #             np.append(self.available_slits, slit)
+
+            # MAKE THE SCOUT WORK 
+
+           
             
     def linkVectorField(self, vector_field : VectorField):
         """Links a vector field to the fluid source"""
@@ -250,7 +254,7 @@ class Source:
 
 
 class Particle(pygame.sprite.Sprite):
-    __width = 2
+    __width = 1
  
     def __init__(self, screen : pygame.surface.Surface, vector_field : VectorField, source : Source):
         super().__init__()
@@ -272,13 +276,11 @@ class Particle(pygame.sprite.Sprite):
         velocity = self.__vector_field.getPointVelocity(self.__rect.centerx, self.__rect.centery)
         self.__rect.centerx += velocity.real
         self.__rect.centery -= velocity.imag
-    
         self.place()
 
     def __relocate(self):
-        slit_coords = self.__source.available_slits[np.random.choice(self.__source.available_slits.shape[0]-1)]
-
-        self.__rect.centerx, self.__rect.centery = slit_coords[0], slit_coords[1] 
+        new_slit = randomChoice(self.__source.available_slits)
+        self.__rect.centerx, self.__rect.centery = new_slit[0], new_slit[1] 
         
             
 

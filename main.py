@@ -15,6 +15,7 @@ if not isfile("fluids.db"):
 translate(rotate(np.array([(1.0, 0), (1.0, 1.0),(1.0, -1.0)]),np.pi), 0, 0)
 colourByMagnitude(0.0)
 
+
 pygame.init()
 
 # Sets constants of the screen
@@ -28,6 +29,7 @@ MAX_PARTICLES = 5000
 
 # Creates the pygame display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Fluid Mechanics NEA")
 screen.fill(BG)
 pygame.display.flip()
 pygame.display.set_icon(pygame.image.load("images\\ui\\icon_image.png"))
@@ -152,10 +154,9 @@ vector_field.updateFunction(db.searchVelocityFunction(data["scenario"]))
 # Creates event loop for the main program
 running = True
 while running:
-    pygame.display.set_caption("Fluid Mechanics NEA")
     screen.fill(BG)
 
-    # 
+    # Main event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -246,6 +247,8 @@ while running:
         # Places the body
         body.update(data["body_index"], data["show_streamline"])
         body.place()
+        
+    
         
         ### TODO Make logic for updating vector field for object
 

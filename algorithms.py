@@ -78,6 +78,10 @@ def colourByMagnitude(magnitude: float):
     return np.array([red, 0, blue])*proportion + lower_colour
 
 
+@nb.njit
+def randomChoice(array : np.array):
+    return array[np.random.choice(array.shape[0]-1)]
+
 def validVelocityFunction(function : str):
     """Checks a string for being a valid velocity function"""
     if re.fullmatch(r" *\d+(\.\d+)?e\^\(i((\*|\/)((-?\d+(\.\d+)?)|-?pi))*\)?", function):
