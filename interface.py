@@ -212,7 +212,6 @@ class Checkbox(Input):
     _inactive_colour = "#FFFFFF"
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, variable : str, start_state : bool = False):
         """A pygame checkbox"""
-
         self._screen = screen
         self._variable = variable
 
