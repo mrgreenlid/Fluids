@@ -28,7 +28,12 @@ class VelocityField:
 
     def place(self):
         """Places the velocity field on the screen"""  
+        self.update()
         self.__screen.blit(self.__plane, self.__rect)
+    
+    def update(self):
+        """Updates the display of the velocity field"""
+        pygame.surfarray.blit_array(self.__plane, self.__pixels)
 
     def pygameToArgand(self, x : int, y : int):
         """Converts a pygame coordinate to a complex coordinate"""

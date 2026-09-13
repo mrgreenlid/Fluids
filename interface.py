@@ -1,5 +1,5 @@
 import pygame
-from algorithms import *
+from algorithms import tapping, typing
 import re
 from typing import Tuple
 
@@ -36,20 +36,64 @@ class Label:
         """Places the label on the screen"""
         self._screen.blit(self._font.render(*self._render_arguments), self._rect)
 
+class TextButton(Label):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifer : str, text : str = "", size : int = 20, width : int = 25,  colour : str = "#000000", bg : str = "#FFFFFF", font : str = "Segoe UI"):
+        """A pygame text button"""
+        super().__init__(screen, x, y, text, size, colour, bg, font)
+        self.__state = False
+        self.__identifier = identifer
+        self.__box_rect = pygame.rect.Rect(0, 0, width, width)
+        self.__box_rect.center = (x, y)
+    
+    def place(self):
+        """Places the text button on the screen"""
+        pygame.draw.rect(self._screen, self._bg, self.__box_rect)
+        super().place()
+        pygame.draw.rect(self._screen, "#000000", self.__box_rect, width=1)
+    
+    def checkInteract(event : pygame.event.Event):
+        """Checks for interaction"""
+        if tapping(event):
+            if self._rect.collidepoint(*pygame.mouse.get_pos()):
+                self.__state = True
+
+    def getIdentifier(self):
+        return self.__identifier
+
+    def getValue(self):
+        """Returns value"""
+        state = self.__state
+        if state:
+            self.__state = False
+        return state
+                
 class DataLabel(Label):
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str = "", size : int = 20, colour : str = "#000000", bg : str = "#FFFFFF", dtype : type = float, font : str = "Segoe UI"):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str = "", size : int = 20, max_length : int = 5, dynamic : bool = False, direction : str = "right", colour : str = "#000000", bg : str = "#FFFFFF", font : str = "Segoe UI"):
         """A pygame data label"""
         super().__init__(screen, x, y, " ", size, colour, bg, font)
-        self._render_arguments[0] = f"{text}"
+        self.__start_x = x
+        self.__text = f"{text}"
         self.__identifier = identifier
-        self.__dtype = dtype
+        self.__max_length = max_length
+        self.__dynamic = dynamic
+        self.__direction = direction
     
-    def update(self, updated_text : str):
+    def update(self, updated_text : float):
         """Updates the text displayed"""
-        if self.__dtype == float or self.__dtype == int:
-            self._render_arguments[0] = f"{updated_text:.{10}f}"[:7]
+        if self.__dynamic:
+            if int(updated_text) == updated_text:
+                if self.__direction == "left":
+                    self._rect.centerx = self.__start_x - (self._size*0.6)*(len(str(updated_text))-2)
+                text = str(int(updated_text))
+            else:
+                if self.__direction == "left":
+                    self._rect.centerx = self.__start_x - (self._size*0.6)*(len(str(updated_text)))
+                text = str(updated_text)
         else:
-            self._render_arguments[0] = updated_text
+            text = f"{updated_text:.{10}f}"[:self.__max_length]
+            if text[-1] == ".":
+                text = text[:-1]
+        self._render_arguments[0] = text
         
     def getIdentifier(self):
         """Returns the identifier for the data"""
@@ -58,7 +102,7 @@ class DataLabel(Label):
 class Entry(Label):
     _inactive_colour = "#FFFFFF"
     _active_colour = "#90D5FF"
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str,  text : str = "", size : int = 25,  max_length : int = 10, width : int = 150, dtype : type = float, font : str = "Segoe UI"):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str = "", size : int = 25,  max_length : int = 10, width : int = 150, dtype : type = float, font : str = "Segoe UI"):
         """A pygame entry box"""
         super().__init__(screen, x, y, " ", size, "#000000", self._inactive_colour, font)
         self._text = f"{text}"
@@ -147,6 +191,10 @@ class Entry(Label):
         elif self._dtype == str:
             return self._text.lower()
         return None
+
+    def inUse(self):
+        """Returns wheter the dropdown is in use"""
+        return self._state
 
 class Dropdown(Entry):
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, options : Tuple[str] | Tuple[int], size : int = 25, width : int = 150, dtype : type = float, font : str = "Segoe UI"):
@@ -286,7 +334,7 @@ class RadioButton(Checkbox):
 
 class ImageBooleanButton:
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, path : str, scale : float = 1.0):
-        """A pygame boolean button"""
+        """A pygame image displaying boolean button"""
         self.__screen = screen
         self.__identifier = identifier
         self.__state = False
@@ -318,6 +366,7 @@ class ImageBooleanButton:
 
 class DualImageBooleanButton:
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, off_path : str, on_path : str, off_scale : float = 1.0, on_scale : float = 1.0):
+        """A pygame dual image displaying boolean button"""
         self.__screen = screen
         self.__identifier = identifier
         self.__state = False
@@ -355,3 +404,10 @@ class DualImageBooleanButton:
         """Returns value"""
         return self.__state
 
+class CompositeEntry(Entry):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str = "", size : int = 25, button_contents : Tuple[str] = None, button_displacement : Tuple[int] = None, button_font_size : Tuple[int] = None, button_width : int = 25, button_text_colour : str = "#000000", button_bg : str = "#FFFFFF", button_font : str =  "Segoe UI",  max_length : int = 10, width : int = 150, dtype : type = float, font : str = "Segoe UI"):
+        """A pygame special entry box"""
+        super().__init__(screen , x, y, identifier, text, size, max_length, width, dtype, font)
+        self.__events = [event for event in range(len(button_contents))]
+        self.__buttons = [TextButton(screen, x+button_displacement[button][0], y+button_displacement[button][1], self.__events[button], button_contents[button], button_font_size[button], button_width, button_text_colour, button_bg, button_font) for button in range(len(button_contents))]
+        

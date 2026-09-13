@@ -13,3 +13,7 @@ def typing(event : pygame.event.Event):
         return True
     else:
         False
+
+# General algorithms
+def equationToResult():
+    ...
