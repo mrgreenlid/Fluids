@@ -425,14 +425,14 @@ class CompositeEntry(Entry):
                 if button.getValue():
                     self._click()
                     self._text += self.__characters[int(button.getIdentifier())]
-            
-        self._updateText()
-        
+            self._updateText()
+
     def _updateText(self):
         super()._updateText()
         if not self._state:
             if len(self._text) == 0:
                 self._text = "0"
-
-        if re.match(r"^0+(\d|\w)", self._text):
+        if len(self._text) > 1 and self._text[0] == "0":
             self._text = self._text[1:]
+        self._render_arguments[0] = self._text
+    
