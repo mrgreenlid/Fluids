@@ -50,8 +50,8 @@ data = {"flow":False,
              "particle":True,
              "streamline":False,
              "uniform":True,
-             "previous_uniform_magnitude":1.0, 
-             "uniform_magnitude":1.0,
+             "previous_uniform_magnitude":10.0, 
+             "uniform_magnitude":10.0,
              "uniform_argument_raw":"π",
              "previous_uniform_argument_raw":"π", 
              "uniform_argument":np.pi,
@@ -142,12 +142,14 @@ while running:
                         data[obj.getIdentifier()] = obj.getValue()
                     
                         if data["previous_uniform_argument_raw"] != data["uniform_argument_raw"] or data["previous_uniform_magnitude"] != data["uniform_magnitude"]:
+                            velocity_field.stopFlow()
                             data["previous_uniform_magnitude"] = data["uniform_magnitude"]
                             if validAngleExpression(data["uniform_argument_raw"]):
                                 data["previous_uniform_argument_raw"] = data["uniform_argument_raw"]
                                 data["uniform_argument"] = refineRawArgument(data["uniform_argument_raw"])
-                                velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"])
-                                    
+                                
+                            velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"])
+                            velocity_field.flow(data["dt"])
             else:
                 velocity_field.nonUniformFlow(data["non_uniform_velocity_function"])
 
@@ -178,7 +180,7 @@ while running:
 
     # Keeps the clock ticking
     data["frames"] = clock.get_fps()
-    data["dt"] = clock.tick(FRAMES) / 10
+    data["dt"] = clock.tick(FRAMES) / 100
 
 
 

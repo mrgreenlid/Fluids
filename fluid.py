@@ -4,7 +4,7 @@ from algorithms import *
 
 class VelocityField:
     __PARTICLE_COLOUR = rgbToInt((0,0,0))
-    __MAX_PARTICLE_COUNT = 97710
+    __MAX_PARTICLE_COUNT = 97000
     __SOURCE_SPACING = 100
     __PARTICLE_SPREAD = 20
     __BG = rgbToInt((255, 255, 255))
@@ -25,7 +25,7 @@ class VelocityField:
     
         self.__current_particle_count = self.__particle_count_increment = 300
 
-        self.__uniform_magnitude = 1
+        self.__uniform_magnitude = 10
         self.__uniform_argument = np.pi
         self.__velocities = mapUniformFlow(self.__argand, self.__uniform_magnitude, self.__uniform_argument)
 
@@ -66,9 +66,8 @@ class VelocityField:
         self.__flow_type = "uniform"
         if magnitude != self.__uniform_magnitude or argument != self.__uniform_argument:
             self.__uniform_magnitude = magnitude
-            self.__uniform_argument = argument - np.pi*(argument//np.pi)
+            self.__uniform_argument = argument
             self.__velocities = mapUniformFlow(self.__argand, self.__uniform_magnitude, self.__uniform_argument)
-            
 
     def nonUniformFlow(self, velocity_function : str):
         """Updates attributes for a non uniform flow velocity"""
@@ -76,6 +75,7 @@ class VelocityField:
         if velocity_function != self.__non_uniform_velocity_function:
             self.__non_uniform_velocity_function = velocity_function
             self.__velocities = mapNonUniformFlow(self.__non_uniform_velocity_function)
+           
 
 
 

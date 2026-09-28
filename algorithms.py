@@ -17,7 +17,6 @@ def typing(event : pygame.event.Event):
     else:
         False
 
-
 @nb.njit
 def pygameToArgand(argand : np.array, x : int, y : int):
     """Converts a pygame coordinate to a complex coordinate"""
@@ -65,7 +64,7 @@ def mapUniformFlow(argand : np.array, magnitude : float, theta : float):
     """Maps a uniform flow function to a velocity field array"""
     real_component = magnitude*np.cos(theta)
     imag_component = magnitude*np.sin(theta)
-    return np.full((argand.shape[0], argand.shape[1]), real_component + imag_component*1j, dtype=np.complex64)
+    return np.full((argand.shape[0]-1, argand.shape[1]-1), real_component + imag_component*1j, dtype=np.complex64)
 
 
 
@@ -110,6 +109,8 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, precise_
         y = particle_positions[particle, 1]
         velocity = velocity_array[y, x]
         dx, dy = velocity.real*dt, velocity.imag*dt
+        dx *= 1 + (np.random.random())/2
+        dy *= 1 + (np.random.random())/2
         precise_particle_positions[particle, 0] += dx
         precise_particle_positions[particle, 1] += dy
 
@@ -138,8 +139,7 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, precise_
 
         pixel_array[new_x, new_y] = pygame_particle_colour
         pixel_array[x, y] = pygame_bg_colour
-        particle_positions[particle, 0] = new_x
-        particle_positions[particle, 1] = new_y
+        particle_positions[particle] = np.array([new_x, new_y])
     
 
 
