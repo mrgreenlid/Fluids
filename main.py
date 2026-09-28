@@ -32,13 +32,12 @@ velocities = np.zeros((FIELD_HEIGHT, FIELD_WIDTH), dtype=np.complex64)
 sources = np.column_stack((np.full(shape=(FIELD_HEIGHT//10)-1, fill_value=FIELD_WIDTH-1, dtype=np.int64), np.arange(10, FIELD_HEIGHT, 10)))
 
 # Initialises functions and algorithms
-black = rgbToInt((0,0,0))
 pygameToArgand(argand, 100, 200)
 mapUniformFlow(argand, 1.0, 1.0)
-mapParticles(pygame.surfarray.array2d(screen), positions, positions.astype(np.float64), velocities, sources, 10, 0.001, 1000, black, black)
+mapParticles(pygame.surfarray.array2d(screen), positions, positions.astype(np.float64), velocities, sources, 10, 0.001, 1000, 0, 0)
 
 # Cleans up test data
-del x, y, argand, positions, velocities, sources, black
+del x, y, argand, positions, velocities, sources
 
 
 # Creates a clock to measure and regulate frames
@@ -179,7 +178,7 @@ while running:
 
     # Keeps the clock ticking
     data["frames"] = clock.get_fps()
-    data["dt"] = clock.tick(FRAMES) / 1000
+    data["dt"] = clock.tick(FRAMES) / 10
 
 
 

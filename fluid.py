@@ -4,9 +4,9 @@ from algorithms import *
 
 class VelocityField:
     __PARTICLE_COLOUR = rgbToInt((0,0,0))
-    __MAX_PARTICLE_COUNT = 10000
-    __SOURCE_SPACING = 300
-    __PARTICLE_SPREAD = 300
+    __MAX_PARTICLE_COUNT = 97710
+    __SOURCE_SPACING = 100
+    __PARTICLE_SPREAD = 20
     __BG = rgbToInt((255, 255, 255))
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, width : int, height : int):
         self.__screen = screen
@@ -23,14 +23,13 @@ class VelocityField:
         self.__plane.fill(self.__BG)
         pixels = pygame.surfarray.array2d(self.__plane)
     
-        self.__current_particle_count = self.__particle_count_increment = 400
+        self.__current_particle_count = self.__particle_count_increment = 300
 
         self.__uniform_magnitude = 1
         self.__uniform_argument = np.pi
         self.__velocities = mapUniformFlow(self.__argand, self.__uniform_magnitude, self.__uniform_argument)
 
         self.__non_uniform_velocity_function = ""
-
 
         self.__lhs_sources = np.column_stack((np.full(shape=(self.__height//self.__SOURCE_SPACING)-1, fill_value=0, dtype=np.int64), np.arange(self.__SOURCE_SPACING, self.__height-1, self.__SOURCE_SPACING)))
         self.__rhs_sources = np.column_stack((np.full(shape=(self.__height//self.__SOURCE_SPACING)-1, fill_value=self.__width-1, dtype=np.int64), np.arange(self.__SOURCE_SPACING, self.__height, self.__SOURCE_SPACING)))
@@ -41,6 +40,7 @@ class VelocityField:
         
         self.__particle_positions =  np.full((self.__MAX_PARTICLE_COUNT, 2), -1, dtype=np.int64)
         self.__precise_particle_positions = self.__particle_positions.astype(np.float64)
+        
 
         self.__flow = False
         self.__flow_type = "uniform"
@@ -51,11 +51,11 @@ class VelocityField:
         """Places the velocity field on the screen"""
         if self.__flow:
             pixels, self.__particle_positions, self.__precise_particle_positions = mapParticles(pygame.surfarray.array2d(self.__plane), self.__particle_positions, self.__precise_particle_positions, self.__velocities, self.__available_sources, self.__PARTICLE_SPREAD, self.__dt, self.__current_particle_count, self.__PARTICLE_COLOUR, self.__BG)
-
+            
             if self.__current_particle_count < self.__MAX_PARTICLE_COUNT:
-                self.__wave_count += 1
-                if self.__wave_count % 10 == 0:
-                    self.__current_particle_count += self.__particle_count_increment
+                 self.__wave_count += 1
+                 if self.__wave_count % 2 == 0:
+                     self.__current_particle_count += self.__particle_count_increment
 
             pygame.surfarray.blit_array(self.__plane, pixels)
 

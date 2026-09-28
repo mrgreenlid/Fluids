@@ -85,26 +85,31 @@ def selectSource(sources : np.array, source_variance : int, max_width : int, max
         x += variance
     return x, y
     
+
 @nb.njit
 def mapParticles(pixel_array : np.array, particle_positions : np.array, precise_particle_positions : np.array, velocity_array : np.array, sources : np.array, source_variance : int, dt : float, particle_count : int, pygame_particle_colour : int, pygame_bg_colour : int):
     """Maps particles onto a pixel array"""
-    on_screen = (particle_positions != np.array([-1, -1])).sum()
+    empty = np.array([-1, -1])
+    on_screen = (particle_positions != empty).sum()
     width, height = pixel_array.shape[0]-1, pixel_array.shape[1]-1
+
 
     for particle in range(particle_count - on_screen):
         x, y = selectSource(sources, source_variance, width, height)
+        if pixel_array[x, y] == pygame_particle_colour:
+            continue
+        new_coords = np.array([x, y])
+        next_free = np.argmin(particle_positions) // 2
         pixel_array[x, y] = pygame_particle_colour
-        particle_positions[particle, 0] = x
-        particle_positions[particle, 1] = y
-        precise_particle_positions[particle, 0] = x
-        precise_particle_positions[particle, 1] = y
-
-
+        particle_positions[next_free] = new_coords
+        precise_particle_positions[next_free] = new_coords
+ 
+    
     for particle in range(particle_positions.shape[0]):
         x = particle_positions[particle, 0]
         y = particle_positions[particle, 1]
         velocity = velocity_array[y, x]
-        dx, dy = velocity.real, velocity.imag
+        dx, dy = velocity.real*dt, velocity.imag*dt
         precise_particle_positions[particle, 0] += dx
         precise_particle_positions[particle, 1] += dy
 
@@ -136,5 +141,7 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, precise_
         particle_positions[particle, 0] = new_x
         particle_positions[particle, 1] = new_y
     
+
+
     return pixel_array, particle_positions, precise_particle_positions
     
