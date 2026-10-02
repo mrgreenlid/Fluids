@@ -4,7 +4,6 @@ from algorithms import *
 import fluid as fluid
 import numpy as np
 
-
 pygame.init()
 
 # Sets the constants of the screen
@@ -21,24 +20,17 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Fluid mechanics NEA")
 screen.fill(BG)
 pygame.display.flip()
-pygame.display.set_icon(pygame.image.load("images\\ui\\icon_image.png"))
+pygame.display.set_icon(pygame.image.load("images\\ui\\icon.png"))
 
 
-#Test data for initialisation
-x, y = np.meshgrid(np.arange(-FIELD_WIDTH//2, FIELD_WIDTH//2), np.arange(FIELD_HEIGHT//2, -FIELD_HEIGHT//2, -1))
-argand = x + 1j*y
-positions = np.zeros((FIELD_HEIGHT, 2), dtype=np.int64)
-velocities = np.zeros((FIELD_HEIGHT, FIELD_WIDTH), dtype=np.complex64)
-sources = np.column_stack((np.full(shape=(FIELD_HEIGHT//10)-1, fill_value=FIELD_WIDTH-1, dtype=np.int64), np.arange(10, FIELD_HEIGHT, 10)))
 
-# Initialises functions and algorithms
-pygameToArgand(argand, 100, 200)
-mapUniformFlow(argand, 1.0, 1.0)
-mapParticles(pygame.surfarray.array2d(screen), positions, positions.astype(np.float64), velocities, sources, 10, 0.001, 1000, 0, 0)
+# Test data for initialisation
+pixels = np.full((FIELD_WIDTH, FIELD_HEIGHT), 16777215)
+positions = np.full((15000, 2), -1, dtype=np.float64)
+velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1*1j, dtype=np.complex64)
 
-# Cleans up test data
-del x, y, argand, positions, velocities, sources
-
+# JITs numba decorated functions
+mapParticles(pixels, positions, velocity, 1, 15000, 0 , 16777215)
 
 # Creates a clock to measure and regulate frames
 clock = pygame.time.Clock()
@@ -46,68 +38,74 @@ clock = pygame.time.Clock()
 data = {"flow":False,
         "control":True,
         "body_control":False,
-
-             "particle":True,
+        "fill":False,
              "streamline":False,
              "uniform":True,
-             "previous_uniform_magnitude":10.0, 
-             "uniform_magnitude":10.0,
-             "uniform_argument_raw":"π",
-             "previous_uniform_argument_raw":"π", 
-             "uniform_argument":np.pi,
+        
+             "uniform_magnitude":10,
+        "previous_uniform_magnitude" : 10,
+
+             "uniform_argument": np.pi,
+        "raw_uniform_argument" : "π",
+        "previous_raw_uniform_argument" : "π",
+
+
              "non_uniform_velocity_function":"",
+
              "frames":0.0,
              "dt":0.0}
 
 control_box = ui.Box(screen, WIDTH-175, HEIGHT//2, 350, HEIGHT, UIBG, True)
 control_title_label = ui.Label(screen, WIDTH-175, 30, "Control Panel", 40, bg=UIBG)
-show_particle_label = ui.Label(screen, WIDTH-280, 100, "Particles:", 22, bg=UIBG)
-particle_field_radiobutton = ui.RadioButton(screen, WIDTH-90, 100, 0, 50, "particle")
-show_field_label = ui.Label(screen, WIDTH-270, 150, "Vector field:", 22, bg=UIBG)
 
-streamline_label = ui.Label(screen, WIDTH-270, 200, "Streamline:", 22, bg=UIBG)
-streamline_checkbox = ui.Checkbox(screen, WIDTH-90, 200, "streamline" )
+control_divider = ui.Box(screen, WIDTH-175, 90, 300, 1)
 
-uniform_label = ui.Label(screen, WIDTH-280, 250, "Uniform:", 22, bg=UIBG)
-non_uniform_label = ui.Label(screen, WIDTH-130, 250, "Non-Uniform:", 22, bg=UIBG )
-uniform_radiobutton = ui.RadioButton(screen, WIDTH-220, 250, 175, 0, "uniform")
+streamline_label = ui.Label(screen, WIDTH-270, 110, "Streamline:", 22, bg=UIBG)
+streamline_checkbox = ui.Checkbox(screen, WIDTH-90, 110, "streamline" )
+uniform_label = ui.Label(screen, WIDTH-280, 160,  "Uniform:", 22, bg=UIBG)
+non_uniform_label = ui.Label(screen, WIDTH-260, 210, "Non-Uniform:", 22, bg=UIBG )
+uniform_radiobutton = ui.RadioButton(screen, WIDTH-90, 160, 0, 50, "uniform")
 
-function_divider = ui.Box(screen, WIDTH-175, 290, 300, 1)
 
-uniform_magnitude_label = ui.Label(screen, WIDTH-268, 330, "Magnitude:", 22, bg=UIBG)
-uniform_magnitude_entry = ui.Entry(screen, WIDTH-175, 330, "uniform_magnitude", data["uniform_magnitude"], max_length=6, font="Courier")
-uniform_argument_label = ui.Label(screen, WIDTH-290, 380, "Angle:", 22, bg=UIBG)
-uniform_argument_composite_entry = ui.CompositeEntry(screen, WIDTH-175, 380, "uniform_argument_raw", data["uniform_argument_raw"], 25, ("π", "e"), ((100, 35), (130, 35)), (20,20), 25, button_font="Courier", max_length=9,  dtype=str, font="Courier")
+function_divider = ui.Box(screen, WIDTH-175, 240, 320, 1)
 
-velocity_funtion_label = ui.Label(screen, WIDTH-230, 458, "Velocity function:", 25, bg=UIBG)
+uniform_magnitude_label = ui.Label(screen, WIDTH-268, 280, "Magnitude:", 22, bg=UIBG)
+uniform_magnitude_entry = ui.Entry(screen, WIDTH-175, 280, "uniform_magnitude", data["uniform_magnitude"], max_length=6, font="Courier")
+uniform_argument_label = ui.Label(screen, WIDTH-270, 340, "Angle (rad):", 22, bg=UIBG)
+uniform_argument_composite_entry = ui.CompositeEntry(screen, WIDTH-175, 340, "raw_uniform_argument", data["raw_uniform_argument"], 25, ("π", "e"), ((100, 35), (130, 35)), (20,20), 25, button_font="Courier", max_length=9,  dtype=str, font="Courier")
 
-uniform_magnitude_datalabel = ui.DataLabel(screen, WIDTH-194, 534, "uniform_magnitude", data["uniform_magnitude"], 30, 6, True, "left", bg=UIBG, font="Courier")
-times_label = ui.Label(screen, WIDTH-195, 534, "\u00D7", 30,  bg=UIBG, font="Courier")
-e_label = ui.Label(screen, WIDTH-175, 530, "e", 36, bg=UIBG, font="Courier")
-i_label = ui.Label(screen, WIDTH-159, 515, "i", 22, bg=UIBG, font="SWital")
-open_bracket_label = ui.Label(screen, WIDTH-148, 515, "(", 30, bg=UIBG, font="Courier")
-uniform_argument_datalabel = ui.DataLabel(screen, WIDTH-135, 515, "uniform_argument", data["uniform_argument"], 21, max_length=6, bg=UIBG, font="Courier")
-close_bracket_label = ui.Label(screen, WIDTH-55, 515, ")", 30, bg=UIBG, font="Courier")
+velocity_funtion_label = ui.Label(screen, WIDTH-240, 400, "Velocity function:", 22, bg=UIBG)
 
-flow_button = ui.DualImageBooleanButton(screen, WIDTH-175, 650, "flow", "images\\ui\\play_image.png", "images\\ui\\pause_image.png", 0.2, 0.2)
+uniform_magnitude_datalabel = ui.DataLabel(screen, WIDTH-194, 474, "uniform_magnitude", data["uniform_magnitude"], 30, 6, True, "left", bg=UIBG, font="Courier")
+times_label = ui.Label(screen, WIDTH-195, 474, "\u00D7", 30,  bg=UIBG, font="Courier")
+e_label = ui.Label(screen, WIDTH-175, 470, "e", 36, bg=UIBG, font="Courier")
+i_label = ui.Label(screen, WIDTH-159, 455, "i", 22, bg=UIBG, font="SWital")
+open_bracket_label = ui.Label(screen, WIDTH-148, 455, "(", 30, bg=UIBG, font="Courier")
+uniform_argument_datalabel = ui.DataLabel(screen, WIDTH-135, 455, "uniform_argument", data["uniform_argument"], 21, max_length=6, bg=UIBG, font="Courier")
+close_bracket_label = ui.Label(screen, WIDTH-55, 455, ")", 30, bg=UIBG, font="Courier")
+
+flow_button = ui.DualImageBooleanButton(screen, WIDTH-175, 650, "flow", "images\\ui\\play.png", "images\\ui\\pause.png", 0.2, 0.2)
+
 data_divider = ui.Box(screen, WIDTH-175, 700, 300, 1)
+
 frames_label = ui.Label(screen, WIDTH-250, 730, "Performance (fps):", bg=UIBG)
 frames_datalabel = ui.DataLabel(screen, WIDTH-100, 730, "frames", data["frames"], max_length=8, bg=UIBG)
 
 control_visual = (control_box, control_title_label, 
-                  show_field_label, particle_field_radiobutton, show_particle_label,
+                    control_divider,
+                  
                   streamline_label, streamline_checkbox, 
                   uniform_label, uniform_radiobutton, non_uniform_label,
                   function_divider,
+                
                   
                   flow_button, data_divider, frames_label, frames_datalabel)
 
 uniform_visual = (velocity_funtion_label, uniform_magnitude_label, uniform_magnitude_entry, 
                   uniform_argument_label, uniform_argument_composite_entry,
-                  uniform_magnitude_datalabel,times_label,  e_label, i_label, open_bracket_label,  uniform_argument_datalabel, close_bracket_label)
+                  uniform_magnitude_datalabel, times_label,  e_label, i_label, open_bracket_label,  uniform_argument_datalabel, close_bracket_label)
 
-control_interact = (particle_field_radiobutton, 
-                    streamline_checkbox,
+control_interact = (streamline_checkbox,
                     uniform_radiobutton, 
                     flow_button)
 
@@ -119,6 +117,8 @@ velocity_field = fluid.VelocityField(screen, (WIDTH-350)//2, HEIGHT//2, FIELD_WI
 
 
 tank_visual = (velocity_field, )
+
+
 
 running = True
 while running:
@@ -140,19 +140,15 @@ while running:
                     obj.checkInteract(event)
                     if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                         data[obj.getIdentifier()] = obj.getValue()
-                    
-                        if data["previous_uniform_argument_raw"] != data["uniform_argument_raw"] or data["previous_uniform_magnitude"] != data["uniform_magnitude"]:
-                            velocity_field.stopFlow()
-                            data["previous_uniform_magnitude"] = data["uniform_magnitude"]
-                            if validAngleExpression(data["uniform_argument_raw"]):
-                                data["previous_uniform_argument_raw"] = data["uniform_argument_raw"]
-                                data["uniform_argument"] = refineRawArgument(data["uniform_argument_raw"])
-                                
-                            velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"])
-                            velocity_field.flow(data["dt"])
+
+                        if not (data["previous_uniform_magnitude"] == data["uniform_magnitude"] and data["previous_raw_uniform_argument"] == data["raw_uniform_argument"]):
+                            if validExpression(valid_angle_rule, data["raw_uniform_argument"]):
+                                data["previous_raw_uniform_argument"] = data["raw_uniform_argument"]
+                                data["previous_uniform_magnitude"] = data["uniform_magnitude"]
+                                data["uniform_argument"] = refineRawArgument(data["raw_uniform_argument"])
+                                velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"])                    
             else:
                 velocity_field.nonUniformFlow(data["non_uniform_velocity_function"])
-
 
     # Places visual elements
     for obj in tank_visual:

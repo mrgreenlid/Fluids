@@ -1,90 +1,146 @@
 import pygame
-from typing import List
+import re
 import numpy as np
 import numba as nb
-import re
 
-
-# Pygame interaction statuses
-class Output:
-    def __init__(self):
-        """Defines an object as taking variables to perform a task"""
-        return None
-
-class Input:
-    def __init__(self):
-        """Defines an object as providing variables to perform a task"""
-        return None
-        
-# Pygame specific algorithms
+# Pygame specifics
 def tapping(event : pygame.event.Event):
-    """Returns True when a left click is detected, else False"""
+    """Returns True when a left mouse click is detected, else False"""
     if event.type == pygame.MOUSEBUTTONDOWN:
         return True
     return False
 
 def typing(event : pygame.event.Event):
-    """Returns True when any keypress is detected, else False"""
+    """Returns True when keystrokes are detected, elese False"""
     if event.type == pygame.KEYDOWN:
         return True
-    return False
+    else:
+        False
 
 @nb.njit
-def rotate(point : np.array, radians : float = 0):
-    """Rotates a numpy array of coordinates about the origin"""
-    radians *= -1
-    rotation_matrix = np.array([[np.cos(radians), -np.sin(radians)],
-                                [np.sin(radians), np.cos(radians)]], dtype=np.float64)
+def pygameToArgand(argand : np.array, x : int, y : int):
+    """Converts a pygame coordinate to a complex coordinate"""
+    return argand[y][x]
     
-    return point @ rotation_matrix.T
+# General algorithms
+
+valid_angle_rule = re.compile(r"((-?\d+(\.\d+)?)|-?[πe])([\*\/]((-?\d+(\.\d+)?)|-?[πe]))*")
+def validExpression(rule : re.Pattern, expression : str):
+    return bool(re.fullmatch(rule, expression))
 
 @nb.njit
-def translate(point : np.array, dx : int = 0, dy : int = 0):
-    """Translates a numpy group of coordinates"""
-    for dot in range(point.shape[0]):
-        point[dot][0] += dx
-        point[dot][1] += dy
-    return point
+def rgbToInt(colour):
+    """Converts an rgb value to an int"""
+    return colour[0] * 256 * 256 + colour[1] * 256 + colour[2]
 
-COLOURS = np.array([(0,0,255),(13,0,242),(26,0,229),(39,0,216),(52,0,203),(65,0,190),
-(78,0,177),(91,0,164),(104,0,151),(117,0,138),(130,0,125),(143,0,112),(156,0,99),
-(169,0,86),(182,0,73),(195,0,60),(208,0,47),(221,0,34),(234,0,21),(247,0,8),(255,0,0)], dtype=np.float64)
-
-PARAMETERS = np.array([5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100], dtype=np.float64)
-
-@nb.njit
-def colourByMagnitude(magnitude: float):
-    """Returns an RGB value for a temperature colour based on a given magnitude"""
-    value = round(magnitude)
-
-    position = np.searchsorted(PARAMETERS, value)
-
-    if value >= PARAMETERS[-1]:
-        return COLOURS[-1]
-
-    elif value <= PARAMETERS[0]:
-        return COLOURS[0]
-
-    higher_parameter = PARAMETERS[position]
-    lower_parameter = PARAMETERS[position-1]
-
-    higher_colour = COLOURS[position]
-    lower_colour = COLOURS[position-1]
-
-    proportion = (value-lower_parameter)/(higher_parameter-lower_parameter)
-    red = (higher_colour[0] - lower_colour[0])
-    blue = (higher_colour[2] - lower_colour[2])
+def refineRawArgument(raw_angle : str):
+    """Returns the value of a raw, angle string"""
+    angle = re.split(r"([\*\/\-])", raw_angle)
+    angle = [term for term in angle if term != ""]
+    negative_flag = False
     
-    return np.array([red, 0, blue])*proportion + lower_colour
+    for term in range(len(angle)):
+        if angle[term] == "π":
+            angle[term] = str(np.pi)
+        elif angle[term] == "e":
+            angle[term] = str(np.e)
+        elif angle[term] == "-":
+            negative_flag = True
+            continue
+        if negative_flag:
+            angle[term] = str(float(angle[term])*-1)
+            negative_flag = False
+    angle = [term for term in angle if term != "-"]
+    angle = eval("".join(angle)) 
 
+    negative = False
+    if angle < 0:
+        negative = True
+    arg = (angle + np.pi) % (2*np.pi) - np.pi
+
+    if abs(arg) == np.pi:
+        arg = np.pi
+    return arg
+    
+        
+@nb.njit
+def mapUniformFlow(width : int, height : int, magnitude : float, theta : float):
+    """Maps a uniform flow function to a velocity field array"""
+    real_component = magnitude*np.cos(theta)
+    imag_component = magnitude*np.sin(theta)
+    return np.full((height, width), real_component + imag_component*1j, dtype=np.complex64)
+
+def mapNonUniformFlow(velocity_function : str):
+    """Maps a non uniform flow function to a velocity field array"""
+    ...
 
 @nb.njit
-def randomChoice(array : np.array):
-    return array[np.random.choice(array.shape[0]-1)]
+def selectSource(sources : np.array, source_variance : int, max_width : int, max_height : int):
+    """Selects a source location for a particle"""
+    variance = np.random.randint(-source_variance, source_variance)
+    x, y = sources[np.random.randint(0, sources.shape[0])]
+    if x == 0 or x == max_width:
+        y += variance
+    elif y == 0 or y == max_height:
+        x += variance
+    return x, y
+    
+@np.njit
+def mapParticles(pixel_array : np.array, particle_positions : np.array, precise_particle_positions : np.array, velocity_array : np.array, sources : np.array, source_variance : int, dt : float, particle_count : int, pygame_particle_colour : int, pygame_bg_colour : int):
+    """Maps particles onto a pixel array"""
+    empty = np.array([-1, -1])
+    on_screen = (particle_positions != empty).sum()
+    width, height = pixel_array.shape[0]-1, pixel_array.shape[1]-1
 
-def validVelocityFunction(function : str):
-    """Checks a string for being a valid velocity function"""
-    if re.fullmatch(r" *\d+(\.\d+)?e\^\(i((\*|\/)((-?\d+(\.\d+)?)|-?pi))*\)?", function):
-        return True
-    return False
+    for particle in range(particle_count - on_screen):
+        x, y = selectSource(sources, source_variance, width, height)
+        if pixel_array[x, y] == pygame_particle_colour:
+            continue
 
+        next_free = np.argmin(particle_positions) // 2
+        pixel_array[x, y] = pygame_particle_colour
+        particle_positions[next_free, 0] = x
+        particle_positions[next_free, 1] = y
+        precise_particle_positions[next_free, 0] = x
+        precise_particle_positions[next_free, 1] = y
+
+ 
+    for particle in range(particle_positions.shape[0]):
+        x = particle_positions[particle, 0]
+        y = particle_positions[particle, 1]
+        velocity = velocity_array[y, x]
+        dx, dy = velocity.real*dt, velocity.imag*dt
+        dx *= 1 + (np.random.random())/2
+        dy *= 1 + (np.random.random())/2
+        precise_particle_positions[particle, 0] += dx
+        precise_particle_positions[particle, 1] += dy
+
+        exact_x = precise_particle_positions[particle, 0]
+        exact_y = precise_particle_positions[particle, 1]
+
+        if not (0 <= exact_x <= width and 0 <= exact_y <= height):
+            
+            pixel_array[x, y] = pygame_bg_colour
+            particle_positions[particle, 0] = -1
+            particle_positions[particle, 1] = -1
+            precise_particle_positions[particle, 0] = -1
+            precise_particle_positions[particle, 1] = -1
+            continue
+        
+        new_x, new_y = x, y
+
+        if not (x-1 < exact_x < x+1):
+            new_x = int(np.rint(exact_x))
+        
+        if not (y-1 < exact_y < y+1):
+            new_y = int(np.rint(exact_y))
+        
+        if pixel_array[new_x, new_y] == pygame_particle_colour:
+            continue
+
+        pixel_array[new_x, new_y] = pygame_particle_colour
+        pixel_array[x, y] = pygame_bg_colour
+        particle_positions[particle] = np.array([new_x, new_y])
+    
+    return pixel_array, particle_positions, precise_particle_positions
+    

@@ -162,7 +162,7 @@ class Entry(Label):
         return None
 
     def inUse(self):
-        """Returns wheter the dropdown is in use"""
+        """Returns wheter the an entry is in use"""
         return self._state
 
 class Dropdown(Entry):
@@ -310,7 +310,7 @@ class ImageBooleanButton:
 
         self.__shape = pygame.transform.scale_by(pygame.image.load(path), (scale, scale))
         self.__rect, self.__clickable_rect = self.__shape.get_rect(), self.__shape.get_bounding_rect()
-        self.__rect.centre = self.__clickable_rect.center = (x, y)
+        self.__rect.center = self.__clickable_rect.center = (x, y)
 
     def place(self):
         """Places the boolean button on the screen"""
@@ -432,7 +432,7 @@ class CompositeEntry(Entry):
         if not self._state:
             if len(self._text) == 0:
                 self._text = "0"
-        if len(self._text) > 1 and self._text[0] == "0":
+        if len(self._text) > 1 and self._text[0] == "0" and self._text[1] != ".":
             self._text = self._text[1:]
         self._render_arguments[0] = self._text
     
