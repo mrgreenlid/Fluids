@@ -46,7 +46,6 @@ class DataLabel(Label, Output):
         """A pygame data label"""
         super().__init__(screen, x, y, " ", size, colour, bg, font)
         self._text = f"{text}"
-
         self.__variable = variable
         self.__dtype = dtype
         

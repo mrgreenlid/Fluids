@@ -42,8 +42,8 @@ data = {"flow":False,
             "streamline":False,
             "uniform":True,
         
-            "uniform_magnitude":10,
-        "previous_uniform_magnitude":10,
+            "uniform_magnitude":10.0,
+        "previous_uniform_magnitude":10.0,
 
              "uniform_argument": np.pi,
         "raw_uniform_argument" : "π",
@@ -65,6 +65,7 @@ streamline_checkbox = ui.Checkbox(screen, WIDTH-90, 110, "streamline" )
 uniform_label = ui.Label(screen, WIDTH-280, 160,  "Uniform:", 22, bg=UIBG)
 non_uniform_label = ui.Label(screen, WIDTH-260, 210, "Non-Uniform:", 22, bg=UIBG )
 uniform_radiobutton = ui.RadioButton(screen, WIDTH-90, 160, 0, 50, "uniform")
+
 
 function_divider = ui.Box(screen, WIDTH-175, 240, 320, 1)
 
@@ -128,11 +129,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        keys = pygame.key.get_pressed()
+
+
         if data["control"]:
             for obj in control_interact:
                 obj.checkInteract(event)
                 if tapping(event) or typing(event):
                     data[obj.getIdentifier()] = obj.getValue()
+            
 
             if data["uniform"]:
                 for obj in uniform_interact:
@@ -157,6 +162,7 @@ while running:
             velocity_field.flow(data["dt"])
         else:
             velocity_field.stopFlow()
+            
 
     if data["control"]:
         for obj in control_visual:

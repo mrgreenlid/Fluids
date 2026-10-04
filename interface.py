@@ -49,7 +49,6 @@ class DataLabel(Label):
         self.__direction = direction
     
         
-
     def update(self, updated_text : float):
         """Updates the text displayed"""
         if self.__dynamic:

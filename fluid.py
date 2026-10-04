@@ -6,6 +6,8 @@ class VelocityField:
     __BG = rgbToInt((255, 255, 255))
     __PARTICLE_COLOUR = rgbToInt((0,0,0))
     __PARTICLE_COUNT = 15000
+    __MINIMUM_MAG = 5
+    __MAXIMUM_MAG = 100000
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, width : int, height : int):
         """A fluid velocity field"""
         self.__screen = screen
@@ -43,6 +45,10 @@ class VelocityField:
     def uniformFlow(self, magnitude : float, argument : float):
         """Updates attributes for a uniform velocity flow"""
         self.__uniform_argument = argument
+        if magnitude < self.__MINIMUM_MAG:
+            magnitude = self.__MINIMUM_MAG
+        elif magnitude > self.__MAXIMUM_MAG:
+            magnitude = self.__MAXIMUM_MAG 
         self.__uniform_magnitude = magnitude
         self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.clearAndFill()
