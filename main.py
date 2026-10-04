@@ -25,12 +25,12 @@ pygame.display.set_icon(pygame.image.load("images\\ui\\icon.png"))
 
 
 # Test data for initialisation
-pixels = np.full((FIELD_WIDTH, FIELD_HEIGHT), 16777215)
+pixels = np.full((FIELD_WIDTH, FIELD_HEIGHT), 16777215, dtype=np.int32)
 positions = np.full((15000, 2), -1, dtype=np.float64)
 velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1*1j, dtype=np.complex64)
 
 # JITs numba decorated functions
-mapParticles(pixels, positions, velocity, 1, 15000, 0 , 16777215)
+mapParticles(pixels, positions, velocity, 1.0, 15000, 0 , 16777215)
 
 # Creates a clock to measure and regulate frames
 clock = pygame.time.Clock()
@@ -39,11 +39,11 @@ data = {"flow":False,
         "control":True,
         "body_control":False,
         "fill":False,
-             "streamline":False,
-             "uniform":True,
+            "streamline":False,
+            "uniform":True,
         
-             "uniform_magnitude":10,
-        "previous_uniform_magnitude" : 10,
+            "uniform_magnitude":10,
+        "previous_uniform_magnitude":10,
 
              "uniform_argument": np.pi,
         "raw_uniform_argument" : "π",
@@ -65,7 +65,6 @@ streamline_checkbox = ui.Checkbox(screen, WIDTH-90, 110, "streamline" )
 uniform_label = ui.Label(screen, WIDTH-280, 160,  "Uniform:", 22, bg=UIBG)
 non_uniform_label = ui.Label(screen, WIDTH-260, 210, "Non-Uniform:", 22, bg=UIBG )
 uniform_radiobutton = ui.RadioButton(screen, WIDTH-90, 160, 0, 50, "uniform")
-
 
 function_divider = ui.Box(screen, WIDTH-175, 240, 320, 1)
 

@@ -23,7 +23,7 @@ class VelocityField:
 
         self.__plane = pygame.Surface((width, height))
         self.__plane.fill(self.__BG)
-        
+
         self.__particle_positions = np.full((self.__PARTICLE_COUNT, 2), -1, dtype=np.float64)
 
         self.__uniform_magnitude = 10
@@ -31,7 +31,6 @@ class VelocityField:
         self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, width, height)
         self.__flow = False
 
-        pixels, self.__particle_positions = mapParticles(pygame.surfarray.array2d(self.__plane), self.__particle_positions, self.__velocities, self.__dt, self.__PARTICLE_COUNT, self.__PARTICLE_COLOUR, self.__BG)
         self.clearAndFill()
 
     def place(self):

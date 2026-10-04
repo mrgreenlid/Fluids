@@ -7,21 +7,17 @@ import numba as nb
 
 def tapping(event : pygame.event.Event):
     """Returns True when a left mouse click is detected, else False"""
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        return True
-    return False
-
+    return event.type == pygame.MOUSEBUTTONDOWN
+    
 def typing(event : pygame.event.Event):
     """Returns True when keystrokes are detected, elese False"""
-    if event.type == pygame.KEYDOWN:
-        return True
-    else:
-        False
+    return event.type == pygame.KEYDOWN
+     
 
 @nb.njit
 def pygameToArgand(argand : np.array, pygame_x : int, pygame_y : int):
     """Converts a pygame coordinate to a complex coordinate"""
-    return argand[y][x]
+    return argand[pygame_y, pygame_x]
     
 
 # General algorithms
@@ -82,6 +78,7 @@ def fillScreen(quota : int,  width : int, height : int, pygame_particle_colour :
         
     return pixel_array, particle_positions
 
+
 @nb.njit
 def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity_array : np.array, dt : float, particle_count : int, pygame_particle_colour : int, pygame_bg_colour):
     """Maps pixels to a pygame screen array, after movement"""
@@ -95,8 +92,8 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity
 
         velocity = velocity_array[current_index_y, current_index_x]
         dx, dy = velocity.real*dt, velocity.imag*dt
-        dx *= 1 + (np.random.random())/2
-        dy *= 1 + (np.random.random())/2
+        dx *= 1 + (np.random.random())
+        dy *= 1 + (np.random.random())
         particle_positions[particle, 0] += dx
         particle_positions[particle, 1] -= dy
 
@@ -136,3 +133,7 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity
         
     
     return pixel_array, particle_positions
+
+
+
+    

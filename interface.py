@@ -42,12 +42,14 @@ class DataLabel(Label):
         """A pygame data label"""
         super().__init__(screen, x, y, " ", size, colour, bg, font)
         self.__start_x = x
-        self.__text = f"{text}"
+        self._text = f"{text}"
         self.__identifier = identifier
         self.__max_length = max_length
         self.__dynamic = dynamic
         self.__direction = direction
     
+        
+
     def update(self, updated_text : float):
         """Updates the text displayed"""
         if self.__dynamic:
