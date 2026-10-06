@@ -13,7 +13,7 @@ class VelocityField:
         self.__screen = screen
         self.__width, self.__height = width, height
     
-        self.__dt = 1
+        self.__dt = float
 
         self.__rect = pygame.Rect(0,0, self.__width, self.__height)
         self.__rect.center = (x, y)
@@ -29,8 +29,11 @@ class VelocityField:
 
         self.__particle_positions = np.full((self.__PARTICLE_COUNT, 2), -1, dtype=np.float64)
 
-        self.__uniform_magnitude = 10
+        self.__uniform_magnitude = float(10)
         self.__uniform_argument = np.pi
+
+        self.__non_uniform_flow_name = str
+
         self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, width, height)
         self.__flow = False
 
@@ -54,10 +57,10 @@ class VelocityField:
         self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.clearAndFill()
         
-    def nonUniformFlow(self, velocity_function : str):
+    def nonUniformFlow(self, flow_name : str):
         """Updates attributes for a non uniform velocity flow"""
-        self.__non_uniform_velocity_function = velocity_function
-        self.__velocities = mapNonUniformFlow(self.__non_uniform_velocity_function, self.__argand)
+        self.__non_uniform_flow_name = flow_name
+        print("Hello")
         self.clearAndFill()
 
     def clearAndFill(self):
