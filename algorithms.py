@@ -57,9 +57,10 @@ def mapUniformFlow(magnitude : float, argument : float, width : int, height : in
     imag = magnitude*np.sin(argument)
     return np.full((height, width), real + imag*1j, dtype=np.complex64)
 
-@nb.njit
-def mapNonUniformFlow(velocity_fuction : str, argand):
-    ...
+
+def mapNonUniformFlow(velocity_fuction : str, argand : np.array):
+    return argand
+
     
 
 @nb.njit
@@ -80,7 +81,7 @@ def fillScreen(quota : int,  width : int, height : int, pygame_particle_colour :
 
 
 @nb.njit
-def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity_array : np.array, dt : float, particle_count : int, pygame_particle_colour : int, pygame_bg_colour):
+def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity_array : np.array, dt : float, particle_count : int, particle_colour : int, bg_colour):
     """Maps pixels to a pygame screen array, after movement"""
     width, height = pixel_array.shape[0]-1, pixel_array.shape[1]-1
     # STOP TRAILS
@@ -111,7 +112,7 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity
             elif y >= height:
                 particle_positions[particle, 1] = 0
 
-            pixel_array[current_index_x, current_index_y] = pygame_bg_colour    
+            pixel_array[current_index_x, current_index_y] = bg_colour    
             continue
         
         new_index_x = current_index_x
@@ -123,17 +124,13 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity
         if not (current_index_y-1 < y < current_index_y+1):
             new_index_y = round(y)
         
-        if pixel_array[new_index_x, new_index_y] == pygame_particle_colour:
+        if pixel_array[new_index_x, new_index_y] == particle_colour:
             particle_positions[particle, 0] = initial_x
             particle_positions[particle, 1] = initial_y
+            pixel_array[current_index_x, current_index_y] = bg_colour
             continue
 
-        pixel_array[new_index_x, new_index_y] = pygame_particle_colour
-        pixel_array[current_index_x, current_index_y] = pygame_bg_colour
+        pixel_array[new_index_x, new_index_y] = particle_colour
+        pixel_array[current_index_x, current_index_y] = bg_colour
         
-    
-    return pixel_array, particle_positions
-
-
-
-    
+    return pixel_array, particle_positions    

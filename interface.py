@@ -75,7 +75,7 @@ class Entry(Label):
     _active_colour = "#90D5FF"
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str = "", size : int = 25,  max_length : int = 10, width : int = 150, dtype : type = float, font : str = "Segoe UI"):
         """A pygame entry box"""
-        super().__init__(screen, x, y, " ", size, "#000000", self._inactive_colour, font)
+        super().__init__(screen, x, y, "", size, "#000000", self._inactive_colour, font)
         self._text = f"{text}"
         self._max_length = max_length
         self._rect.width = width
@@ -179,7 +179,7 @@ class Dropdown(Entry):
             option_rect.centery += 30*(option+1)
             self.__options_rect.append(option_rect)
         
-        self.__arrow_rect = pygame.Rect(x+width, y-15, 30, 30)
+        self.__arrow_rect = pygame.Rect(x+width, y-15, size*1.2, size*1.2)
         self.__arrow_coordinates = [(self.__arrow_rect.centerx, self.__arrow_rect.centery + 2.5),
                                     (self.__arrow_rect.centerx + 5, self.__arrow_rect.centery - 2.5),
                                     (self.__arrow_rect.centerx - 5, self.__arrow_rect.centery - 2.5)]
@@ -437,3 +437,48 @@ class CompositeEntry(Entry):
             self._text = self._text[1:]
         self._render_arguments[0] = self._text
     
+
+class SelectionByImageButton:
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str, value : str, path : str, scale : float = 1.0, box_width = 150, box_height = 150):
+        self.__screen = screen
+        self.__value = value
+        self.__text = text
+
+        self.__rect = pygame.Rect(0,0, box_width, box_height)
+        self.__image = pygame.transform.scale_by(pygame.image.load(path), (scale, scale))
+        self.__image_rect = self.__image.get_rect()
+        self.__rect.center = self.__image_rect.center = (x,y)
+
+        self.__font = pygame.font.SysFont("consolas", 20)
+        self.__text_rect = self.__font.render(text, True, "#000000", "#FFFFFF").get_rect()
+        self.__text_box_rect = self.__text_rect.copy()
+        self.__text_box_rect.width = box_width
+        self.__text_box_rect.height = 30
+        self.__text_box_rect.center = self.__text_rect.center = (x, y + box_width//2+14)
+
+    def place(self):
+        """Draws body selection button"""
+        pygame.draw.rect(self.__screen, "#FFFFFF", self.__rect)
+        pygame.draw.rect(self.__screen, "#000000", self.__rect, 1)
+        self.__screen.blit(self.__image, self.__image_rect)
+        pygame.draw.rect(self.__screen, "#FFFFFF", self.__text_box_rect)
+        pygame.draw.rect(self.__screen, "#000000", self.__text_box_rect, 1)
+        self.__screen.blit(self.__font.render(self.__text, True, "#000000", "#FFFFFF"), self.__text_rect)
+
+    def checkInteract(self, event : pygame.event.Event):
+        """Checks for interactions"""
+        if tapping(event):
+            if self.__rect.collidepoint(*pygame.mouse.get_pos()) or self.__text_box_rect.collidepoint(*pygame.mouse.get_pos()):
+                self.__click_flag = True
+                
+    def getClickFlag(self):
+        """Returns whether the button was clicked more recently than a call of self.getValue()"""
+        return self.__click_flag
+
+    def getVariable(self):
+        """Returns associated variable"""
+        return self.__identifier
+    
+    def getValue(self):
+        """Returns value"""
+        return self.__value
