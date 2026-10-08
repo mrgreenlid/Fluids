@@ -5,7 +5,7 @@ from algorithms import *
 class VelocityField:
     __BG = rgbToInt((255, 255, 255))
     __PARTICLE_COLOUR = rgbToInt((0,0,0))
-    __PARTICLE_COUNT = 10000
+    __PARTICLE_COUNT = 15000
     __MINIMUM_MAG = 5
     __MAXIMUM_MAG = 1000
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, width : int, height : int):
@@ -26,6 +26,7 @@ class VelocityField:
         self.__plane = pygame.Surface((width, height))
         self.__plane.fill(self.__BG)
         
+
         self.__particle_positions = np.full((self.__PARTICLE_COUNT, 2), -1, dtype=np.float64)
 
         self.__uniform_magnitude = 10
@@ -56,6 +57,7 @@ class VelocityField:
     def nonUniformFlow(self, flow_name : str):
         """Updates attributes for a non uniform velocity flow"""
         self.__non_uniform_flow_name = flow_name
+        print("Hello")
         self.clearAndFill()
 
     def clearAndFill(self):
@@ -66,7 +68,7 @@ class VelocityField:
     def flow(self, dt):
         """Flow"""
         self.__flow = True
-        self.__dt = dt
+        self.__dt = dt*10
         
     def stopFlow(self):
         """Stop flow"""
