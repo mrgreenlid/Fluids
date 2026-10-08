@@ -441,6 +441,7 @@ class CompositeEntry(Entry):
 class ImageTitleButton:
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str, value : str, path : str, scale : float = 1.0, box_width = 150, box_height = 150):
         self.__screen = screen
+        self.__identifier = identifier
         self.__value = value
         self.__text = text
 
@@ -455,6 +456,8 @@ class ImageTitleButton:
         self.__text_box_rect.width = box_width
         self.__text_box_rect.height = 30
         self.__text_box_rect.center = self.__text_rect.center = (x, y + box_width//2+14)
+
+        self.__click_flag = False
 
     def place(self):
         """Draws body selection button"""
@@ -471,14 +474,15 @@ class ImageTitleButton:
             if self.__rect.collidepoint(*pygame.mouse.get_pos()) or self.__text_box_rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__click_flag = True
                 
-    def getClickFlag(self):
-        """Returns whether the button was clicked more recently than a call of self.getValue()"""
+    def getClicked(self):
+        """Returns whether the button was clicked more recently than a call of getValue()"""
         return self.__click_flag
 
-    def getVariable(self):
-        """Returns associated variable"""
+    def getIdentifier(self):
+        """Returns the associated identifier"""
         return self.__identifier
     
     def getValue(self):
         """Returns value"""
+        self.__click_flag = False
         return self.__value

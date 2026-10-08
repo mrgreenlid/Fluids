@@ -48,6 +48,7 @@ data = {"flow":False,
         "raw_uniform_argument" : "π",
         "uniform_argument": np.pi,
         
+        "previous_non_uniform_flow_name":"",
         "non_uniform_flow_name":"",
 
              "frames":0.0,
@@ -83,7 +84,7 @@ close_bracket_label = ui.Label(screen, WIDTH-55, 455, ")", 30, bg=UIBG, font="Co
 non_uniform_flow_selection_1 = ui.ImageTitleButton(screen, WIDTH-251, 330, "non_uniform_flow_name", "Point Source", "point_source", "images\\flow\\point_source.png", 0.19)
 non_uniform_flow_selection_2 = ui.ImageTitleButton(screen, WIDTH-99, 330, "non_uniform_flow_name", "Vortex", "vortex", "images\\flow\\vortex.png", 0.29)
 non_uniform_flow_selection_3 = ui.ImageTitleButton(screen, WIDTH-251, 511, "non_uniform_flow_name", "Doublet", "doublet", "images\\flow\\doublet.png", 0.29)
-non_uniform_flow_selection_4 = ui.ImageTitleButton(screen, WIDTH-99, 511, "non_uniform_flow_name", "Vortex", "vortex", "images\\flow\\vortex.png", 0.29)
+
 flow_button = ui.DualImageBooleanButton(screen, WIDTH-175, 650, "flow", "images\\ui\\play.png", "images\\ui\\pause.png", 0.1, 0.14)
 data_divider = ui.Box(screen, WIDTH-175, 700, 300, 1)
 frames_label = ui.Label(screen, WIDTH-250, 730, "Performance (fps):", bg=UIBG)
@@ -104,7 +105,8 @@ uniform_visual = (velocity_funtion_label, uniform_magnitude_label, uniform_magni
                   uniform_magnitude_datalabel, times_label,  e_label, i_label, open_bracket_label,  uniform_argument_datalabel, close_bracket_label)
 
 
-non_uniform_visual = (non_uniform_flow_selection_1,)
+non_uniform_visual = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
+                    non_uniform_flow_selection_3)
 
 control_interact = (streamline_checkbox,
                     uniform_radiobutton, 
@@ -113,7 +115,8 @@ control_interact = (streamline_checkbox,
 uniform_interact = (uniform_magnitude_entry, 
                     uniform_argument_composite_entry)
 
-non_uniform_interact = (non_uniform_dropdown,)
+non_uniform_interact = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
+                    non_uniform_flow_selection_3)
 
 
 velocity_field = fluid.VelocityField(screen, (WIDTH-350)//2, HEIGHT//2, FIELD_WIDTH, FIELD_HEIGHT)
@@ -138,6 +141,7 @@ while running:
                 if tapping(event) or typing(event):
                     data[obj.getIdentifier()] = obj.getValue()
         
+        
             if data["uniform"]:
                 for obj in uniform_interact:
                     obj.checkInteract(event)
@@ -154,10 +158,17 @@ while running:
                 for obj in non_uniform_interact:
                     obj.checkInteract(event)
                     if tapping(event) or (typing(event) and event.unicode == "\x0D"):
-                        data[obj.getIdentifier()] = obj.getValue()
+                        if isinstance(obj, ui.ImageTitleButton):
+                            if obj.getClicked():
+                                data[obj.getIdentifier()] = obj.getValue()
+                        else:
+                            data[obj.getIdentifier()] = obj.getValue()
+                        
+                        if data["previous_non_uniform_flow_name"] != data["non_uniform_flow_name"]:
+                            data["previous_non_uniform_flow_name"] = data["non_uniform_flow_name"]
+                            velocity_field.nonUniformFlow(data["non_uniform_flow_name"])
 
-                       
-                    
+
     # Places visual elements
     for obj in tank_visual:
         obj.place()

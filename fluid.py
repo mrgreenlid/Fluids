@@ -57,7 +57,7 @@ class VelocityField:
     def nonUniformFlow(self, flow_name : str):
         """Updates attributes for a non uniform velocity flow"""
         self.__non_uniform_flow_name = flow_name
-        print("Hello")
+        
         self.clearAndFill()
 
     def clearAndFill(self):
