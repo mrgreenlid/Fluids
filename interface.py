@@ -303,13 +303,13 @@ class RadioButton(Checkbox):
                 self.__antiClick()
 
 class ImageBooleanButton:
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, path : str, scale : float = 1.0):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, path : str, scale : float = 1.0, rotation : float = 0.0):
         """A pygame image displaying boolean button"""
         self.__screen = screen
         self.__identifier = identifier
         self.__state = False
 
-        self.__shape = pygame.transform.scale_by(pygame.image.load(path), (scale, scale))
+        self.__shape = pygame.transform.rotate(pygame.transform.scale_by(pygame.image.load(path), (scale, scale)), rotation)
         self.__rect, self.__clickable_rect = self.__shape.get_rect(), self.__shape.get_bounding_rect()
         self.__rect.center = self.__clickable_rect.center = (x, y)
 
@@ -335,13 +335,13 @@ class ImageBooleanButton:
         return state
 
 class DualImageBooleanButton:
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, off_path : str, on_path : str, off_scale : float = 1.0, on_scale : float = 1.0):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, off_path : str, on_path : str, off_scale : float = 1.0, on_scale : float = 1.0, rotation : float = 0.0):
         """A pygame dual image displaying boolean button"""
         self.__screen = screen
         self.__identifier = identifier
         self.__state = False
 
-        self.__off_shape = pygame.transform.scale_by(pygame.image.load(off_path), (off_scale, off_scale))
+        self.__off_shape = pygame.transform.rotate(pygame.transform.scale_by(pygame.image.load(off_path), (off_scale, off_scale)), rotation)
         self.__off_rect, self.__off_clickable_rect = self.__off_shape.get_rect(), self.__off_shape.get_bounding_rect()
 
         self.__on_shape = pygame.transform.scale_by(pygame.image.load(on_path), (on_scale, on_scale))
@@ -440,14 +440,14 @@ class CompositeEntry(Entry):
     
 
 class ImageTitleButton:
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str, value : str, path : str, scale : float = 1.0, box_width = 150, box_height = 150):
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str, value : str, path : str, scale : float = 1.0, rotation : float = 0, box_width : int = 150, box_height : int = 150):
         self.__screen = screen
         self.__value = value
         self.__identifier = identifier
         self.__text = text
 
         self.__rect = pygame.Rect(0,0, box_width, box_height)
-        self.__image = pygame.transform.scale_by(pygame.image.load(path), (scale, scale))
+        self.__image = pygame.transform.rotate(pygame.transform.scale_by(pygame.image.load(path), (scale, scale)), rotation)
         self.__image_rect = self.__image.get_rect()
         self.__rect.center = self.__image_rect.center = (x,y)
 
