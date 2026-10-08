@@ -396,7 +396,6 @@ class TextButton(Label):
                 self.__state = True
 
     def getIdentifier(self):
-        """Returns the associated identifier"""
         return self.__identifier
 
     def getValue(self):
@@ -439,11 +438,10 @@ class CompositeEntry(Entry):
         self._render_arguments[0] = self._text
     
 
-class ImageTitleButton:
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str, value : str, path : str, scale : float = 1.0, rotation : float = 0, box_width : int = 150, box_height : int = 150):
+class SelectionByImageButton:
+    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, identifier : str, text : str, value : str, path : str, scale : float = 1.0, box_width = 150, box_height = 150):
         self.__screen = screen
         self.__value = value
-        self.__identifier = identifier
         self.__text = text
 
         self.__rect = pygame.Rect(0,0, box_width, box_height)
@@ -458,10 +456,8 @@ class ImageTitleButton:
         self.__text_box_rect.height = 30
         self.__text_box_rect.center = self.__text_rect.center = (x, y + box_width//2+14)
 
-        self.__click_flag = False
-
     def place(self):
-        """Draws the Image selection button on the screen"""
+        """Draws body selection button"""
         pygame.draw.rect(self.__screen, "#FFFFFF", self.__rect)
         pygame.draw.rect(self.__screen, "#000000", self.__rect, 1)
         self.__screen.blit(self.__image, self.__image_rect)
@@ -476,15 +472,13 @@ class ImageTitleButton:
                 self.__click_flag = True
                 
     def getClickFlag(self):
-        """Returns whether the button was clicked more recently than a call of getValue()"""
+        """Returns whether the button was clicked more recently than a call of self.getValue()"""
         return self.__click_flag
 
-    def getIdentifier(self):
-        """Returns the associated identifier"""
+    def getVariable(self):
+        """Returns associated variable"""
         return self.__identifier
     
     def getValue(self):
         """Returns value"""
-        self.__click_flag = False
         return self.__value
-        

@@ -13,7 +13,7 @@ class VelocityField:
         self.__screen = screen
         self.__width, self.__height = width, height
     
-        self.__dt = float
+        self.__dt = 1
 
         self.__rect = pygame.Rect(0,0, self.__width, self.__height)
         self.__rect.center = (x, y)
@@ -28,11 +28,8 @@ class VelocityField:
         
         self.__particle_positions = np.full((self.__PARTICLE_COUNT, 2), -1, dtype=np.float64)
 
-        self.__uniform_magnitude = float(10)
+        self.__uniform_magnitude = 10
         self.__uniform_argument = np.pi
-
-        self.__non_uniform_flow_name = str
-
         self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, width, height)
         self.__flow = False
 

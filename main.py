@@ -50,8 +50,7 @@ data = {"flow":False,
         "raw_uniform_argument" : "π",
         "uniform_argument": np.pi,
         
-        "previous_non_uniform_flow_name":"point_source",
-        "non_uniform_flow_name":"point_source",
+        "non_uniform_flow_name":"",
 
         "frames":0.0,
         "dt":0.001}
@@ -105,8 +104,7 @@ uniform_visual = (velocity_funtion_label, uniform_magnitude_label, uniform_magni
                   uniform_magnitude_datalabel, times_label,  e_label, i_label, open_bracket_label,  uniform_argument_datalabel, close_bracket_label)
 
 
-non_uniform_visual = (non_uniform_flow_selection_1, non_uniform_flow_selection_2,
-                      non_uniform_flow_selection_3)
+non_uniform_visual = (non_uniform_flow_selection_1,)
 
 control_interact = (streamline_checkbox,
                     uniform_radiobutton, 
@@ -115,8 +113,8 @@ control_interact = (streamline_checkbox,
 uniform_interact = (uniform_magnitude_entry, 
                     uniform_argument_composite_entry)
 
-non_uniform_interact = (non_uniform_flow_selection_1, non_uniform_flow_selection_2,
-                        non_uniform_flow_selection_3)
+non_uniform_interact = (non_uniform_dropdown,)
+
 
 velocity_field = fluid.VelocityField(screen, (WIDTH-350)//2, HEIGHT//2, FIELD_WIDTH, FIELD_HEIGHT)
 
@@ -156,15 +154,8 @@ while running:
                 for obj in non_uniform_interact:
                     obj.checkInteract(event)
                     if tapping(event) or (typing(event) and event.unicode == "\x0D"):
-                        if isinstance(obj, ui.ImageTitleButton):
-                            if obj.getClickFlag():
-                                data[obj.getIdentifier()] = obj.getValue()
-                        else:
-                            data[obj.getIdentifier()] = obj.getValue()
-                    
-                        if data["previous_non_uniform_flow_name"] != data["non_uniform_flow_name"]:
-                            data["previous_non_uniform_flow_name"] = data["non_uniform_flow_name"]
-                            velocity_field.nonUniformFlow(data["non_uniform_flow_name"])
+                        data[obj.getIdentifier()] = obj.getValue()
+
                        
                     
     # Places visual elements
@@ -187,7 +178,7 @@ while running:
                 if isinstance(obj, ui.DataLabel):
                     obj.update(data[obj.getIdentifier()])
                 obj.place() 
-
+        
         else:
             for obj in non_uniform_visual:
                 obj.place() 
@@ -198,7 +189,6 @@ while running:
     # Keeps the clock ticking
     data["dt"] = clock.tick(FRAMES) / 1000
     data["frames"] = clock.get_fps()
-    
     
     
     
