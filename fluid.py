@@ -7,21 +7,24 @@ class VelocityField:
     __PARTICLE_COLOUR = rgbToInt((0,0,0))
     __PARTICLE_COUNT = 15000
     __MINIMUM_MAG = 5
-    __MAXIMUM_MAG = 1000
+    __MAXIMUM_MAG = 100
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, width : int, height : int):
         """A fluid velocity field"""
         self.__screen = screen
         self.__width, self.__height = width, height
     
-        self.__dt = 1
+        self.__dt = 0.01
 
         self.__rect = pygame.Rect(0,0, self.__width, self.__height)
         self.__rect.center = (x, y)
 
         x_coords = np.arange(-self.__width//2, self.__width//2)
-        y_coords = np.arange(self.__height//2, -self.__height//2)
-        real, imag = np.meshgrid(x_coords, y_coords)
-        self.__argand = real + imag*1j  
+        y_coords = np.arange(self.__height//2, -self.__height//2, -1)
+        self.__argand = np.zeros((width, height), dtype=np.complex64)
+
+        for x in range(self.__width):
+            for y in range(self.__height):
+                self.__argand[x, y] = x_coords[x] + y_coords[y]*1j
 
         self.__plane = pygame.Surface((width, height))
         self.__plane.fill(self.__BG)
@@ -63,7 +66,7 @@ class VelocityField:
 
     def clearAndFill(self):
         """Fills the velocity field with particles"""
-        self.__particle_positions = fillScreen(self.__PARTICLE_COUNT, self.__particle_positions, self.__PARTICLE_COLOUR, self.__BG)
+        self.__particle_positions = mapFillScreen(self.__PARTICLE_COUNT, self.__particle_positions, self.__PARTICLE_COLOUR, self.__BG)
         pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
         pygame.surfarray.blit_array(self.__plane, pixel_array)
 

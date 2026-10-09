@@ -57,13 +57,13 @@ def mapUniformFlow(magnitude : float, argument : float, width : int, height : in
     imag = magnitude*np.sin(argument)
     return np.full((height, width), real + imag*1j, dtype=np.complex64)
 
-
+@nb.njit
 def mapNonUniformFlow(velocity_fuction : str, argand : np.array):
     return argand
 
     
 @nb.njit
-def fillScreen(quota : int, particle_positions : np.array, particle_colour : int, bg_colour : int):
+def mapFillScreen(quota : int, particle_positions : np.array, particle_colour : int, bg_colour : int):
     """Randomly sets positions of particles"""
     width = particle_positions.shape[0]
     height =  particle_positions.shape[1]
@@ -89,8 +89,8 @@ def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : 
         initial_y = particle_positions[current_index_x, current_index_y, 1]
     
         velocity = velocity_array[current_index_y, current_index_x]
-        dx = velocity.real*dt
-        dy = velocity.imag*dt
+        dx = velocity.real*(1 + (np.random.random()))*dt
+        dy = velocity.imag*(1 + (np.random.random()))*dt
         potential_x = initial_x + dx
         potential_y = initial_y - dy
 
@@ -111,11 +111,13 @@ def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : 
         if not (current_index_y-1 < potential_y < current_index_y+1):
             new_index_y = round(potential_y)
         
-        if particle_positions[new_index_x, new_index_y, 0] == -1:
-            particle_positions[current_index_x, current_index_y, 0] = -1
-            particle_positions[current_index_x, current_index_y, 1] = -1
-            particle_positions[new_index_x, new_index_y, 0] = potential_x
-            particle_positions[new_index_x, new_index_y, 1] = potential_y
+        if particle_positions[new_index_x, new_index_y, 0] != -1:
+            continue
+
+        particle_positions[current_index_x, current_index_y, 0] = -1
+        particle_positions[current_index_x, current_index_y, 1] = -1
+        particle_positions[new_index_x, new_index_y, 0] = potential_x
+        particle_positions[new_index_x, new_index_y, 1] = potential_y
 
     return particle_positions
 
@@ -129,61 +131,3 @@ def makePixelArray(particle_positions : np.array, plane : np.array, particle_col
         pixel_array[x, y] = particle_colour
     return pixel_array
 
-
-    
-
-
-@nb.njit
-def oldmapParticles(pixel_array : np.array, particle_positions : np.array, velocity_array : np.array, dt : float, particle_count : int, particle_colour : int, bg_colour):
-    """Maps pixels to a pygame screen array, after movement"""
-    width, height = pixel_array.shape[0]-1, pixel_array.shape[1]-1
-    # STOP TRAILS
-    for particle in range(particle_positions.shape[0]):
-        initial_x = particle_positions[particle, 0] 
-        initial_y = particle_positions[particle, 1]
-        current_index_x = round(initial_x)
-        current_index_y = round(initial_y)
-
-        velocity = velocity_array[current_index_y, current_index_x]
-        dx, dy = velocity.real*dt, velocity.imag*dt
-        dx *= 1 + (np.random.random())
-        dy *= 1 + (np.random.random())
-        particle_positions[particle, 0] += dx
-        particle_positions[particle, 1] -= dy
-
-        x = particle_positions[particle, 0]
-        y = particle_positions[particle, 1]
-
-        if not (0 <= x <= width and 0 <= y <= height):
-            if x < 0:
-                particle_positions[particle, 0] = width
-            elif x >= width:
-                particle_positions[particle, 0] = 0 
-
-            if y < 0:
-                particle_positions[particle, 1] = height
-            elif y > height:
-                particle_positions[particle, 1] = 0
-
-            pixel_array[current_index_x, current_index_y] = bg_colour    
-            continue
-        
-        new_index_x = current_index_x
-        new_index_y = current_index_y
-
-        if not (current_index_x-1 < x < current_index_x+1):
-            new_index_x = round(x)
-        
-        if not (current_index_y-1 < y < current_index_y+1):
-            new_index_y = round(y)
-        
-        if pixel_array[new_index_x, new_index_y] == particle_colour:
-            particle_positions[particle, 0] = initial_x
-            particle_positions[particle, 1] = initial_y
-            pixel_array[current_index_x, current_index_y] = bg_colour
-            continue
-
-        pixel_array[new_index_x, new_index_y] = particle_colour
-        pixel_array[current_index_x, current_index_y] = bg_colour
-        
-    return pixel_array, particle_positions    
