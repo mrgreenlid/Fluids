@@ -62,26 +62,79 @@ def mapNonUniformFlow(velocity_fuction : str, argand : np.array):
     return argand
 
     
-
 @nb.njit
-def fillScreen(quota : int,  width : int, height : int, pygame_particle_colour : int, pygame_bg_colour):
-    """Randomly places particles on a screen"""
-    particle_positions = np.full((quota, 2), -1, dtype=np.float64)
-    pixel_array = np.full((width, height), pygame_bg_colour)
-    
+def fillScreen(quota : int, particle_positions : np.array, particle_colour : int, bg_colour : int):
+    """Randomly sets positions of particles"""
+    width = particle_positions.shape[0]
+    height =  particle_positions.shape[1]
+    particle_positions = np.full((width, height, 2), -1, dtype=np.float64)
     for particle in range(quota):
-        x, y = np.random.randint(0, width-1), np.random.randint(0, height-1)
-        if pixel_array[x, y] == pygame_particle_colour:
-            continue
-        pixel_array[x, y] = pygame_particle_colour
-        particle_positions[particle, 0] = x
-        particle_positions[particle, 1] = y
+        x = np.random.randint(0, width-1)
+        y = np.random.randint(0, height-1)
+        if particle_positions[x, y, 0] == -1:
+            particle_positions[x, y, 0] = x
+            particle_positions[x, y, 1] = y
+    return particle_positions
+
+@nb.njit
+def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : float):
+    max_x = particle_positions.shape[0]-1
+    max_y = particle_positions.shape[1]-1
+    particles = np.argwhere(particle_positions[:, :, 0] != -1)
+    
+    for particle in particles:
+        current_index_x = new_index_x = particle[0]
+        current_index_y = new_index_y = particle[1]
+        initial_x = particle_positions[current_index_x, current_index_y, 0]
+        initial_y = particle_positions[current_index_x, current_index_y, 1]
+    
+        velocity = velocity_array[current_index_y, current_index_x]
+        dx = velocity.real*dt
+        dy = velocity.imag*dt
+        potential_x = initial_x + dx
+        potential_y = initial_y - dy
+
+        if not (0 <= potential_x <= max_x and 0 <= potential_y <= max_y):
+            if potential_x < 0:
+                potential_x = max_x
+            elif potential_x > max_x:
+                potential_x = 0
+
+            if potential_y < 0:
+                potential_y = max_y
+            elif potential_y > max_y:
+                potential_y = 0
+
+        if not (current_index_x-1 < potential_x < current_index_x+1):
+            new_index_x = round(potential_x)
         
-    return pixel_array, particle_positions
+        if not (current_index_y-1 < potential_y < current_index_y+1):
+            new_index_y = round(potential_y)
+        
+        if particle_positions[new_index_x, new_index_y, 0] == -1:
+            particle_positions[current_index_x, current_index_y, 0] = -1
+            particle_positions[current_index_x, current_index_y, 1] = -1
+            particle_positions[new_index_x, new_index_y, 0] = potential_x
+            particle_positions[new_index_x, new_index_y, 1] = potential_y
+
+    return particle_positions
+
+@nb.njit  
+def makePixelArray(particle_positions : np.array, plane : np.array, particle_colour : int):
+    particles = np.argwhere(particle_positions[:, :, 0] != -1)
+    pixel_array = plane.copy()
+    for particle in particles:
+        x = particle[0]
+        y = particle[1]
+        pixel_array[x, y] = particle_colour
+    return pixel_array
+
+
+    
 
 
 @nb.njit
-def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity_array : np.array, dt : float, particle_count : int, particle_colour : int, bg_colour):
+def oldmapParticles(pixel_array : np.array, particle_positions : np.array, velocity_array : np.array, dt : float, particle_count : int, particle_colour : int, bg_colour):
     """Maps pixels to a pygame screen array, after movement"""
     width, height = pixel_array.shape[0]-1, pixel_array.shape[1]-1
     # STOP TRAILS
@@ -109,7 +162,7 @@ def mapParticles(pixel_array : np.array, particle_positions : np.array, velocity
 
             if y < 0:
                 particle_positions[particle, 1] = height
-            elif y >= height:
+            elif y > height:
                 particle_positions[particle, 1] = 0
 
             pixel_array[current_index_x, current_index_y] = bg_colour    

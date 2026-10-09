@@ -25,11 +25,11 @@ pygame.display.set_icon(pygame.image.load("images\\ui\\icon.png"))
 
 # Test data for initialisation
 pixels = np.full((FIELD_WIDTH, FIELD_HEIGHT), 16777215, dtype=np.int32)
-positions = np.full((15000, 2), -1, dtype=np.float64)
-velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1*1j, dtype=np.complex64)
+positions = np.full((FIELD_WIDTH, FIELD_HEIGHT, 2), -1, dtype=np.float64)
+velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1j, dtype=np.complex64)
 
 # JITs numba decorated functions
-mapParticles(pixels, positions, velocity, 1.0, 15000, 0 , 16777215)
+mapParticles(positions, velocity, 0.001)
 
 # Creates a clock to measure and regulate frames
 clock = pygame.time.Clock()
@@ -83,7 +83,7 @@ close_bracket_label = ui.Label(screen, WIDTH-55, 455, ")", 30, bg=UIBG, font="Co
 
 non_uniform_flow_selection_1 = ui.ImageTitleButton(screen, WIDTH-251, 330, "non_uniform_flow_name", "Point Source", "point_source", "images\\flow\\point_source.png", 0.19)
 non_uniform_flow_selection_2 = ui.ImageTitleButton(screen, WIDTH-99, 330, "non_uniform_flow_name", "Vortex", "vortex", "images\\flow\\vortex.png", 0.29)
-non_uniform_flow_selection_3 = ui.ImageTitleButton(screen, WIDTH-251, 511, "non_uniform_flow_name", "Doublet", "doublet", "images\\flow\\doublet.png", 0.29)
+non_uniform_flow_selection_3 = ui.ImageTitleButton(screen, WIDTH-251, 511, "non_uniform_flow_name", "Doublet", "doublet", "images\\flow\\doublet.png", 0.29, -90)
 
 flow_button = ui.DualImageBooleanButton(screen, WIDTH-175, 650, "flow", "images\\ui\\play.png", "images\\ui\\pause.png", 0.1, 0.14)
 data_divider = ui.Box(screen, WIDTH-175, 700, 300, 1)
@@ -141,7 +141,6 @@ while running:
                 if tapping(event) or typing(event):
                     data[obj.getIdentifier()] = obj.getValue()
         
-        
             if data["uniform"]:
                 for obj in uniform_interact:
                     obj.checkInteract(event)
@@ -189,7 +188,6 @@ while running:
                 if isinstance(obj, ui.DataLabel):
                     obj.update(data[obj.getIdentifier()])
                 obj.place() 
-        
         else:
             for obj in non_uniform_visual:
                 obj.place() 

@@ -25,22 +25,23 @@ class VelocityField:
 
         self.__plane = pygame.Surface((width, height))
         self.__plane.fill(self.__BG)
+        self.__empty = pygame.surfarray.array2d(self.__plane)
         
-
-        self.__particle_positions = np.full((self.__PARTICLE_COUNT, 2), -1, dtype=np.float64)
+        self.__particle_positions = np.full((self.__width, self.__height, 2), -1, dtype=np.float64)
 
         self.__uniform_magnitude = 10
         self.__uniform_argument = np.pi
         self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, width, height)
-        self.__flow = False
 
+        self.__flow = False
         self.clearAndFill()
 
     def place(self):
         """Places the velocity field on the screen"""
         if self.__flow:
-            pixels, self.__particle_positions = mapParticles(pygame.surfarray.array2d(self.__plane), self.__particle_positions, self.__velocities, self.__dt, self.__PARTICLE_COUNT, self.__PARTICLE_COLOUR, self.__BG)
-            pygame.surfarray.blit_array(self.__plane, pixels)
+            self.__particle_positions = mapParticles(self.__particle_positions, self.__velocities, self.__dt)
+            pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
+            pygame.surfarray.blit_array(self.__plane, pixel_array)
         self.__screen.blit(self.__plane, self.__rect)
         
     def uniformFlow(self, magnitude : float, argument : float):
@@ -57,13 +58,14 @@ class VelocityField:
     def nonUniformFlow(self, flow_name : str):
         """Updates attributes for a non uniform velocity flow"""
         self.__non_uniform_flow_name = flow_name
-        
+        self.__velocities = mapNonUniformFlow(self.__non_uniform_flow_name, self.__argand)
         self.clearAndFill()
 
     def clearAndFill(self):
         """Fills the velocity field with particles"""
-        pixels, self.__particle_positions = fillScreen(self.__PARTICLE_COUNT, self.__width, self.__height, self.__PARTICLE_COLOUR, self.__BG)
-        pygame.surfarray.blit_array(self.__plane, pixels)
+        self.__particle_positions = fillScreen(self.__PARTICLE_COUNT, self.__particle_positions, self.__PARTICLE_COLOUR, self.__BG)
+        pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
+        pygame.surfarray.blit_array(self.__plane, pixel_array)
 
     def flow(self, dt):
         """Flow"""
