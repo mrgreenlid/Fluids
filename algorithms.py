@@ -61,9 +61,8 @@ def mapUniformFlow(magnitude : float, argument : float, width : int, height : in
 def mapNonUniformFlow(velocity_fuction : str, argand : np.array):
     return argand
 
-    
 @nb.njit
-def mapFillScreen(quota : int, particle_positions : np.array, particle_colour : int, bg_colour : int):
+def mapFilledScreen(quota : int, particle_positions : np.array, particle_colour : int, bg_colour : int):
     """Randomly sets positions of particles"""
     width = particle_positions.shape[0]
     height =  particle_positions.shape[1]
@@ -128,6 +127,9 @@ def makePixelArray(particle_positions : np.array, plane : np.array, particle_col
     for particle in particles:
         x = particle[0]
         y = particle[1]
-        pixel_array[x, y] = particle_colour
+        
+        if pixel_array[x, y] != particle_colour:
+            pixel_array[x, y] = particle_colour
+
     return pixel_array
 

@@ -5,7 +5,7 @@ from algorithms import *
 class VelocityField:
     __BG = rgbToInt((255, 255, 255))
     __PARTICLE_COLOUR = rgbToInt((0,0,0))
-    __PARTICLE_COUNT = 15000
+    __PARTICLE_COUNT = 12000
     __MINIMUM_MAG = 5
     __MAXIMUM_MAG = 100
     def __init__(self, screen : pygame.surface.Surface, x : int, y : int, width : int, height : int):
@@ -66,7 +66,7 @@ class VelocityField:
 
     def clearAndFill(self):
         """Fills the velocity field with particles"""
-        self.__particle_positions = mapFillScreen(self.__PARTICLE_COUNT, self.__particle_positions, self.__PARTICLE_COLOUR, self.__BG)
+        self.__particle_positions = mapFilledScreen(self.__PARTICLE_COUNT, self.__particle_positions, self.__PARTICLE_COLOUR, self.__BG)
         pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
         pygame.surfarray.blit_array(self.__plane, pixel_array)
 

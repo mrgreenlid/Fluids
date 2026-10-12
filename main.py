@@ -3,6 +3,7 @@ import interface as ui
 from algorithms import *
 import fluid as fluid
 import numpy as np
+import databaseManagement as db
 
 pygame.init()
 
@@ -22,15 +23,16 @@ screen.fill(BG)
 pygame.display.flip()
 pygame.display.set_icon(pygame.image.load("images\\ui\\icon.png"))
 
-
 # Test data for initialisation
-pixels = np.full((FIELD_WIDTH, FIELD_HEIGHT), 16777215, dtype=np.int32)
 positions = np.full((FIELD_WIDTH, FIELD_HEIGHT, 2), -1, dtype=np.float64)
 velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1j, dtype=np.complex64)
 
-# JITs numba decorated functions
+# Initialises database and JITed functions 
+db.initialiseFlowTable()
 mapParticles(positions, velocity, 0.001)
 
+
+del positions, velocity
 # Creates a clock to measure and regulate frames
 clock = pygame.time.Clock()
 
@@ -58,17 +60,16 @@ control_box = ui.Box(screen, WIDTH-175, HEIGHT//2, 350, HEIGHT, UIBG, True)
 control_title_label = ui.Label(screen, WIDTH-175, 30, "Control Panel", 40, bg=UIBG)
 
 control_divider = ui.Box(screen, WIDTH-175, 90, 300, 1)
-streamline_label = ui.Label(screen, WIDTH-270, 110, "Streamline:", 22, bg=UIBG)
-streamline_checkbox = ui.Checkbox(screen, WIDTH-90, 110, "streamline" )
-uniform_label = ui.Label(screen, WIDTH-280, 160,  "Uniform:", 22, bg=UIBG)
-non_uniform_label = ui.Label(screen, WIDTH-260, 210, "Non-Uniform:", 22, bg=UIBG )
-uniform_radiobutton = ui.RadioButton(screen, WIDTH-90, 160, 0, 50, "uniform")
+uniform_label = ui.Label(screen, WIDTH-280, 110,  "Uniform:", 22, bg=UIBG)
+non_uniform_label = ui.Label(screen, WIDTH-255, 150, "Non-Uniform:", 22, bg=UIBG )
+uniform_radiobutton = ui.RadioButton(screen, WIDTH-90, 110, 0, 40, "uniform")
 
+# MAKE FLOW PAST OBSTACLE A SEPERATE FLOW PATTERN
 
 
 function_divider = ui.Box(screen, WIDTH-175, 240, 320, 1)
 uniform_magnitude_label = ui.Label(screen, WIDTH-268, 280, "Magnitude:", 22, bg=UIBG)
-uniform_magnitude_entry = ui.Entry(screen, WIDTH-175, 280, "uniform_magnitude", data["uniform_magnitude"], max_length=6, font="Courier")
+uniform_magnitude_entry = ui.Entry(screen, WIDTH-175, 280, "uniform_magnitude", data["uniform_magnitude"], max_length=4, font="Courier")
 uniform_argument_label = ui.Label(screen, WIDTH-270, 340, "Angle (rad):", 22, bg=UIBG)
 uniform_argument_composite_entry = ui.CompositeEntry(screen, WIDTH-175, 340, "raw_uniform_argument", data["raw_uniform_argument"], 25, ("π", "e"), ((100, 35), (130, 35)), (20,20), 25, button_font="Courier", max_length=9,  dtype=str, font="Courier")
 velocity_funtion_label = ui.Label(screen, WIDTH-240, 400, "Velocity function:", 22, bg=UIBG)
@@ -93,7 +94,6 @@ frames_datalabel = ui.DataLabel(screen, WIDTH-100, 730, "frames", data["frames"]
 control_visual = (control_box, control_title_label, 
                     control_divider,
                   
-                  streamline_label, streamline_checkbox, 
                   uniform_label, uniform_radiobutton, non_uniform_label,
                   function_divider,
                 
@@ -108,8 +108,7 @@ uniform_visual = (velocity_funtion_label, uniform_magnitude_label, uniform_magni
 non_uniform_visual = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
                     non_uniform_flow_selection_3)
 
-control_interact = (streamline_checkbox,
-                    uniform_radiobutton, 
+control_interact = (uniform_radiobutton, 
                     flow_button)
 
 uniform_interact = (uniform_magnitude_entry, 
