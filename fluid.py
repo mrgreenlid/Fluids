@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 from algorithms import *
+import databaseManagement as db
 
 class VelocityField:
     __BG = rgbToInt((255, 255, 255))
@@ -20,21 +21,24 @@ class VelocityField:
 
         x_coords = np.arange(-self.__width//2, self.__width//2)
         y_coords = np.arange(self.__height//2, -self.__height//2, -1)
-        self.__argand = np.zeros((width, height), dtype=np.complex64)
-
-        for x in range(self.__width):
-            for y in range(self.__height):
-                self.__argand[x, y] = x_coords[x] + y_coords[y]*1j
+        x, y = np.meshgrid(y_coords, x_coords)
+        self.__argand = x + y*1j
 
         self.__plane = pygame.Surface((width, height))
         self.__plane.fill(self.__BG)
         self.__empty = pygame.surfarray.array2d(self.__plane)
-        
+    
+
         self.__particle_positions = np.full((self.__width, self.__height, 2), -1, dtype=np.float64)
 
+        self.__uniform = True
         self.__uniform_magnitude = 10
         self.__uniform_argument = np.pi
-        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, width, height)
+        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__argand)
+
+        self.__non_uniform_velocity_function = str
+        self.__non_uniform_source_x = -1
+        self.__non_uniform_source_y = -1
 
         self.__flow = False
         self.clearAndFill()
@@ -42,12 +46,14 @@ class VelocityField:
     def place(self):
         """Places the velocity field on the screen"""
         if self.__flow:
-            self.__particle_positions = mapParticles(self.__particle_positions, self.__velocities, self.__dt)
+
+            self.__particle_positions = mapParticles(self.__particle_positions, self.__velocities, self.__dt, self.__uniform, (self.__non_uniform_source_x, self.__non_uniform_source_y))
             pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
             pygame.surfarray.blit_array(self.__plane, pixel_array)
         self.__screen.blit(self.__plane, self.__rect)
         
     def uniformFlow(self, magnitude : float, argument : float):
+        self.__uniform = True
         """Updates attributes for a uniform velocity flow"""
         self.__uniform_argument = argument
         if magnitude < self.__MINIMUM_MAG:
@@ -55,13 +61,17 @@ class VelocityField:
         elif magnitude > self.__MAXIMUM_MAG:
             magnitude = self.__MAXIMUM_MAG 
         self.__uniform_magnitude = magnitude
-        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
+        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__argand)
         self.clearAndFill()
         
     def nonUniformFlow(self, flow_name : str):
         """Updates attributes for a non uniform velocity flow"""
-        self.__non_uniform_flow_name = flow_name
-        self.__velocities = mapNonUniformFlow(self.__non_uniform_flow_name, self.__argand)
+        self.__uniform = False
+        flow_attributes = db.getFlowAttributes(flow_name)
+        self.__non_uniform_velocity_function = flow_attributes[0]
+        self.__non_uniform_source_x = flow_attributes[1]
+        self.__non_uniform_source_y = flow_attributes[2]
+        self.__velocities = mapNonUniformFlow(self.__non_uniform_velocity_function, self.__argand, flow_attributes[3])
         self.clearAndFill()
 
     def clearAndFill(self):

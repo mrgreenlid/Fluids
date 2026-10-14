@@ -29,7 +29,7 @@ velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1j, dtype=np.complex64)
 
 # Initialises database and JITed functions 
 db.initialiseFlowTable()
-mapParticles(positions, velocity, 0.001)
+mapParticles(positions, velocity, 0.001, True, (-1, -1))
 
 
 del positions, velocity
@@ -80,7 +80,6 @@ i_label = ui.Label(screen, WIDTH-159, 455, "i", 22, bg=UIBG, font="SWital")
 open_bracket_label = ui.Label(screen, WIDTH-148, 455, "(", 30, bg=UIBG, font="Courier")
 uniform_argument_datalabel = ui.DataLabel(screen, WIDTH-135, 455, "uniform_argument", data["uniform_argument"], 21, max_length=6, bg=UIBG, font="Courier")
 close_bracket_label = ui.Label(screen, WIDTH-55, 455, ")", 30, bg=UIBG, font="Courier")
-
 
 non_uniform_flow_selection_1 = ui.ImageTitleButton(screen, WIDTH-251, 330, "non_uniform_flow_name", "Point Source", "point_source", "images\\flow\\point_source.png", 0.19)
 non_uniform_flow_selection_2 = ui.ImageTitleButton(screen, WIDTH-99, 330, "non_uniform_flow_name", "Vortex", "vortex", "images\\flow\\vortex.png", 0.29)
