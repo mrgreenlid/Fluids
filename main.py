@@ -29,7 +29,7 @@ velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1j, dtype=np.complex64)
 
 # Initialises database and JITed functions 
 db.initialiseFlowTable()
-mapParticles(positions, velocity, 0.001, True, (-1, -1))
+mapParticles(positions, velocity, 0.001, True)
 
 
 del positions, velocity

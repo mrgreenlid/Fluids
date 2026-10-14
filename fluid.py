@@ -69,9 +69,7 @@ class VelocityField:
         self.__uniform = False
         flow_attributes = db.getFlowAttributes(flow_name)
         self.__non_uniform_velocity_function = flow_attributes[0]
-        self.__non_uniform_source_x = flow_attributes[1]
-        self.__non_uniform_source_y = flow_attributes[2]
-        self.__velocities = mapNonUniformFlow(self.__non_uniform_velocity_function, self.__argand, flow_attributes[3])
+        self.__velocities = mapNonUniformFlow(self.__non_uniform_velocity_function, self.__argand, flow_attributes[1])
         self.clearAndFill()
 
     def clearAndFill(self):

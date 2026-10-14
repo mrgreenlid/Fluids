@@ -3,6 +3,7 @@ import re
 import numpy as np
 import numba as nb
 
+
 # Pygame specifics
 
 def tapping(event : pygame.event.Event):
@@ -67,7 +68,8 @@ def naturaliseVelocityFunction(velocity_function : str):
         if velocity_function[char] == "z":
             z_positions.append(char)
     return velocity_function, z_positions
-  
+
+
 def mapNonUniformFlow(velocity_function : str, argand : np.array, clockScalar):
     width = argand.shape[0]
     height = argand.shape[1]
@@ -100,7 +102,7 @@ def mapFilledScreen(quota : int, particle_positions : np.array, particle_colour 
     return particle_positions
 
 @nb.njit
-def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : float, uniform : bool = True, non_uniform_source = (-1, -1)):
+def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : float, uniform : bool = True):
     max_x = particle_positions.shape[0]-1
     max_y = particle_positions.shape[1]-1
     particles = np.argwhere(particle_positions[:, :, 0] != -1)
@@ -115,9 +117,8 @@ def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : 
         dx = velocity.real*(1 + np.random.random())*dt
         dy = velocity.imag*(1 + np.random.random())*dt
         potential_x = initial_x + dx
-        potential_y = initial_y + dy
+        potential_y = initial_y - dy
 
-        
         if not (0 <= potential_x <= max_x and 0 <= potential_y <= max_y):
             if uniform: 
                 if potential_x < 0:
@@ -130,16 +131,9 @@ def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : 
                 elif potential_y > max_y:
                     potential_y = 0
             else:
-                if non_uniform_source[0] == -1:
-                    potential_x = np.random.randint(0, max_x)
-                else:
-                    potential_x = non_uniform_source[0]
-                
-                if non_uniform_source[1] == -1:
-                    potential_y = np.random.randint(0, max_y)
-                else:
-                    potential_y = non_uniform_source[1]
-            
+                potential_x = np.random.randint(0, max_x)
+                potential_y = np.random.randint(0, max_y)
+               
 
 
         if not (current_index_x-1 < potential_x < current_index_x+1):
