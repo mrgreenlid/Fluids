@@ -1,5 +1,5 @@
 import pygame
-from algorithms import tapping, typing
+from pygameFuncs import *
 import re
 from typing import Tuple
 

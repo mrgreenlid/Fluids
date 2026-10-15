@@ -3,16 +3,9 @@ import re
 import numpy as np
 import numba as nb
 
-
 # Pygame specifics
 
-def tapping(event : pygame.event.Event):
-    """Returns True when a left mouse click is detected, else False"""
-    return event.type == pygame.MOUSEBUTTONDOWN
-    
-def typing(event : pygame.event.Event):
-    """Returns True when keystrokes are detected, elese False"""
-    return event.type == pygame.KEYDOWN
+
     
 # General algorithms
 
@@ -50,24 +43,13 @@ def mapUniformFlow(magnitude : float, argument : float, argand : np.array):
     imag = magnitude*np.sin(argument)
     return np.full((width, height), real + imag*1j, dtype=np.complex64)
 
+
 def naturaliseVelocityFunction(velocity_function : str):
     z_positions = []
-    end_mod = False
-    velocity_function = list(velocity_function)
-    for char in range(len(velocity_function)):
-        if velocity_function[char] == "i":
-            velocity_function[char] = str(1j)
-        elif velocity_function[char] == "|":
-            if not end_mod:
-                velocity_function[char] = "abs("
-                end_mod = True
-            else:
-                velocity_function[char] = ")"
-                end_mod = False
     for char in range(len(velocity_function)):
         if velocity_function[char] == "z":
             z_positions.append(char)
-    return velocity_function, z_positions
+    return list(velocity_function), z_positions
 
 
 def mapNonUniformFlow(velocity_function : str, argand : np.array, clockScalar):
@@ -134,8 +116,6 @@ def mapParticles(particle_positions : np.array, velocity_array : np.array, dt : 
                 potential_x = np.random.randint(0, max_x)
                 potential_y = np.random.randint(0, max_y)
                
-
-
         if not (current_index_x-1 < potential_x < current_index_x+1):
             new_index_x = round(potential_x)
         

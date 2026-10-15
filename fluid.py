@@ -1,88 +1,81 @@
 import pygame
 import numpy as np
-from algorithms import *
-import databaseManagement as db
+import arrayMath as am
+import databaseManagement as database
+
 
 class VelocityField:
-    __BG = rgbToInt((255, 255, 255))
-    __PARTICLE_COLOUR = rgbToInt((0,0,0))
-    __PARTICLE_COUNT = 12000
-    __MINIMUM_MAG = 5
-    __MAXIMUM_MAG = 100
-    def __init__(self, screen : pygame.surface.Surface, x : int, y : int, width : int, height : int):
-        """A fluid velocity field"""
-        self.__screen = screen
-        self.__width, self.__height = width, height
-    
-        self.__dt = 0.01
 
-        self.__rect = pygame.Rect(0,0, self.__width, self.__height)
+    __BG_COLOUR = 16777215
+    __PARTICLE_COLOUR = 0
+    __PARTICLE_COUNT = 10000
+
+    def __init__(self, screen : pygame.Surface, x : int, y : int, width : int, height : int):
+        """A fluid's velocity field"""
+
+        self.__screen = screen
+        self.__width = width
+        self.__height = height
+        self.__dt = float
+
+        self.__rect = pygame.Rect(0, 0, self.__width, self.__height)
         self.__rect.center = (x, y)
 
         x_coords = np.arange(-self.__width//2, self.__width//2)
         y_coords = np.arange(self.__height//2, -self.__height//2, -1)
-        x, y = np.meshgrid(y_coords, x_coords)
-        self.__argand = x + y*1j
+        y, x = np.meshgrid(y_coords, x_coords)
+        argand = x + y*1j
 
-        self.__plane = pygame.Surface((width, height))
-        self.__plane.fill(self.__BG)
-        self.__empty = pygame.surfarray.array2d(self.__plane)
-    
+        self.__plane = pygame.Surface((self.__width, self.__height))
+        self.__plane.fill(self.__BG_COLOUR)
+        self.__empty_plane = pygame.surfarray.array2d(self.__plane)
 
-        self.__particle_positions = np.full((self.__width, self.__height, 2), -1, dtype=np.float64)
-
+        self.__particle_positions = np.full((self.__width, self.__height), -1, dtype=np.float64)
+        
         self.__uniform = True
-        self.__uniform_magnitude = 10
+
+        self.__uniform_magnitude = 10.0
         self.__uniform_argument = np.pi
-        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__argand)
-
+       
         self.__non_uniform_velocity_function = str
-        self.__non_uniform_source_x = -1
-        self.__non_uniform_source_y = -1
-
+        
+        self.__velocities = am.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.__flow = False
-        self.clearAndFill()
+
+        self.__fill()
 
     def place(self):
         """Places the velocity field on the screen"""
         if self.__flow:
-
-            self.__particle_positions = mapParticles(self.__particle_positions, self.__velocities, self.__dt, self.__uniform, (self.__non_uniform_source_x, self.__non_uniform_source_y))
-            pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
-            pygame.surfarray.blit_array(self.__plane, pixel_array)
+            self.__particle_positions = am.moveParticles(self.__particle_positions, self.__velocities, self.__dt, self.__uniform)
+            pixels = am.pixelArray(self.__particle_positions, self.__empty_plane, 0)
+            pygame.surfarray.blit_array(self.__plane, pixels)
         self.__screen.blit(self.__plane, self.__rect)
-        
+
     def uniformFlow(self, magnitude : float, argument : float):
+        """Updates attributes for a uniform flow"""
         self.__uniform = True
-        """Updates attributes for a uniform velocity flow"""
-        self.__uniform_argument = argument
-        if magnitude < self.__MINIMUM_MAG:
-            magnitude = self.__MINIMUM_MAG
-        elif magnitude > self.__MAXIMUM_MAG:
-            magnitude = self.__MAXIMUM_MAG 
         self.__uniform_magnitude = magnitude
-        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__argand)
-        self.clearAndFill()
-        
+        self.__uniform_argument = argument
+        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
+        self.__fill()
+
     def nonUniformFlow(self, flow_name : str):
-        """Updates attributes for a non uniform velocity flow"""
+        """Updates attributes for a non uniform flow"""
         self.__uniform = False
-        flow_attributes = db.getFlowAttributes(flow_name)
-        self.__non_uniform_velocity_function = flow_attributes[0]
-        self.__velocities = mapNonUniformFlow(self.__non_uniform_velocity_function, self.__argand, flow_attributes[1])
-        self.clearAndFill()
-
-    def clearAndFill(self):
-        """Fills the velocity field with particles"""
-        self.__particle_positions = mapFilledScreen(self.__PARTICLE_COUNT, self.__particle_positions, self.__PARTICLE_COLOUR, self.__BG)
-        pixel_array = makePixelArray(self.__particle_positions, self.__empty, self.__PARTICLE_COLOUR)
-        pygame.surfarray.blit_array(self.__plane, pixel_array)
-
-    def flow(self, dt):
-        """Flow"""
-        self.__flow = True
-        self.__dt = dt*10
         
-    def stopFlow(self):
-        """Stop flow"""
-        self.__flow = False
+    def __fill(self):
+        """Fills the field, randomly, with particles"""
+        self.__particle_positions = am.mapFilledScreen(self.__particle_positions, self.__PARTICLE_COUNT)
+        pixels = am.pixelArray(self.__particle_positions, self.__empty_plane, 0)
+        pygame.surfarray.blit_array(self.__plane, pixels)
+
+    def flowState(self, flow : bool, dt : float = None):
+        """Sets the state of fluid flow"""
+        if flow:
+            self.__flow = True
+            self.__dt = dt
+        else:
+            self.__flow = False
+
+

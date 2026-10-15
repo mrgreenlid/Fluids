@@ -1,6 +1,7 @@
 import pygame
 import interface as ui
-from algorithms import *
+from pygameFuncs import *
+import arrayMath as am
 import fluid as fluid
 import numpy as np
 import databaseManagement as db
@@ -25,14 +26,14 @@ pygame.display.set_icon(pygame.image.load("images\\ui\\icon.png"))
 
 # Test data for initialisation
 positions = np.full((FIELD_WIDTH, FIELD_HEIGHT, 2), -1, dtype=np.float64)
-velocity = np.full((FIELD_HEIGHT, FIELD_WIDTH), 1 + 1j, dtype=np.complex64)
+velocities = np.full((FIELD_WIDTH, FIELD_HEIGHT), -1, dtype=np.complex64)
 
 # Initialises database and JITed functions 
 db.initialiseFlowTable()
-mapParticles(positions, velocity, 0.001, True)
+am.moveParticles(positions, velocities, 0.001, True)
 
 
-del positions, velocity
+
 # Creates a clock to measure and regulate frames
 clock = pygame.time.Clock()
 
@@ -59,12 +60,10 @@ data = {"flow":False,
 control_box = ui.Box(screen, WIDTH-175, HEIGHT//2, 350, HEIGHT, UIBG, True)
 control_title_label = ui.Label(screen, WIDTH-175, 30, "Control Panel", 40, bg=UIBG)
 
-control_divider = ui.Box(screen, WIDTH-175, 90, 300, 1)
+control_divider = ui.Box(screen, WIDTH-175, 70, 300, 1)
 uniform_label = ui.Label(screen, WIDTH-280, 110,  "Uniform:", 22, bg=UIBG)
 non_uniform_label = ui.Label(screen, WIDTH-255, 150, "Non-Uniform:", 22, bg=UIBG )
 uniform_radiobutton = ui.RadioButton(screen, WIDTH-90, 110, 0, 40, "uniform")
-
-# MAKE FLOW PAST OBSTACLE A SEPERATE FLOW PATTERN
 
 
 function_divider = ui.Box(screen, WIDTH-175, 240, 320, 1)
@@ -83,7 +82,6 @@ close_bracket_label = ui.Label(screen, WIDTH-55, 455, ")", 30, bg=UIBG, font="Co
 
 non_uniform_flow_selection_1 = ui.ImageTitleButton(screen, WIDTH-251, 330, "non_uniform_flow_name", "Point Source", "point_source", "images\\flow\\point_source.png", 0.19)
 non_uniform_flow_selection_2 = ui.ImageTitleButton(screen, WIDTH-99, 330, "non_uniform_flow_name", "Vortex", "vortex", "images\\flow\\vortex.png", 0.29)
-non_uniform_flow_selection_3 = ui.ImageTitleButton(screen, WIDTH-251, 511, "non_uniform_flow_name", "Doublet", "doublet", "images\\flow\\doublet.png", 0.29, -90)
 
 flow_button = ui.DualImageBooleanButton(screen, WIDTH-175, 650, "flow", "images\\ui\\play.png", "images\\ui\\pause.png", 0.1, 0.14)
 data_divider = ui.Box(screen, WIDTH-175, 700, 300, 1)
@@ -105,7 +103,7 @@ uniform_visual = (velocity_funtion_label, uniform_magnitude_label, uniform_magni
 
 
 non_uniform_visual = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
-                    non_uniform_flow_selection_3)
+        )
 
 control_interact = (uniform_radiobutton, 
                     flow_button)
@@ -114,7 +112,7 @@ uniform_interact = (uniform_magnitude_entry,
                     uniform_argument_composite_entry)
 
 non_uniform_interact = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
-                    non_uniform_flow_selection_3)
+                    )
 
 
 velocity_field = fluid.VelocityField(screen, (WIDTH-350)//2, HEIGHT//2, FIELD_WIDTH, FIELD_HEIGHT)
@@ -144,13 +142,7 @@ while running:
                     obj.checkInteract(event)
                     if tapping(event) or (typing(event) and event.unicode == "\x0D"):
                         data[obj.getIdentifier()] = obj.getValue()
-
-                        if not (data["previous_uniform_magnitude"] == data["uniform_magnitude"] and data["previous_raw_uniform_argument"] == data["raw_uniform_argument"]):
-                            if validExpression(valid_angle_rule, data["raw_uniform_argument"]):
-                                data["previous_raw_uniform_argument"] = data["raw_uniform_argument"]
-                                data["previous_uniform_magnitude"] = data["uniform_magnitude"]
-                                data["uniform_argument"] = refineRawArgument(data["raw_uniform_argument"])
-                                velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"])                    
+            
             else:
                 for obj in non_uniform_interact:
                     obj.checkInteract(event)
@@ -161,19 +153,14 @@ while running:
                         else:
                             data[obj.getIdentifier()] = obj.getValue()
                         
-                        if data["previous_non_uniform_flow_name"] != data["non_uniform_flow_name"]:
-                            data["previous_non_uniform_flow_name"] = data["non_uniform_flow_name"]
-                            velocity_field.nonUniformFlow(data["non_uniform_flow_name"])
+
+                        
+    velocity_field.flowState(data["flow"], data["dt"])
 
 
     # Places visual elements
     for obj in tank_visual:
         obj.place()
-
-        if data["flow"]:
-            velocity_field.flow(data["dt"])
-        else:
-            velocity_field.stopFlow()
             
     if data["control"]:
         for obj in control_visual:
@@ -192,7 +179,6 @@ while running:
     
     # Updates the screen with changes set in the loop
     pygame.display.flip()
-
     # Keeps the clock ticking
     data["frames"] = clock.get_fps()
     data["dt"] = clock.tick(FRAMES) / 1000
