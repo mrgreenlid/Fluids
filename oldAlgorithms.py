@@ -3,12 +3,9 @@ import re
 import numpy as np
 import numba as nb
 
-# Pygame specifics
-
 
     
 # General algorithms
-
 valid_angle_rule = re.compile(r"((-?\d+(\.\d+)?)|-?[πe])([\*\/]((-?\d+(\.\d+)?)|-?[πe]))*")
 def validExpression(rule : re.Pattern, expression : str):
     return bool(rule.fullmatch(expression))

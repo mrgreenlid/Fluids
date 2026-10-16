@@ -8,7 +8,7 @@ class VelocityField:
 
     __BG_COLOUR = 16777215
     __PARTICLE_COLOUR = 0
-    __PARTICLE_COUNT = 10000
+    __PARTICLE_COUNT = 100000
 
     def __init__(self, screen : pygame.Surface, x : int, y : int, width : int, height : int):
         """A fluid's velocity field"""
@@ -24,13 +24,13 @@ class VelocityField:
         x_coords = np.arange(-self.__width//2, self.__width//2)
         y_coords = np.arange(self.__height//2, -self.__height//2, -1)
         y, x = np.meshgrid(y_coords, x_coords)
-        argand = x + y*1j
+        self.__argand = x + y*1j
 
         self.__plane = pygame.Surface((self.__width, self.__height))
         self.__plane.fill(self.__BG_COLOUR)
         self.__empty_plane = pygame.surfarray.array2d(self.__plane)
 
-        self.__particle_positions = np.full((self.__width, self.__height), -1, dtype=np.float64)
+        self.__particle_positions = np.full((self.__width, self.__height, 2), -1, dtype=np.float64)
         
         self.__uniform = True
 
@@ -43,6 +43,7 @@ class VelocityField:
         self.__flow = False
 
         self.__fill()
+
 
     def place(self):
         """Places the velocity field on the screen"""
@@ -57,7 +58,7 @@ class VelocityField:
         self.__uniform = True
         self.__uniform_magnitude = magnitude
         self.__uniform_argument = argument
-        self.__velocities = mapUniformFlow(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
+        self.__velocities = am.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.__fill()
 
     def nonUniformFlow(self, flow_name : str):

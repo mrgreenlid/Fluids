@@ -8,6 +8,8 @@ def mapFilledScreen(particle_positions : np.array, particle_count : int):
     height = particle_positions.shape[1]
     positions = np.full((width, height, 2), -1, dtype=np.float64)
     quota = particle_count
+    if quota >= width*height:
+        quota = (width*height)//2
     while quota != 0:
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
@@ -24,6 +26,7 @@ def pixelArray(particle_positions : np.array, plane : np.array, particle_colour 
     for x in range(particle_positions.shape[0]-1):
         for y in range(particle_positions.shape[1]-1):
             if particle_positions[x, y, 0] != -1:
+                
                 pixel_array[x, y] = particle_colour
     return pixel_array
 
@@ -41,7 +44,7 @@ def moveParticles(particle_positions : np.array, velocities : np.array, dt : flo
     height = particle_positions.shape[1]-1
     
     particles = np.argwhere(particle_positions[:, :, 0] != -1)
-
+    
     for position in particles:
         x = position[0]
         y = position[1]
@@ -49,20 +52,14 @@ def moveParticles(particle_positions : np.array, velocities : np.array, dt : flo
         velocity = velocities[x, y]
         dx = velocity.real*(1 + np.random.random())*dt*10
         dy = velocity.imag*(1 + np.random.random())*dt*10
+
         potential_x = x + dx
         potential_y = y - dy
 
         if not (0 <= potential_x <= width and 0 <= potential_y <= height):
             if uniform: 
-                if potential_x < 0:
-                    potential_x = width
-                elif potential_x > width:
-                    potential_x = 0
-
-                if potential_y < 0:
-                    potential_y = height
-                elif potential_y > height:
-                    potential_y = 0
+                potential_x %= width
+                potential_y %= height
             else:
                 potential_x = np.random.randint(0, width)
                 potential_y = np.random.randint(0, height) 
@@ -70,6 +67,9 @@ def moveParticles(particle_positions : np.array, velocities : np.array, dt : flo
         new_x = round(potential_x)
         new_y = round(potential_y)
 
+        if particle_positions[new_x, new_y, 0] != -1:
+            continue
+        
         particle_positions[x, y, 0] = -1
         particle_positions[x, y, 1] = -1
         particle_positions[new_x, new_y, 0] = potential_x

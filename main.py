@@ -1,6 +1,6 @@
 import pygame
 import interface as ui
-from pygameFuncs import *
+import interfaceMath as im
 import arrayMath as am
 import fluid as fluid
 import numpy as np
@@ -134,19 +134,27 @@ while running:
         if data["control"]:
             for obj in control_interact:
                 obj.checkInteract(event)
-                if tapping(event) or typing(event):
+                if im.tapping(event) or im.typing(event):
                     data[obj.getIdentifier()] = obj.getValue()
         
             if data["uniform"]:
                 for obj in uniform_interact:
                     obj.checkInteract(event)
-                    if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+                    if im.tapping(event) or (im.typing(event) and event.unicode == "\x0D"):
                         data[obj.getIdentifier()] = obj.getValue()
+
+                        if data["previous_uniform_magnitude"] != data["uniform_magnitude"] or data["previous_raw_uniform_argument"] != data["raw_uniform_argument"]:
+                            data["previous_uniform_magnitude"] = data["uniform_magnitude"]
+                            data["previous_raw_uniform_argument"] = data["raw_uniform_argument"]
+                            if im.validExpression(im.ANGLE_PATTERN, data["raw_uniform_argument"]):
+                                data["uniform_argument"] = im.naturaliseArgument(data["raw_uniform_argument"])
+
+                            velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"]) 
             
             else:
                 for obj in non_uniform_interact:
                     obj.checkInteract(event)
-                    if tapping(event) or (typing(event) and event.unicode == "\x0D"):
+                    if im.tapping(event) or (im.typing(event) and event.unicode == "\x0D"):
                         if isinstance(obj, ui.ImageTitleButton):
                             if obj.getClicked():
                                 data[obj.getIdentifier()] = obj.getValue()
