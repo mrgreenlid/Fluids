@@ -44,3 +44,25 @@ def naturaliseArgument(angle : str):
         argument = np.pi
     return argument
 
+def naturaliseFlowFunction(function : str):
+    """Returns a computationally sound velocity function and positions of the general complex terms"""
+    function = list(function)
+    abs_end = False
+    for term in range(len(function)):
+        if function[term] == "i":
+            function[term] = "1j"
+        elif function[term] == "|":
+            if abs_end:
+                function[term] = ")"
+                abs_end = False
+            else:
+                function[term] = "abs("
+                abs_end = True
+    function = "".join(function)
+    z_positions = []
+    for term in range(len(function)):
+        if function[term] == "z":
+            z_positions.append(term)
+    return list(function), z_positions
+    
+        

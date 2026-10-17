@@ -1,6 +1,23 @@
 import numpy as np
 import numba as nb
 
+class Stack:
+    def __init__(self):
+        self.__stack = []
+    
+    def push(self):
+        ...
+    
+    def pop(self):
+        ...
+
+    def normalise(self):
+        ...
+
+    def evaluate(self):
+        ...
+
+
 @nb.njit
 def mapFilledScreen(particle_positions : np.array, particle_count : int):
     """Randomly sets postions of fresh set of particles"""
@@ -37,6 +54,21 @@ def mapUniformVelocity(magnitude : float, argument : float, plane_width : int, p
     imaginary = magnitude*np.sin(argument) * 1j
     return np.full((plane_width, plane_height), real + imaginary, dtype=np.complex64)
 
+def mapNonUniformVelocity(function : str, z_positions, argand : np.array, displacement_scalar : int):
+    width = argand.shape[0]
+    height = argand.shape[1]
+    velocities = np.empty((width, height), dtype=np.complex64)
+    for x in range(width-1):
+        for y in range(height-1):
+            z = argand[x, y]
+            for pos in z_positions:
+                function[pos] = str(z)
+            try:
+                velocities[x, y] = eval("".join(function))*displacement_scalar
+            except ZeroDivisionError:
+                velocities[x, y] = 0j
+    return velocities
+
 @nb.njit
 def moveParticles(particle_positions : np.array, velocities : np.array, dt : float, uniform : bool = True):
     """Updates particle positions by their point velocity"""
@@ -60,10 +92,12 @@ def moveParticles(particle_positions : np.array, velocities : np.array, dt : flo
             if uniform: 
                 potential_x %= width
                 potential_y %= height
+
             else:
                 potential_x = np.random.randint(0, width)
-                potential_y = np.random.randint(0, height) 
-
+                potential_y = np.random.randint(0, height)
+                
+                    
         new_x = round(potential_x)
         new_y = round(potential_y)
 

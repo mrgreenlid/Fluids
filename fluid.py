@@ -1,14 +1,15 @@
 import pygame
 import numpy as np
 import arrayMath as am
-import databaseManagement as database
+import interfaceMath as im
+import databaseManagement as db
 
 
 class VelocityField:
 
     __BG_COLOUR = 16777215
     __PARTICLE_COLOUR = 0
-    __PARTICLE_COUNT = 100000
+    __PARTICLE_COUNT = 50000
 
     def __init__(self, screen : pygame.Surface, x : int, y : int, width : int, height : int):
         """A fluid's velocity field"""
@@ -38,7 +39,8 @@ class VelocityField:
         self.__uniform_argument = np.pi
        
         self.__non_uniform_velocity_function = str
-        
+        self.__non_uniform_flow_name = str
+       
         self.__velocities = am.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.__flow = False
 
@@ -64,6 +66,14 @@ class VelocityField:
     def nonUniformFlow(self, flow_name : str):
         """Updates attributes for a non uniform flow"""
         self.__uniform = False
+        flow = db.getFlowAttributes(flow_name)
+        self.__non_uniform_flow_name = flow[0]
+        self.__non_uniform_velocity_function, z_positions = im.naturaliseFlowFunction(flow[1])
+        self.__non_uniform_source_x = flow[2]
+        self.__non_uniform_source_y = flow[3]
+        displacement_scalar = flow[4]
+        self.__velocities = am.mapNonUniformVelocity(self.__non_uniform_velocity_function, z_positions, self.__argand, displacement_scalar)
+        self.__fill()
         
     def __fill(self):
         """Fills the field, randomly, with particles"""

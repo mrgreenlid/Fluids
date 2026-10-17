@@ -161,6 +161,10 @@ while running:
                         else:
                             data[obj.getIdentifier()] = obj.getValue()
                         
+                        if data["previous_non_uniform_flow_name"] != data["non_uniform_flow_name"]:
+                            data["previous_non_uniform_flow_name"] = data["non_uniform_flow_name"]
+                            velocity_field.nonUniformFlow(data["non_uniform_flow_name"])
+                        
 
                         
     velocity_field.flowState(data["flow"], data["dt"])
