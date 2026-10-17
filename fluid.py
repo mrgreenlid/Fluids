@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
-import arrayMath as am
-import interfaceMath as im
+import mathAlgorithms as ma
+import interfaceAlgorithms as ia
 import databaseManagement as db
 
 
@@ -41,7 +41,7 @@ class VelocityField:
         self.__non_uniform_velocity_function = str
         self.__non_uniform_flow_name = str
        
-        self.__velocities = am.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
+        self.__velocities = ma.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.__flow = False
 
         self.__fill()
@@ -50,8 +50,8 @@ class VelocityField:
     def place(self):
         """Places the velocity field on the screen"""
         if self.__flow:
-            self.__particle_positions = am.moveParticles(self.__particle_positions, self.__velocities, self.__dt, self.__uniform)
-            pixels = am.pixelArray(self.__particle_positions, self.__empty_plane, 0)
+            self.__particle_positions = ma.moveParticles(self.__particle_positions, self.__velocities, self.__dt, self.__uniform)
+            pixels = ma.pixelArray(self.__particle_positions, self.__empty_plane, 0)
             pygame.surfarray.blit_array(self.__plane, pixels)
         self.__screen.blit(self.__plane, self.__rect)
 
@@ -60,7 +60,7 @@ class VelocityField:
         self.__uniform = True
         self.__uniform_magnitude = magnitude
         self.__uniform_argument = argument
-        self.__velocities = am.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
+        self.__velocities = ma.mapUniformVelocity(self.__uniform_magnitude, self.__uniform_argument, self.__width, self.__height)
         self.__fill()
 
     def nonUniformFlow(self, flow_name : str):
@@ -68,17 +68,14 @@ class VelocityField:
         self.__uniform = False
         flow = db.getFlowAttributes(flow_name)
         self.__non_uniform_flow_name = flow[0]
-        self.__non_uniform_velocity_function, z_positions = im.naturaliseFlowFunction(flow[1])
-        self.__non_uniform_source_x = flow[2]
-        self.__non_uniform_source_y = flow[3]
-        displacement_scalar = flow[4]
-        self.__velocities = am.mapNonUniformVelocity(self.__non_uniform_velocity_function, z_positions, self.__argand, displacement_scalar)
+        self.__non_uniform_velocity_function, z_positions = ia.naturaliseFlowFunction(flow[1])
+        self.__velocities = ma.mapNonUniformVelocity(self.__non_uniform_velocity_function, z_positions, self.__argand, flow[2])
         self.__fill()
         
     def __fill(self):
         """Fills the field, randomly, with particles"""
-        self.__particle_positions = am.mapFilledScreen(self.__particle_positions, self.__PARTICLE_COUNT)
-        pixels = am.pixelArray(self.__particle_positions, self.__empty_plane, 0)
+        self.__particle_positions = ma.mapFilledScreen(self.__particle_positions, self.__PARTICLE_COUNT)
+        pixels = ma.pixelArray(self.__particle_positions, self.__empty_plane, 0)
         pygame.surfarray.blit_array(self.__plane, pixels)
 
     def flowState(self, flow : bool, dt : float = None):

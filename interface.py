@@ -1,5 +1,5 @@
 import pygame
-import interfaceMath as im
+import interfaceAlgorithms as ia
 import re
 
 
@@ -94,14 +94,14 @@ class Entry(Label):
 
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if self._rect.collidepoint(*pygame.mouse.get_pos()):
                 self._click()
             else:
                 self._antiClick()
         
         if self._state:
-            if im.typing(event):
+            if ia.typing(event):
                 key = event.unicode
                 if key == "\x08":
                     self._text = self._text[:-1]
@@ -199,7 +199,7 @@ class Dropdown(Entry):
     
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if not self._state:
                 self.__configureOptions()
                 if self.__arrow_rect.collidepoint(*pygame.mouse.get_pos()):
@@ -211,7 +211,7 @@ class Dropdown(Entry):
                 self._antiClick()
 
         if self._state:
-            if im.typing(event):
+            if ia.typing(event):
                 if event.unicode == "\x0D":
                         self._antiClick()
 
@@ -244,7 +244,7 @@ class Checkbox:
     
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interaction"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if self._rect.collidepoint(*pygame.mouse.get_pos()):
                 if not self._state:
                     self._click()
@@ -296,7 +296,7 @@ class RadioButton(Checkbox):
 
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if self._rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__click()
             elif self.__rect2.collidepoint(*pygame.mouse.get_pos()):
@@ -319,7 +319,7 @@ class ImageBooleanButton:
     
     def checkInteract(self):
         """Checks for interactions"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if self.__clickable_rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__state = True
 
@@ -358,7 +358,7 @@ class DualImageBooleanButton:
 
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""    
-        if im.tapping(event):
+        if ia.tapping(event):
             if self.__state:
                 if self.__on_clickable_rect.collidepoint(*pygame.mouse.get_pos()):
                     self.__state = False
@@ -391,7 +391,7 @@ class TextButton(Label):
     
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interaction"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if self.__box_rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__state = True
 
@@ -423,7 +423,7 @@ class CompositeEntry(Entry):
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""  
         super().checkInteract(event)
-        if im.tapping(event):
+        if ia.tapping(event):
             for button in self.__buttons:
                 button.checkInteract(event)
                 if button.getValue():
@@ -474,7 +474,7 @@ class ImageTitleButton:
 
     def checkInteract(self, event : pygame.event.Event):
         """Checks for interactions"""
-        if im.tapping(event):
+        if ia.tapping(event):
             if self.__rect.collidepoint(*pygame.mouse.get_pos()) or self.__text_box_rect.collidepoint(*pygame.mouse.get_pos()):
                 self.__click_flag = True
                 

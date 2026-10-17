@@ -1,7 +1,7 @@
 import pygame
 import interface as ui
-import interfaceMath as im
-import arrayMath as am
+import interfaceAlgorithms as ia
+import mathAlgorithms as ma
 import fluid as fluid
 import numpy as np
 import databaseManagement as db
@@ -11,8 +11,8 @@ pygame.init()
 # Sets the constants of the screen
 HEIGHT = 900
 WIDTH = 1550
-FIELD_HEIGHT = 900
-FIELD_WIDTH = 1200
+FIELD_HEIGHT = 1170
+FIELD_WIDTH = 1560
 BG = "#FFFFFF"
 UIBG = "#ECECEC"
 FRAMES = 60
@@ -30,7 +30,7 @@ velocities = np.full((FIELD_WIDTH, FIELD_HEIGHT), -1, dtype=np.complex64)
 
 # Initialises database and JITed functions 
 db.initialiseFlowTable()
-am.moveParticles(positions, velocities, 0.001, True)
+ma.moveParticles(positions, velocities, 0.001, True)
 
 
 
@@ -82,6 +82,7 @@ close_bracket_label = ui.Label(screen, WIDTH-55, 455, ")", 30, bg=UIBG, font="Co
 
 non_uniform_flow_selection_1 = ui.ImageTitleButton(screen, WIDTH-251, 330, "non_uniform_flow_name", "Point Source", "point_source", "images\\flow\\point_source.png", 0.19)
 non_uniform_flow_selection_2 = ui.ImageTitleButton(screen, WIDTH-99, 330, "non_uniform_flow_name", "Vortex", "vortex", "images\\flow\\vortex.png", 0.29)
+non_uniform_flow_selection_3 = ui.ImageTitleButton(screen, WIDTH-251, 512, "non_uniform_flow_name", "Doublet", "doublet", "images\\flow\\doublet.png", 0.29, -90)
 
 flow_button = ui.DualImageBooleanButton(screen, WIDTH-175, 650, "flow", "images\\ui\\play.png", "images\\ui\\pause.png", 0.1, 0.14)
 data_divider = ui.Box(screen, WIDTH-175, 700, 300, 1)
@@ -103,6 +104,7 @@ uniform_visual = (velocity_funtion_label, uniform_magnitude_label, uniform_magni
 
 
 non_uniform_visual = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
+                    non_uniform_flow_selection_3
         )
 
 control_interact = (uniform_radiobutton, 
@@ -112,6 +114,7 @@ uniform_interact = (uniform_magnitude_entry,
                     uniform_argument_composite_entry)
 
 non_uniform_interact = (non_uniform_flow_selection_1, non_uniform_flow_selection_2, 
+                    non_uniform_flow_selection_3
                     )
 
 
@@ -134,27 +137,27 @@ while running:
         if data["control"]:
             for obj in control_interact:
                 obj.checkInteract(event)
-                if im.tapping(event) or im.typing(event):
+                if ia.tapping(event) or ia.typing(event):
                     data[obj.getIdentifier()] = obj.getValue()
         
             if data["uniform"]:
                 for obj in uniform_interact:
                     obj.checkInteract(event)
-                    if im.tapping(event) or (im.typing(event) and event.unicode == "\x0D"):
+                    if ia.tapping(event) or (ia.typing(event) and event.unicode == "\x0D"):
                         data[obj.getIdentifier()] = obj.getValue()
 
                         if data["previous_uniform_magnitude"] != data["uniform_magnitude"] or data["previous_raw_uniform_argument"] != data["raw_uniform_argument"]:
                             data["previous_uniform_magnitude"] = data["uniform_magnitude"]
                             data["previous_raw_uniform_argument"] = data["raw_uniform_argument"]
-                            if im.validExpression(im.ANGLE_PATTERN, data["raw_uniform_argument"]):
-                                data["uniform_argument"] = im.naturaliseArgument(data["raw_uniform_argument"])
+                            if ia.validExpression(ia.ANGLE_PATTERN, data["raw_uniform_argument"]):
+                                data["uniform_argument"] = ia.naturaliseArgument(data["raw_uniform_argument"])
 
                             velocity_field.uniformFlow(data["uniform_magnitude"], data["uniform_argument"]) 
             
             else:
                 for obj in non_uniform_interact:
                     obj.checkInteract(event)
-                    if im.tapping(event) or (im.typing(event) and event.unicode == "\x0D"):
+                    if ia.tapping(event) or (ia.typing(event) and event.unicode == "\x0D"):
                         if isinstance(obj, ui.ImageTitleButton):
                             if obj.getClicked():
                                 data[obj.getIdentifier()] = obj.getValue()
